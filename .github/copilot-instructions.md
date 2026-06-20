@@ -1,0 +1,1 @@
+Build Recovery Radar™ as a privacy-aware ABA operational recovery growth platform. Preserve no-migration positioning. Do not collect PHI. Do not claim HIPAA compliance. Keep AI calls server-side. Keep outreach human-reviewed. Store consent and audit events.

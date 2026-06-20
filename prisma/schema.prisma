@@ -1,0 +1,351 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN
+  GROWTH
+  VIEWER
+}
+
+enum LeadStatus {
+  NEW
+  RESEARCHED
+  CONNECTION_REQUESTED
+  REPLIED
+  DEMO_OFFERED
+  DEMO_BOOKED
+  BETA_CANDIDATE
+  NOT_FIT
+  NURTURE
+  DO_NOT_CONTACT
+}
+
+enum LeadSource {
+  INTENT_FINDER
+  CALCULATOR
+  QUIZ
+  CHATBOT
+  MANUAL
+  IMPORT
+}
+
+enum OutreachStatus {
+  PENDING
+  APPROVED
+  SENT
+  COMPLETED
+  CANCELLED
+}
+
+enum OutreachTaskType {
+  CONNECTION_NOTE
+  INMAIL
+  EMAIL_FOLLOWUP
+  CALL
+}
+
+enum TemplateChannel {
+  LINKEDIN_NOTE
+  LINKEDIN_INMAIL
+  EMAIL
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole @default(VIEWER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Company {
+  id            String   @id @default(cuid())
+  name          String
+  website       String?
+  city          String?
+  state         String?
+  sizeEstimate  Int?
+  serviceModel  String?
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  leads    Lead[]
+  contacts Contact[]
+
+  @@index([name])
+}
+
+model Lead {
+  id                    String     @id @default(cuid())
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  source                LeadSource @default(MANUAL)
+  sourceUrl             String?
+  companyName           String
+  companyId             String?
+  contactName           String?
+  contactRole           String?
+  city                  String?
+  state                 String?
+  website               String?
+  publicEmail           String?
+  contactFormUrl        String?
+  linkedinSearchQuery   String?
+  facebookSearchQuery   String?
+  currentEmr            String?
+  painPoint             String?
+  clinicSize            Int?
+  serviceModel          String?
+  leadScore             Int        @default(0)
+  status                LeadStatus @default(NEW)
+  nextStep              String?
+  notes                 String?    @db.Text
+
+  company              Company?              @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  intentSignals        IntentSignal[]
+  calculatorResults    CalculatorResult[]
+  quizResponses        QuizResponse[]
+  chatbotConversations ChatbotConversation[]
+  outreachTasks        OutreachTask[]
+  consentOptIns        ConsentOptIn[]
+
+  @@index([leadScore])
+  @@index([status])
+  @@index([source])
+  @@index([companyName])
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  companyId   String
+  name        String?
+  role        String?
+  publicEmail String?
+  publicPhone String?
+  linkedinUrl String?
+  facebookUrl String?
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model IntentSignal {
+  id              String   @id @default(cuid())
+  leadId          String
+  signalType      String
+  signalDetail    String   @db.Text
+  signalSourceUrl String?
+  detectedAt      DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([signalType])
+  @@index([detectedAt])
+}
+
+model KeywordGroup {
+  id        String   @id @default(cuid())
+  groupName String   @unique
+  keywords  String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CalculatorResult {
+  id                         String   @id @default(cuid())
+  leadId                     String?
+  inputs                     Json
+  weeklyHoursAtRisk           Float
+  monthlyHoursAtRisk          Float
+  monthlyRevenueLeakage       Float
+  adminHoursSpent             Float
+  potentialRecoveredHours10   Float
+  potentialRecoveredHours20   Float
+  potentialRecoveredHours30   Float
+  recommendedModules          String[]
+  createdAt                   DateTime @default(now())
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}
+
+model QuizResponse {
+  id                 String   @id @default(cuid())
+  leadId             String?
+  responses          Json
+  personaSegment     String
+  recommendedModules String[]
+  createdAt          DateTime @default(now())
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}
+
+model ChatbotConversation {
+  id        String   @id @default(cuid())
+  leadId    String?
+  transcript Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}
+
+model OutreachTask {
+  id                String           @id @default(cuid())
+  leadId            String
+  taskType          OutreachTaskType
+  dueDate           DateTime?
+  status            OutreachStatus   @default(PENDING)
+  assignedTo        String?
+  messageTemplateId String?
+  generatedMessage  String?          @db.Text
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  lead            Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  messageTemplate MessageTemplate? @relation(fields: [messageTemplateId], references: [id], onDelete: SetNull)
+}
+
+model MessageTemplate {
+  id            String          @id @default(cuid())
+  templateName  String          @unique
+  channel       TemplateChannel
+  personaTarget String
+  body          String          @db.Text
+  maxLength     Int?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  outreachTasks OutreachTask[]
+}
+
+model ConsentOptIn {
+  id          String   @id @default(cuid())
+  leadId      String
+  consentType String
+  consented   Boolean
+  consentedAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([consentType])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  channel     String
+  status      String   @default("draft")
+  budget      Float?
+  keywords    String[]
+  landingPage String?
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LandingPage {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  hero            String   @db.Text
+  body            String   @db.Text
+  cta             String
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventName String
+  path      String?
+  leadId    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([eventName])
+  @@index([createdAt])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+
+model SuppressionListEntry {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  domain    String?
+  reason    String
+  source    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([domain])
+  @@index([createdAt])
+}

@@ -1,0 +1,1253 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Infinite Pieces AI | Infinite Suite OS™ + Mock Provider Portal</title>
+  <meta name="description" content="Infinite Suite OS™ is an Operational Recovery Core for ABA clinics. Keep your EMR. Recover lost hours beside it." />
+  <meta property="og:title" content="Infinite Suite OS™ | Operational Recovery Core for ABA Clinics" />
+  <meta property="og:description" content="One cancellation should not become one lost hour. Tour the Mock OS." />
+  <meta property="og:image" content="assets/hero_every_hour_recovered.png" />
+  <meta name="theme-color" content="#F8FAFC" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Provider Portal runtime: Tailwind + React + Babel for the embedded Mock OS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    #workflow, #estimator, #trust, #modules, #top { scroll-margin-top: 110px; }
+    :root{
+      --navy:#061125;
+      --navy2:#0A192F;
+      --ink:#0B1220;
+      --cyan:#22D3EE;
+      --cyan2:#06B6D4;
+      --gold:#FBBF24;
+      --gold2:#F59E0B;
+      --emerald:#10B981;
+      --rose:#F43F5E;
+      --cream:#FFF8EA;
+      --soft:#F8FAFC;
+      --line:#E2E8F0;
+      --muted:#64748B;
+      --shadow:0 20px 60px rgba(15,23,42,.12);
+      --shadow2:0 24px 90px rgba(6,17,37,.18);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fff 0%,#f7fbff 42%,#fff 100%);}
+    body{overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    .wrap{width:min(1180px,calc(100% - 40px));margin-inline:auto}
+    .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(226,232,240,.8)}
+    .nav-inner{height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:14px;font-weight:900;color:var(--navy)}
+    .brand-mark{height:48px;width:48px;border-radius:18px;background:linear-gradient(145deg,#0A192F,#04263b);display:grid;place-items:center;color:#fff;box-shadow:0 15px 35px rgba(34,211,238,.25);position:relative;overflow:hidden}
+    .brand-mark::before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 30% 30%,rgba(251,191,36,.8),transparent 28%),radial-gradient(circle at 75% 70%,rgba(34,211,238,.85),transparent 34%)}
+    .brand-mark span{position:relative;font-size:30px;line-height:1;font-weight:900}
+    .brand-sub{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan2);font-weight:900;margin-top:2px}
+    .nav-links{display:flex;align-items:center;gap:26px;color:#475569;font-weight:800;font-size:14px}
+    .nav-links a:hover{color:var(--navy)}
+    .btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:14px 22px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:12px;transition:.2s ease;white-space:nowrap}
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{background:linear-gradient(135deg,#67E8F9,#22D3EE);color:#061125;box-shadow:0 14px 36px rgba(34,211,238,.26)}
+    .btn-gold{background:linear-gradient(135deg,#FCD34D,#F59E0B);color:#061125;box-shadow:0 14px 36px rgba(245,158,11,.22)}
+    .btn-dark{background:var(--navy);color:white;box-shadow:0 14px 36px rgba(6,17,37,.22)}
+    .btn-ghost{background:white;border:1px solid var(--line);color:var(--navy)}
+    .mobile-actions{display:none}
+    .hero{position:relative;padding:58px 0 40px;overflow:hidden;background:linear-gradient(135deg,#FFFFFF 0%,#F6FBFF 52%,#FFF7DF 100%)}
+    .hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(10,25,47,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(10,25,47,.035) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(180deg,#000,transparent 86%)}
+    .hero-grid{position:relative;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:42px}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;background:#E8FBFF;border:1px solid #B7F3FF;color:#087A8C;font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+    .eyebrow.gold{background:#FFF8E1;border-color:#FDE68A;color:#92400E}
+    h1{font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:clamp(48px,7vw,88px);line-height:.94;letter-spacing:-.07em;margin:22px 0 0;color:var(--navy)}
+    .grad{background:linear-gradient(90deg,#0EA5E9,#2563EB,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .underline{display:inline-block;position:relative}
+    .underline::after{content:"";position:absolute;height:8px;border-radius:999px;background:var(--gold);left:2px;right:4px;bottom:-8px;transform:rotate(-1.5deg)}
+    .hero p.lead{font-size:clamp(20px,2.3vw,31px);line-height:1.32;font-weight:900;color:#111827;margin:34px 0 0;max-width:740px}
+    .hero p.copy{font-size:17px;line-height:1.75;color:#475569;font-weight:600;margin:22px 0 0;max-width:690px}
+    .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+    .microcopy{font-size:12px;font-weight:800;color:#64748B;margin-top:14px;line-height:1.6}
+    .hero-card{position:relative;border-radius:34px;padding:12px;background:white;border:1px solid rgba(226,232,240,.9);box-shadow:var(--shadow2);display:flex;flex-direction:column}
+    .hero-card img{display:block;width:100%;border-radius:26px;object-fit:cover;max-height:630px}
+    .floating-panel{position:static;width:100%;margin-top:14px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(226,232,240,.9);box-shadow:0 18px 42px rgba(15,23,42,.10);padding:18px;backdrop-filter:blur(16px)}
+    .floating-panel strong{display:block;color:var(--navy);font-size:15px;margin-bottom:8px}
+    .chip-row{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:8px 10px;background:#F1F5F9;color:#334155;font-size:11px;font-weight:900}
+    .section{padding:84px 0}
+    .section-title{max-width:820px;margin:0 auto 38px;text-align:center}
+    .section-title h2{font-family:"Plus Jakarta Sans";font-size:clamp(34px,4vw,58px);letter-spacing:-.055em;line-height:1.04;margin:12px 0 0;color:var(--navy)}
+    .section-title p{color:#64748B;font-size:17px;line-height:1.65;font-weight:600;margin:20px 0 0}
+    .soft-band{background:linear-gradient(180deg,#F8FAFC,#FFFFFF)}
+    .story-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .story-card{background:white;border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:0 18px 55px rgba(15,23,42,.08);position:relative;overflow:hidden;min-height:260px}
+    .story-num{width:48px;height:48px;border-radius:18px;background:linear-gradient(135deg,#22D3EE,#A7F3D0);display:grid;place-items:center;font-size:24px;font-weight:900;color:#061125;margin-bottom:18px}
+    .story-card h3{font-size:22px;line-height:1.12;margin:0;color:var(--navy);letter-spacing:-.03em}
+    .story-card p{font-size:14px;line-height:1.65;color:#64748B;font-weight:650;margin:12px 0 0}
+    .story-card::after{content:"";position:absolute;right:-40px;bottom:-44px;height:130px;width:130px;border-radius:50%;background:rgba(34,211,238,.12)}
+    .visual-feature{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:52px}
+    .image-frame{border-radius:34px;background:white;border:1px solid var(--line);padding:12px;box-shadow:var(--shadow);overflow:hidden}
+    .image-frame img{display:block;width:100%;border-radius:24px;object-fit:cover}
+    .why-box{border-radius:34px;background:linear-gradient(135deg,#061125,#0A192F);color:white;padding:36px;box-shadow:var(--shadow2);position:relative;overflow:hidden}
+    .why-box::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 10%,rgba(34,211,238,.22),transparent 34%),radial-gradient(circle at 90% 70%,rgba(251,191,36,.16),transparent 35%)}
+    .why-box > *{position:relative}
+    .why-box h2{font-family:"Plus Jakarta Sans";font-size:clamp(34px,4vw,54px);line-height:1;letter-spacing:-.055em;margin:0}
+    .why-box p{font-size:16px;line-height:1.75;color:#CBD5E1;font-weight:600}
+    .why-highlight{color:#FBBF24;font-weight:900}
+    .estimator{border-radius:36px;border:1px solid rgba(14,165,233,.18);background:linear-gradient(135deg,#FFFFFF,#F0FBFF);box-shadow:var(--shadow);overflow:hidden}
+    .estimator-head{padding:30px;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+    .estimator-head h2{font-family:"Plus Jakarta Sans";font-size:clamp(30px,3vw,46px);letter-spacing:-.05em;line-height:1.05;margin:8px 0 0;color:var(--navy)}
+    .estimator-body{display:grid;grid-template-columns:1.15fr .85fr;gap:0}
+    .sliders{padding:30px;border-right:1px solid var(--line);display:grid;gap:18px}
+    .slider-box{border:1px solid var(--line);background:white;border-radius:24px;padding:18px}
+    .slider-label{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .slider-label label{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#64748B}
+    .slider-value{font-size:22px;font-weight:900;color:var(--navy)}
+    input[type=range]{width:100%;accent-color:var(--cyan2)}
+    .receipt{padding:30px;background:linear-gradient(135deg,#061125,#0A192F);color:white;display:flex;flex-direction:column;justify-content:center}
+    .receipt-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:28px;padding:24px}
+    .receipt h3{margin:0;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#A5F3FC;font-weight:900}
+    .receipt .big{font-size:clamp(38px,4.5vw,62px);line-height:1;font-weight:900;margin-top:12px;color:white;letter-spacing:-.05em}
+    .receipt p{font-size:13px;line-height:1.65;color:#CBD5E1;font-weight:650;margin:14px 0 0}
+    .receipt .range{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .receipt .range span{border:1px solid rgba(34,211,238,.24);background:rgba(34,211,238,.1);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:900;color:#CFFAFE}
+    .modules{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .module{border-radius:28px;background:white;border:1px solid var(--line);padding:22px;box-shadow:0 16px 45px rgba(15,23,42,.07);min-height:230px;transition:.2s ease}
+    .module:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:#A5F3FC}
+    .module-icon{height:48px;width:48px;border-radius:18px;display:grid;place-items:center;background:#ECFEFF;color:#0891B2;font-weight:900;margin-bottom:16px}
+    .module h3{font-size:18px;line-height:1.15;margin:0;color:var(--navy);letter-spacing:-.02em}
+    .module p{font-size:13px;line-height:1.62;color:#64748B;font-weight:650;margin:10px 0 0}
+    .trust{background:linear-gradient(135deg,#061125,#0A192F);color:white;position:relative;overflow:hidden}
+    .trust::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 25% 20%,rgba(34,211,238,.18),transparent 35%),radial-gradient(circle at 75% 90%,rgba(251,191,36,.14),transparent 34%)}
+    .trust .wrap{position:relative}
+    .trust .section-title h2,.trust .section-title p{color:white}.trust .section-title p{color:#CBD5E1}
+    .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .trust-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);border-radius:28px;padding:24px;backdrop-filter:blur(14px)}
+    .trust-card h3{margin:0;font-size:19px;color:white}.trust-card p{font-size:14px;line-height:1.7;color:#CBD5E1;font-weight:650}
+    .cta{padding:90px 0;background:linear-gradient(135deg,#FFF8EA,#ECFEFF)}
+    .cta-box{border-radius:40px;background:white;border:1px solid var(--line);box-shadow:var(--shadow);padding:48px;display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center}
+    .cta h2{font-family:"Plus Jakarta Sans";font-size:clamp(34px,4vw,58px);letter-spacing:-.055em;line-height:1;margin:0;color:var(--navy)}
+    .cta p{font-size:17px;line-height:1.65;color:#64748B;font-weight:650;margin:16px 0 0;max-width:740px}
+    footer{background:#061125;color:#94A3B8;padding:38px 0;font-size:12px;line-height:1.8;font-weight:650}
+    footer strong{color:#E2E8F0}
+    .logo-word{font-size:18px;line-height:1}.logo-word small{display:block;color:#0891B2;letter-spacing:.16em;text-transform:uppercase;font-size:11px;margin-top:4px}
+    @media (max-width: 980px){.hero-grid,.visual-feature,.estimator-body,.cta-box{grid-template-columns:1fr}.sliders{border-right:0;border-bottom:1px solid var(--line)}.story-grid,.modules{grid-template-columns:repeat(2,1fr)}.trust-grid{grid-template-columns:1fr}.nav-links{display:none}.mobile-actions{display:flex;gap:10px}.floating-panel{position:static;width:auto;margin-top:14px}.hero-card{padding:10px}.hero-card img{max-height:none}.hero{padding-top:34px}}
+    @media (max-width: 620px){.wrap{width:min(100% - 28px,1180px)}.story-grid,.modules{grid-template-columns:1fr}.nav-inner{height:70px}.brand-word{display:none}.hero-actions .btn,.mobile-actions .btn{width:100%}.hero-actions{flex-direction:column}.mobile-actions{width:100%;padding:0 14px 14px}.nav-inner{flex-wrap:wrap;height:auto;padding:12px 0}.cta-box{padding:28px}.section{padding:60px 0}.receipt .big{font-size:42px}.hero-card{border-radius:24px}.hero-card img{border-radius:18px}}
+  </style>
+
+  <style id="provider-portal-css">
+    /* Provider Portal support styles from the original Mock OS */
+    .glass-panel { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .hide-scroll::-webkit-scrollbar { display: none; }
+    .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    .grid-bg { background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 42px 42px; }
+    .fade-in { animation: providerFadeIn .4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .slide-up { animation: providerSlideUp .5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes providerFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes providerSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.3); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.6); }
+    .pulse-slow { animation: providerPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes providerPulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    .a4-container { margin: 0 auto; padding: 2rem; background: white; width: 100%; max-width: 8.5in; min-height: 11in; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 1rem; color: #0f172a; }
+    .fill-line { border-bottom: 1px solid #000; flex-grow: 1; margin-left: 0.25rem; min-height: 1.25rem; outline: none; }
+    [contenteditable]:empty::before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; }
+    @media print {
+      body { background: white !important; color: black !important; }
+      .no-print { display: none !important; }
+      .a4-container { box-shadow: none !important; margin: 0 !important; width: 100% !important; border-radius: 0 !important; }
+      .active-print-view { display: flex !important; }
+      .print-landscape-container { width: 11in !important; height: 8.5in !important; max-width: 11in !important; max-height: 8.5in !important; padding: 0.5in !important; overflow: hidden !important; page-break-after: always; display: flex !important; flex-direction: column !important; }
+      .ta-program-block, .net-program-block, .prt-program-block { height: 135mm !important; page-break-inside: avoid; }
+      .flashcards-page { page-break-before: always; height: auto !important; min-height: auto !important; }
+      .flashcard, .craft-step-row, .social-story-page { page-break-inside: avoid; }
+      .view-schedule, .view-dtt, .view-net, .view-ta, .view-prt, .view-activities, .view-tokenboard, .view-socialstory { display: none !important; }
+    }
+  </style>
+
+  <style id="provider-portal-final-shell-styles">
+    .dark-grid-bg { background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 42px 42px; }
+    .hero-glow { box-shadow: 0 24px 80px rgba(34, 211, 238, .12); }
+    .paper-shadow { box-shadow: 0 18px 55px rgba(15, 23, 42, .08); }
+    .safe-focus:focus { outline: 3px solid rgba(34,211,238,.25); outline-offset: 2px; }
+
+    /* Stronger Provider Portal no-flash patch */
+    #provider-root.provider-stable {
+      background: #F8FAFC;
+      min-height: 100vh;
+    }
+    #provider-root.provider-stable .fade-in,
+    #provider-root.provider-stable .slide-up {
+      animation: none !important;
+    }
+    #provider-scroll-area {
+      scroll-behavior: auto !important;
+      overflow-anchor: none;
+      contain: layout paint;
+    }
+
+
+    /* No-flash provider portal patch:
+       prevents every click/render from re-playing fade animations and jumping scroll back to top. */
+    #provider-root.provider-stable .fade-in,
+    #provider-root.provider-stable .slide-up {
+      animation: none !important;
+    }
+    #provider-scroll-area {
+      scroll-behavior: auto !important;
+      overflow-anchor: none;
+      contain: layout paint;
+    }
+    #provider-root button,
+    #provider-root input,
+    #provider-root textarea,
+    #provider-root select {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Infinite Pieces patch: hero box moved + stronger provider no-flash morph render -->
+  <div id="provider-root" style="display:none"></div>
+  <div id="landing-page">
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="Infinite Pieces AI home">
+        <div class="brand-mark"><span>∞</span></div>
+        <div class="brand-word"><div class="logo-word">Infinite Pieces AI™<small>Infinite Suite OS™</small></div></div>
+      </a>
+      <div class="nav-links">
+        <a href="#workflow">Workflow</a>
+        <a href="#estimator">Lost-hour check</a>
+        <a href="#trust">Trust & review</a>
+        <a href="#modules">Core 8</a>
+        <button class="btn btn-ghost" onclick="tourMockOS()">Tour Mock OS</button>
+        <a class="btn btn-primary" href="mailto:founders@infinitepieces.ai?subject=Founding%20Clinic%20Trial%20Inquiry">Apply for Beta</a>
+      </div>
+      <div class="mobile-actions">
+        <button class="btn btn-ghost" onclick="tourMockOS()">Tour</button>
+        <a class="btn btn-primary" href="mailto:founders@infinitepieces.ai?subject=Founding%20Clinic%20Trial%20Inquiry">Beta</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow"><span>●</span> Founding Clinic Trial · Operational Recovery Core</div>
+          <h1>Every Piece Matters.<br><span class="grad underline">Every Hour Counts.</span></h1>
+          <p class="lead">Keep your EMR. Add an Operational Recovery Core beside it.</p>
+          <p class="copy">Infinite Suite OS™ helps ABA clinics turn one cancellation into one routed recovery workflow: scheduling, authorization fit, eligible coverage, field support, caregiver communication, material support, readiness checks, and copy/export packets.</p>
+          <div class="hero-actions">
+            <button class="btn btn-dark" onclick="tourMockOS()">Tour the Mock OS →</button>
+            <a class="btn btn-gold" href="mailto:founders@infinitepieces.ai?subject=Founding%20Clinic%20Trial%20Inquiry">Apply for Founding Clinic Trial</a>
+          </div>
+          <p class="microcopy">The homepage explains the problem. <strong>Tour Mock OS</strong> shows how the workflow would look live with de-identified demo data.</p>
+        </div>
+        <div class="hero-card">
+          <img src="assets/hero_every_hour_recovered.png" alt="Infinite Pieces bright hero showing Infinite Suite recovery workflow" />
+          <div class="floating-panel">
+            <strong>Simple first impression:</strong>
+            <div class="chip-row">
+              <span class="chip">Recover lost hours</span>
+              <span class="chip">Support staff</span>
+              <span class="chip">Keep families informed</span>
+              <span class="chip">Proof before export</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft-band" id="workflow">
+      <div class="wrap">
+        <div class="section-title">
+          <div class="eyebrow gold">One visual story</div>
+          <h2>A cancellation should not automatically become a lost hour.</h2>
+          <p>Infinite Suite OS™ makes the recovery path visible in seconds, without asking clinics to rip out their current EMR.</p>
+        </div>
+        <div class="story-grid">
+          <div class="story-card"><div class="story-num">1</div><h3>Capture the cancellation</h3><p>Care Pocket™ collects reason, makeup windows, substitute comfort, and telehealth openness in a family-friendly flow.</p></div>
+          <div class="story-card"><div class="story-num">2</div><h3>Check the recovery fit</h3><p>Scheduler AI™ and Auth War Room™ surface the safest next route: RBT makeup, BCBA parent-training fallback, or admin review.</p></div>
+          <div class="story-card"><div class="story-num">3</div><h3>Support the team</h3><p>SubPool™, FieldPocket™, and Material Maker™ help eligible staff claim, prepare, and work the recovered session with less scramble.</p></div>
+          <div class="story-card"><div class="story-num">4</div><h3>Review before export</h3><p>Compliance Sentinel™ and API Integration Hub™ stage a readiness packet beside the current EMR.</p></div>
+        </div>
+        <div class="visual-feature">
+          <div class="image-frame"><img src="assets/recovery_trust_support_export.png" alt="Four-panel Infinite Suite recovery, trust, support, and export campaign visual"></div>
+          <div class="why-box">
+            <div class="eyebrow" style="background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.25);color:#A5F3FC">The message</div>
+            <h2>Recover → Trust → Support → Export</h2>
+            <p>Do not make buyers memorize every app first. Help them understand one transformation: <span class="why-highlight">one canceled session becomes one recovered, supported, documented, review-ready hour.</span></p>
+            <p>That is the story your website, emails, LinkedIn posts, and demos should all repeat.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="estimator">
+      <div class="wrap">
+        <div class="estimator">
+          <div class="estimator-head">
+            <div>
+              <div class="eyebrow">Low-key opportunity check</div>
+              <h2>How much recovery opportunity is hiding in the weekly scramble?</h2>
+            </div>
+            <button class="btn btn-dark" onclick="tourMockOS()">See how recovery routes</button>
+          </div>
+          <div class="estimator-body">
+            <div class="sliders">
+              <div class="slider-box">
+                <div class="slider-label"><label for="cancelledHours">Canceled / at-risk hours per week</label><span class="slider-value"><span id="cancelledHoursValue">12</span> hrs</span></div>
+                <input id="cancelledHours" type="range" min="1" max="80" value="12" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-label"><label for="hourRate">Approx. service value per hour</label><span class="slider-value">$<span id="hourRateValue">75</span></span></div>
+                <input id="hourRate" type="range" min="40" max="150" step="5" value="75" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-label"><label for="recoveryRate">Recovery target to investigate</label><span class="slider-value"><span id="recoveryRateValue">35</span>%</span></div>
+                <input id="recoveryRate" type="range" min="5" max="75" value="35" />
+              </div>
+            </div>
+            <div class="receipt">
+              <div class="receipt-card">
+                <h3>Illustrative monthly recovery opportunity</h3>
+                <div class="big" id="opportunityValue">$1.3k</div>
+                <p>This is not a promise, guarantee, payer approval, or reimbursement claim. It is a quick conversation starter for clinic leaders to estimate whether lost-hour recovery is worth exploring.</p>
+                <div class="range">
+                  <span id="hoursAtRisk">48 hrs/month at risk</span>
+                  <span>De-identified demo first</span>
+                  <span>No EMR migration required</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft-band">
+      <div class="wrap visual-feature">
+        <div class="why-box" style="background:linear-gradient(135deg,#FFF,#EFFAFF);color:#0B1220;border:1px solid #E2E8F0;box-shadow:var(--shadow)">
+          <div class="eyebrow gold">Founder-built from the field</div>
+          <h2 style="color:var(--navy)">Built because the gaps are real.</h2>
+          <p style="color:#475569">After years in the field, the pattern became impossible to ignore: families cancel, RBTs call out, schedulers scramble, BCBAs clean up documentation, and good people carry the stress.</p>
+          <p style="color:#475569"><span class="why-highlight">Infinite Suite OS™ is not trying to replace clinicians.</span> It is built to support the people responsible for care by giving them a clearer recovery workflow.</p>
+          <button class="btn btn-dark" onclick="tourMockOS()">Tour Mock OS</button>
+        </div>
+        <div class="image-frame"><img src="assets/founder_every_piece_matters.png" alt="Founder why visual for Infinite Pieces and Infinite Suite"></div>
+      </div>
+    </section>
+
+    <section class="section" id="modules">
+      <div class="wrap">
+        <div class="section-title">
+          <div class="eyebrow">Core 8 MVP</div>
+          <h2>One operating recovery story, not eight disconnected apps.</h2>
+          <p>The modules matter after the buyer understands the transformation. This is how the MVP workflow is framed.</p>
+        </div>
+        <div class="modules">
+          <div class="module"><div class="module-icon">SA</div><h3>Scheduler AI™</h3><p>Routes cancellations, callouts, recovery windows, and next best actions.</p></div>
+          <div class="module"><div class="module-icon">CP</div><h3>Care Pocket™</h3><p>Family cancellation intake, makeup preferences, and approved caregiver updates.</p></div>
+          <div class="module"><div class="module-icon">FP</div><h3>FieldPocket™</h3><p>Recovered-session handoff, staff support, notes, pulse, and Safe Capture workflow.</p></div>
+          <div class="module"><div class="module-icon">SP</div><h3>SubPool™</h3><p>Eligible clinical recovery opportunities for RBT/BCBA coverage.</p></div>
+          <div class="module"><div class="module-icon">MM</div><h3>Material Maker™</h3><p>Clinic-reviewed visuals, token boards, handouts, and prep supports.</p></div>
+          <div class="module"><div class="module-icon">CS</div><h3>Compliance Sentinel™</h3><p>Readiness checks, review queue, audit timeline, and proof packet.</p></div>
+          <div class="module"><div class="module-icon">AW</div><h3>Auth War Room™</h3><p>Authorization and service-code preflight before recovery is routed.</p></div>
+          <div class="module"><div class="module-icon">API</div><h3>API Integration Hub™</h3><p>CSV import/export, copy packets, and no-migration bridge to the current EMR.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section trust" id="trust">
+      <div class="wrap">
+        <div class="section-title">
+          <div class="eyebrow" style="background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.25);color:#A5F3FC">Trust, consent & human review</div>
+          <h2>Responsible AI should support care teams, not pretend to be one.</h2>
+          <p>Infinite Suite OS™ should make role boundaries, consent, review, and audit trails visible from the beginning.</p>
+        </div>
+        <div class="trust-grid">
+          <div class="trust-card"><h3>Click™ drafts. Humans approve.</h3><p>AI output is labeled as draft support. BCBAs, schedulers, and authorized clinic staff stay responsible for review and approval.</p></div>
+          <div class="trust-card"><h3>Consent-aware workflows</h3><p>Caregiver updates, media, materials, and clinical-adjacent outputs require the right consent and role context before use.</p></div>
+          <div class="trust-card"><h3>Audit-ready, not overpromised</h3><p>The product supports compliance workflows, readiness checks, and export packets. It does not guarantee payer approval or legal compliance.</p></div>
+        </div>
+        <div class="image-frame" style="margin-top:34px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)"><img src="assets/website_story_panels.png" alt="Bright Infinite Pieces website story panels showing founder, workflow, and product visuals"></div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="wrap cta-box">
+        <div>
+          <h2>Ready to see the Mock OS?</h2>
+          <p>Tour the de-identified workflow, then decide whether a Founding Clinic Trial makes sense for your team. No forced migration. No live PHI in the demo.</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-dark" onclick="tourMockOS()">Tour Mock OS</button>
+          <a class="btn btn-primary" href="mailto:founders@infinitepieces.ai?subject=Founding%20Clinic%20Trial%20Inquiry">Apply for Beta</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p><strong>© 2026 Infinite Pieces AI.</strong> Infinite Pieces AI™, Infinite Suite OS™, Operational Recovery Core™, Click™, Scheduler AI™, Care Pocket™, FieldPocket™, SubPool™, Material Maker™, Compliance Sentinel™, Auth Utilization War Room™, and API Integration Hub™ are trademarks claimed by Infinite Pieces AI.</p>
+      <p><strong>Clinical / compliance notice:</strong> Infinite Suite OS™ supports operations, documentation, scheduling, readiness, and review workflows. It does not replace BCBA supervision, clinical judgment, emergency decision-making, payer review, or professional documentation review.</p>
+      <p><strong>Financial notice:</strong> The lost-hour estimate is illustrative only and depends on payer contracts, authorization rules, staffing patterns, documentation quality, clinic configuration, and operational behavior. Infinite Pieces AI does not guarantee reimbursement, revenue recovery, denial prevention, staff retention, or financial outcomes.</p>
+      <p><strong>Security notice:</strong> Do not submit PHI through the public site. Production use requires tenant scoping, role-based access, audit logging, secure media/file handling, consent controls, backend-enforced AI calls, and appropriate legal/security agreements.</p>
+    </div>
+  </footer>
+
+  <script>
+    function tourMockOS(){
+      try {
+        window.location.hash = "provider-portal";
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      } catch(e) {
+        window.location.href = "#provider-portal";
+      }
+    }
+    const cancelledHours = document.getElementById('cancelledHours');
+    const hourRate = document.getElementById('hourRate');
+    const recoveryRate = document.getElementById('recoveryRate');
+    const fmt = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+    function compactMoney(n){
+      if(n >= 1000) return '$' + (n/1000).toFixed(n >= 10000 ? 0 : 1) + 'k';
+      return fmt.format(n);
+    }
+    function updateEstimator(){
+      const h = Number(cancelledHours.value);
+      const r = Number(hourRate.value);
+      const rec = Number(recoveryRate.value);
+      document.getElementById('cancelledHoursValue').textContent = h;
+      document.getElementById('hourRateValue').textContent = r;
+      document.getElementById('recoveryRateValue').textContent = rec;
+      const monthlyAtRiskHours = h * 4;
+      const estimated = monthlyAtRiskHours * r * (rec/100);
+      document.getElementById('opportunityValue').textContent = compactMoney(estimated);
+      document.getElementById('hoursAtRisk').textContent = monthlyAtRiskHours + ' hrs/month at risk';
+    }
+    [cancelledHours,hourRate,recoveryRate].forEach(el=>el.addEventListener('input',updateEstimator));
+    updateEstimator();
+  </script>
+</div>
+
+  <script data-provider-portal="final-core7">
+    const app = document.getElementById('provider-root');
+
+    const ICON = {
+      hub: '⌂', calendar: '□', heart: '♡', bolt: 'ϟ', users: '◌', wand: '✧', shield: '◈', brain: '◎', activity: '⌁', workflow: '⇄', file: '▣', check: '✓', lock: '⌘', spark: '✦', alert: '!', image: '▧', book: '▤', target: '◉', clock: '◷', money: '$', menu: '☰'
+    };
+
+    const MODULES = [
+      { id:'scheduler-ai', name:'Scheduler AI™', shortName:'Scheduler', pillar:'Recovery Brain', status:'Core 7', icon:'calendar', accent:'indigo', core:true, purpose:'Detects lost-hour risk, runs auth preflight, and routes RBT makeup, BCBA telehealth fallback, or prep/admin fallback.' },
+      { id:'caregiver-pocket', name:'Care Pocket™', shortName:'Care Pocket', pillar:'Family Front Door', status:'Core 7', icon:'heart', accent:'gold', core:true, purpose:'Caregiver cancellation, makeup windows, substitute consent, telehealth openness, and secure approved updates.' },
+      { id:'fieldpocket', name:'FieldPocket™', shortName:'FieldPocket', pillar:'Field Support', status:'Core 7', icon:'bolt', accent:'cyan', core:true, purpose:'RBT session support, crisis protocol access, Safe Capture, caregiver updates, objective note drafts, and play/program prompts.' },
+      { id:'subpool', name:'SubPool™ Marketplace', shortName:'SubPool', pillar:'Clinical Recovery Board', status:'Core 7', icon:'users', accent:'gold', core:true, purpose:'Eligible RBT direct makeup and BCBA parent-training opportunities. Recognition/ledger only; no automatic cash-out.' },
+      { id:'material-maker', name:'Material Maker™', shortName:'Materials', pillar:'Productivity Fallback', status:'Core 7', icon:'wand', accent:'purple', core:true, purpose:'Built-in generator for review-required visuals, token boards, schedules, social stories, visual aids, activity sheets, data sheets, flashcards, and prep/admin artifacts.' },
+      { id:'compliance-auth', name:'Compliance Sentinel™', shortName:'Sentinel', pillar:'Readiness Boundary', status:'Core 7', icon:'shield', accent:'green', core:true, purpose:'Checks notes, signatures, auth, caregiver updates, BCBA review, audit trail, and export packet readiness.' },
+      { id:'analyst-pocket', name:'Analyst Pocket™', shortName:'Analyst', pillar:'BCBA Review Workspace', status:'Core 7', icon:'brain', accent:'indigo', core:true, purpose:'BCBA/clinical director workspace for telehealth fallback claims, treatment plan drafts, FBA summaries, SOAP notes, protocols, and review packets.' },
+      { id:'auth-war-room', name:'Auth Utilization War Room™', shortName:'Auth War Room', pillar:'Hidden/Admin Engine', status:'Hidden', icon:'activity', accent:'cyan', core:false, purpose:'Admin preflight for service-code capacity, auth windows, weekly caps, and BCBA telehealth 97156 feasibility.' },
+      { id:'api-integration', name:'API Integration Hub™', shortName:'API Hub', pillar:'Hidden/Admin Engine', status:'Hidden', icon:'workflow', accent:'cyan', core:false, purpose:'No-migration CSV/copy/export bridge for current EMR workflows, proof packets, readiness summaries, and future connectors.' },
+      { id:'program-tree', name:'Program Tree™', shortName:'Program Tree', pillar:'Phase 1B / Expansion', status:'Expansion', icon:'book', accent:'green', core:false, purpose:'Expansion target library after the operational recovery overlay is validated.' },
+      { id:'dataflow-pro', name:'DataFlow Pro™', shortName:'DataFlow', pillar:'Phase 1B / Expansion', status:'Expansion', icon:'activity', accent:'cyan', core:false, purpose:'Future clinical data capture expansion. Phase 1 keeps clinics using current EMR/data tools.' }
+    ];
+
+    const FLOW = [
+      ['1','Caregiver cancels','Care Pocket™ captures reason, makeup windows, substitute consent, and BCBA telehealth openness.','caregiver-pocket'],
+      ['2','Scheduler AI™ routes','Scheduler AI™ calculates hours at risk and asks Auth War Room™ for service-code capacity.','scheduler-ai'],
+      ['3','Path A: RBT makeup','If 97153 capacity and staff fit exist, SubPool™ posts a clinical recovery opportunity.','subpool'],
+      ['4','FieldPocket™ supports session','RBT gets handoff, safe prompts, note drafting, Safe Capture, and caregiver-board draft tools.','fieldpocket'],
+      ['5','Path B: BCBA telehealth','Analyst Pocket™ can claim/review a BCBA 97156 parent-training fallback when allowed.','analyst-pocket'],
+      ['6','Path C: prep/admin fallback','Material Maker™ creates review-required prep/admin materials when clinical recovery is blocked.','material-maker'],
+      ['7','Compliance reviews','Compliance Sentinel™ checks note, caregiver update, auth, BCBA review, and proof readiness.','compliance-auth'],
+      ['8','Export beside EMR','API Integration Hub™ stages copy/export packets so the clinic keeps its current EMR.','api-integration']
+    ];
+
+    const state = {
+      route: (location.hash === '#provider-portal' || location.hash === '#mock-os') ? 'portal' : 'landing',
+      activeModule: null,
+      sidebarCollapsed: false,
+      mobileSidebar: false,
+      copilotOpen: false,
+      copilotQuery: '',
+      copilotResponse: 'Ask Click™ how a cancellation becomes a recovered, supported, review-ready hour.',
+      events: [],
+      timer: { status:'ready', seconds:0, gps:'demo-soft', geofence:'not captured' },
+      landing: { learners: 50, canceledHours: 18, recoveryRate: 35, hourlyRate: 75 },
+      scheduler: { tab:'schedule', unlocked:false, audit:'', eod:'', sessions:[
+        { day:'Mon', date:'8', time:'09:00 – 11:30', client:'Client A', staff:'Sarah Jenkins', status:'scheduled' },
+        { day:'Tue', date:'9', time:'13:00 – 16:00', client:'Client B', staff:'David Chen', status:'parent cancel' },
+        { day:'Wed', date:'10', time:'15:00 – 17:30', client:'Client C', staff:'John D.', status:'scheduled' }
+      ]},
+      care: { tab:'recovery', cancelState:'idle', slot:'', reason:'Sick / not feeling well', telehealth:true, substitute:true, feed:['Daily win posted: Client A requested break with visual support.','BCBA shared home practice target: Mand for Break.'] },
+      subpool: { role:'rbt', selected:'shift-1', feed:['Auth preflight clear — 97153 direct recovery and 97156 fallback available.','Opportunity posted — visible to eligible staff only.'], shifts:[
+        { id:'shift-1', type:'rbt', title:'Saturday direct makeup', client:'Client A', date:'Saturday', time:'10:00 AM – 1:00 PM', status:'open', code:'97153', auth:'24 direct hrs available', consent:'Substitute allowed', match:92, points:'1000 optional pts' },
+        { id:'shift-2', type:'bcba', title:'BCBA telehealth parent training', client:'Client A', date:'Tomorrow', time:'12:00 PM – 1:00 PM', status:'open', code:'97156', auth:'6 parent-training hrs available', consent:'Caregiver open to telehealth', match:88, points:'$0 required' },
+        { id:'shift-3', type:'redirect', title:'Material Maker™ prep fallback', client:'Client A', date:'Admin assigned', time:'Not SubPool', status:'redirect', code:'Non-billable', auth:'Does not use auth by default', consent:'Supervisor approval', match:0, points:'$0 required' }
+      ]},
+      material: {
+        tab:'tokenboard',
+        status:'Ready — built-in Material Maker™ demo engine',
+        tokenCount:10,
+        tokens:Array(10).fill(false),
+        tokenTheme:'Transforming Robots',
+        rewardTheme:'Robot Reward',
+        tokenBoardData:{ title:'Transforming Robots Token Board', bgUrl:null, imgUrl:null, rewardImgUrl:null },
+        scheduleInputs:['Hang up coat','Wash hands','Eat snack','Play with blocks'],
+        scheduleStyle:'cartoon',
+        scheduleItems:[],
+        storyTopic:'When the room is loud',
+        storyName:'Client A',
+        socialStoryData:null,
+        activeSheet:'dtt',
+        planInput1:'Receptive Colors',
+        planInput2:'Functional Communication',
+        sheetData:null,
+        flashcards:[],
+        activityType:'coloring',
+        activityTheme:'Under the sea',
+        activityData:null,
+        visualAidType:'firstThen',
+        firstText:'Wash hands',
+        thenText:'Blocks',
+        singleCardText:'Stop',
+        visualAidData:null,
+        cvType:'calendar',
+        cvTheme:'Space',
+        cvData:null,
+        reviewPacket:null
+      },
+      compliance: { ready:false, checklist:{ recovered:true, staff:true, auth:true, caregiver:false, note:false, bcba:false, export:false } },
+      field: { tab:'crisis', role:'rbt', snap:'idle', vault:[], result:null, forms:{
+        board:'Manded for break independently 4x and transitioned back after visual timer.',
+        behavior:'Throwing blocks during transition from play to table work', functionText:'Escape / Avoidance',
+        antecedent:'RBT presented first table-work demand after five minutes of block play.', abBehavior:'Client threw two blocks toward the wall and moved away from the table.',
+        program:'Functional Communication', target:'Request break using card or AAC before leaving area', interests:'Blocks, bubbles, cars, movement play',
+        objective:'He got mad when I took the iPad and refused to work.', play:'Client is wandering and not engaging with the current NET activity.', parent:'Using first/then language during transitions'
+      }},
+      analyst: { tab:'dashboard', artifacts:[], selected:null, telehealth:[
+        { id:'tel-001', client:'Demo Client A', date:'2026-06-07', time:'10:00 AM', status:'open', code:'97156', auth:'97156 capacity available', reason:'RBT direct recovery constrained; caregiver accepted parent-training fallback.' },
+        { id:'tel-002', client:'Demo Client B', date:'2026-06-08', time:'3:00 PM', status:'review', code:'97156', auth:'Review weekly cap', reason:'Saturday makeup unclaimed; BCBA telehealth fallback available.' }
+      ], forms:{ client:'Demo Client A', age:'5 yrs 2 mo', dx:'F84.0', intensity:'30 hrs/wk', behaviors:'Elopement during transitions, dropping during table demands', skills:'Functional communication, transition tolerance, independent play', fbaBehavior:'Leaving the instructional area more than 6 feet without permission during transition demands.', fbaFunction:'Escape / Avoidance', antecedents:'Transition from preferred play to table work.', consequences:'Task demand delayed and additional adult attention occurred.', soap:'Practiced break card and cleanup transitions. 4 independent break requests. Left table twice after cleanup demand.', comms:'Transition from blocks to table was hard. Client used break card 4 times and returned after visual schedule.', task:'Packing backpack', program:'Request break using AAC before leaving the area', library:'What should I check before using BCBA telehealth parent training as a fallback?', review:'Client will stop running away when told to sit.' } }
+    };
+
+    let timerInterval = null;
+
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(Number.isFinite(value) ? value : 0);
+    }
+
+    function formatStopwatch(seconds = 0) {
+      const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = Math.floor(seconds % 60);
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function emit(type, module = 'Provider Hub') {
+      state.events.unshift({ id: `${Date.now()}-${Math.random()}`, type, module, time: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) });
+      state.events = state.events.slice(0, 20);
+    }
+
+    function setRoute(route) {
+      const previousRoute = state.route;
+      state.route = route;
+      if (route === 'portal' && previousRoute !== 'portal') state.__scrollToTop = true;
+      const landingEl = document.getElementById('landing-page');
+      const providerEl = document.getElementById('provider-root');
+      if (route === 'portal') {
+        try { history.replaceState(null, '', '#provider-portal'); } catch (e) { location.hash = 'provider-portal'; }
+        if (landingEl) landingEl.style.display = 'none';
+        if (providerEl) providerEl.style.display = 'block';
+        render();
+        if (previousRoute !== 'portal') window.scrollTo(0, 0);
+      } else {
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; }
+        if (providerEl) { providerEl.style.display = 'none'; providerEl.innerHTML = ''; }
+        if (landingEl) landingEl.style.display = '';
+        state.activeModule = null;
+        if (previousRoute !== 'landing') window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function tourMockOS() { setRoute('portal'); }
+
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function openModule(id) {
+      const nextModule = id || null;
+      const changedModule = state.activeModule !== nextModule;
+      state.activeModule = nextModule;
+      state.mobileSidebar = false;
+      if (changedModule) state.__scrollToTop = true;
+      const module = MODULES.find(m => m.id === id);
+      emit('Module opened', module ? module.shortName : 'Dashboard');
+      render();
+    }
+
+    function exitPortal() { state.activeModule = null; setRoute('landing'); }
+
+    function runCopilot(query = '') {
+      const q = String(query || state.copilotQuery || '').toLowerCase();
+      let response = 'Click™ can explain the Core 7 Provider Apps plus hidden admin engines. The clinic keeps its current EMR while Infinite Suite OS™ routes recovery and stages proof packets.';
+      if (q.includes('roi') || q.includes('recover') || q.includes('revenue')) response = 'ROI framing: use estimated opportunity, not a promise. One 3-hour cancellation can become a direct makeup, BCBA telehealth fallback, or documented prep/admin task depending on auth, staffing, consent, and clinic policy.';
+      if (q.includes('trust') || q.includes('consent') || q.includes('review')) response = 'Trust layer: AI drafts, humans approve. Consent is checked before media or caregiver updates. Compliance Sentinel™ reviews readiness but does not guarantee payer/legal compliance.';
+      if (q.includes('demo') || q.includes('walkthrough')) response = 'Demo flow: Care Pocket cancellation → Scheduler AI recovery options → Auth preflight → SubPool / Analyst fallback → FieldPocket support → Compliance Sentinel packet → API export beside current EMR.';
+      if (q.includes('field')) response = 'FieldPocket™ supports the RBT during a recovered session with Safe Capture, crisis protocol access, caregiver-board drafts, and objective note translation. It does not replace the BCBA plan.';
+      if (q.includes('analyst')) response = 'Analyst Pocket™ is the BCBA review workspace: claim telehealth fallback, draft FBA/treatment/SOAP/protocol artifacts, and route packets to Compliance Sentinel™.';
+      state.copilotResponse = response;
+      state.copilotOpen = true;
+      emit('Click™ answered workflow question', 'Click™');
+      render();
+    }
+
+    function setLandingField(field, value) { state.landing[field] = Number(value); render(); }
+
+    function startTimer() {
+      if (state.timer.status === 'active') return;
+      state.timer.status = 'active'; state.timer.gps = 'GPS verified demo'; state.timer.geofence = 'demo-soft pass';
+      if (!timerInterval) timerInterval = setInterval(() => { if (state.route === 'portal' && state.timer.status === 'active') { state.timer.seconds++; render(); } }, 1000);
+      emit('Global OS work-state started with timestamp + GPS/geofence packet', 'Motherboard OS™'); render();
+    }
+    function pauseTimer() { if (state.timer.status !== 'active') return; state.timer.status = 'paused'; emit('Global OS work-state paused', 'Motherboard OS™'); render(); }
+    function resumeTimer() { if (state.timer.status !== 'paused') return; state.timer.status = 'active'; emit('Global OS work-state resumed', 'Motherboard OS™'); render(); }
+    function endTimer() { state.timer.status = 'ended'; state.timer.geofence = 'end packet captured'; emit('Global OS proof packet ready', 'Motherboard OS™'); render(); }
+
+    function fieldValue(path, value) {
+      const [root, key] = path.split('.');
+      state[root].forms[key] = value;
+    }
+
+    function updateInput(path, value) { fieldValue(path, value); }
+
+    function moduleById(id) { return MODULES.find(m => m.id === id); }
+
+    function icon(name) {
+      return `<span class="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700 text-lg font-black">${ICON[name] || '•'}</span>`;
+    }
+
+    function landingPage() {
+      const { learners, canceledHours, recoveryRate, hourlyRate } = state.landing;
+      const monthlyAtRisk = canceledHours * 4 * hourlyRate;
+      const estimatedOpportunity = monthlyAtRisk * recoveryRate / 100;
+      const coreModules = MODULES.filter(m => m.core);
+      return `
+        <div class="min-h-screen bg-[#F8FAFC] text-[#0A192F] fade-in">
+          <nav class="sticky top-0 z-40 border-b border-slate-200 bg-white/88 backdrop-blur-xl">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8">
+              <button onclick="scrollToSection('top')" class="flex items-center gap-4 text-left">
+                <div class="relative flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-[#020817] text-white shadow-[0_0_30px_rgba(34,211,238,.2)]"><span class="absolute left-2 top-2 h-5 w-5 rounded-full bg-[#FBBF24]/75 blur-md"></span><span class="relative text-3xl font-black">∞</span></div>
+                <div>
+                  <p class="text-xl font-black tracking-tight md:text-2xl">Infinite Pieces AI™</p>
+                  <p class="text-[12px] font-black uppercase tracking-[0.24em] text-cyan-600">Infinite Suite OS™</p>
+                </div>
+              </button>
+              <div class="hidden items-center gap-8 text-sm font-black text-slate-600 lg:flex">
+                <button onclick="scrollToSection('workflow')" class="transition hover:text-[#0A192F]">Workflow</button>
+                <button onclick="scrollToSection('lost-hour-check')" class="transition hover:text-[#0A192F]">Lost-hour check</button>
+                <button onclick="scrollToSection('trust-review')" class="transition hover:text-[#0A192F]">Trust & review</button>
+                <button onclick="scrollToSection('core-apps')" class="transition hover:text-[#0A192F]">Core 7</button>
+                <button onclick="tourMockOS()" class="rounded-full bg-[#0A192F] px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg hover:bg-[#020817]">Tour Mock OS</button>
+              </div>
+              <button onclick="tourMockOS()" class="rounded-full bg-cyan-300 px-4 py-3 text-[11px] font-black uppercase tracking-widest text-[#020817] lg:hidden">Tour OS</button>
+            </div>
+          </nav>
+
+          <header id="top" class="grid-bg relative overflow-hidden">
+            <div class="absolute -right-40 top-28 h-96 w-96 rounded-full bg-cyan-200/45 blur-3xl"></div>
+            <div class="absolute -left-20 bottom-12 h-72 w-72 rounded-full bg-amber-200/45 blur-3xl"></div>
+            <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-20 md:px-8 lg:grid-cols-[1.05fr_.95fr] lg:py-28">
+              <section class="relative z-10">
+                <div class="mb-6 inline-flex items-center gap-3 rounded-full border border-cyan-200 bg-cyan-50 px-5 py-3 text-[11px] font-black uppercase tracking-[0.22em] text-cyan-700">
+                  <span class="h-2.5 w-2.5 rounded-full bg-cyan-600"></span> Founding Clinic Trial · Operational Recovery Core
+                </div>
+                <h1 class="max-w-4xl text-5xl font-black leading-[.95] tracking-[-.07em] text-[#0A192F] md:text-7xl">
+                  A cancellation should not automatically become a <span class="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">lost hour.</span>
+                </h1>
+                <p class="mt-7 max-w-2xl text-xl font-black leading-relaxed text-slate-800 md:text-2xl">Keep your EMR. Add an Operational Recovery Core beside it.</p>
+                <p class="mt-4 max-w-2xl text-base font-semibold leading-relaxed text-slate-600 md:text-lg">Infinite Suite OS™ turns one cancellation into a routed, supported, documented, review-ready workflow across Scheduler AI™, Care Pocket™, FieldPocket™, SubPool™, Material Maker™, Compliance Sentinel™, Analyst Pocket™, and export support.</p>
+                <div class="mt-9 flex flex-col gap-4 sm:flex-row">
+                  <button onclick="tourMockOS()" class="inline-flex items-center justify-center gap-2 rounded-full bg-[#0A192F] px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-cyan-200/60 transition hover:bg-[#020817]">Tour the Mock OS →</button>
+                  <a href="mailto:founders@infinitepieces.ai?subject=Founding%20Clinic%20Beta%20Inquiry" class="inline-flex items-center justify-center rounded-full border border-cyan-200 bg-white px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-[#0A192F] shadow-sm transition hover:bg-cyan-50">Apply for Beta</a>
+                </div>
+                <p class="mt-4 max-w-xl text-xs font-bold leading-relaxed text-slate-500">The homepage explains the problem. The mock OS shows the workflow.</p>
+              </section>
+
+              <section class="relative z-10 flex items-center justify-center">
+                <div class="hero-glow w-full max-w-xl rounded-[2rem] border border-slate-200 bg-white p-5 paper-shadow">
+                  <div class="rounded-[1.6rem] bg-[#0B1121] p-5 text-white">
+                    <div class="mb-5 flex items-center justify-between"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-300">Recovery Workflow Preview</p><span class="rounded-full bg-emerald-400/15 px-3 py-1 text-[10px] font-black text-emerald-300">Review-ready</span></div>
+                    <div class="space-y-3">
+                      ${FLOW.slice(0,7).map(([num,title,desc]) => `<div class="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div class="flex items-start gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-300 text-[11px] font-black text-[#020817]">${num}</span><div><p class="text-sm font-black text-white">${title}</p><p class="mt-1 text-xs font-semibold leading-relaxed text-slate-400">${desc}</p></div></div></div>`).join('')}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </header>
+
+          <main>
+            <section id="workflow" class="bg-white py-20">
+              <div class="mx-auto max-w-7xl px-6 md:px-8">
+                <div class="mb-12 text-center"><p class="text-xs font-black uppercase tracking-[.25em] text-cyan-600">Workflow</p><h2 class="mt-3 text-4xl font-black tracking-[-.04em] md:text-5xl">One visual story clinics understand fast.</h2><p class="mx-auto mt-4 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">Before: cancellation chaos. After: detected, checked, routed, supported, reviewed, and export-ready beside the current EMR.</p></div>
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-4">
+                  ${FLOW.map(([num,title,desc,id]) => `<button onclick="tourMockOS(); setTimeout(()=>openModule('${id || ''}'), 80)" class="rounded-[1.5rem] border border-slate-200 bg-[#F8FAFC] p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"><span class="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0A192F] text-sm font-black text-white">${num}</span><h3 class="font-black text-[#0A192F]">${title}</h3><p class="mt-2 text-xs font-semibold leading-relaxed text-slate-600">${desc}</p></button>`).join('')}
+                </div>
+              </div>
+            </section>
+
+            <section id="lost-hour-check" class="grid-bg border-y border-slate-200 bg-[#F8FAFC] py-20">
+              <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 md:px-8 xl:grid-cols-[1.1fr_.9fr]">
+                <div>
+                  <p class="text-xs font-black uppercase tracking-[.25em] text-cyan-600">Lost-hour check</p>
+                  <h2 class="mt-3 text-4xl font-black tracking-[-.04em] md:text-5xl">Estimate the size of the recovery opportunity.</h2>
+                  <p class="mt-4 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600">This is deliberately low-key: it shows operational opportunity, not a savings promise. Results depend on authorization, staffing, payer rules, documentation quality, and clinic policy.</p>
+                  <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    ${sliderHTML('Active learners','learners',learners,1,250,'')}
+                    ${sliderHTML('Canceled hours / week','canceledHours',canceledHours,0,120,' hrs')}
+                    ${sliderHTML('Estimated recovery target','recoveryRate',recoveryRate,0,100,'%')}
+                    ${sliderHTML('Blended hourly value','hourlyRate',hourlyRate,40,150,'/hr','$')}
+                  </div>
+                </div>
+                <aside class="rounded-[2rem] border border-emerald-200 bg-white p-7 shadow-xl">
+                  <p class="text-[10px] font-black uppercase tracking-[.24em] text-emerald-700">Modeled monthly opportunity</p>
+                  <p class="mt-3 text-5xl font-black tracking-[-.05em] text-[#0A192F]">${money(estimatedOpportunity)}</p>
+                  <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-600">Based on ${canceledHours} canceled hours/week × ${money(hourlyRate)}/hr × ${recoveryRate}% modeled recovery target.</p>
+                  <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4"><p class="text-sm font-black text-amber-900">Not a guarantee</p><p class="mt-1 text-xs font-semibold leading-relaxed text-amber-800">Use this as a conversation starter for beta measurement, not a claim of guaranteed reimbursement or savings.</p></div>
+                  <button onclick="tourMockOS()" class="mt-6 w-full rounded-2xl bg-[#0A192F] px-5 py-4 text-sm font-black text-white">See the mock workflow</button>
+                </aside>
+              </div>
+            </section>
+
+            <section id="trust-review" class="bg-white py-20">
+              <div class="mx-auto max-w-7xl px-6 md:px-8">
+                <div class="mb-12 text-center"><p class="text-xs font-black uppercase tracking-[.25em] text-cyan-600">Trust & review</p><h2 class="mt-3 text-4xl font-black tracking-[-.04em] md:text-5xl">AI drafts. Humans approve. Consent is built in.</h2><p class="mx-auto mt-4 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">Infinite Suite OS™ is not an AI therapist, AI BCBA, or replacement for clinical judgment. It is an operational recovery layer with human review and audit-aware workflows.</p></div>
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+                  ${trustCard('AI draft labeling','Every generated note, update, material, or route is labeled as a draft requiring authorized human review.','✦')}
+                  ${trustCard('Consent-aware media','Safe Capture checks consent, linked caregiver, staff assignment, and unknown/extra face risk before posting.','◈')}
+                  ${trustCard('Audit-ready workflow','Key actions create a visible event trail: cancellation, claim, draft, approval, proof packet, and export.','▣')}
+                </div>
+              </div>
+            </section>
+
+            <section id="core-apps" class="border-y border-slate-200 bg-[#F8FAFC] py-20">
+              <div class="mx-auto max-w-7xl px-6 md:px-8">
+                <div class="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p class="text-xs font-black uppercase tracking-[.25em] text-cyan-600">Core 7 Provider Apps</p><h2 class="mt-3 text-4xl font-black tracking-[-.04em] md:text-5xl">Seven visible apps. Two hidden engines.</h2></div><button onclick="tourMockOS()" class="rounded-full bg-cyan-300 px-6 py-3 text-xs font-black uppercase tracking-widest text-[#020817]">Open Mock OS</button></div>
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  ${coreModules.map((m, i) => coreCard(m, i + 1)).join('')}
+                </div>
+                <div class="mt-7 rounded-[2rem] border border-[#0A192F]/10 bg-white p-6"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-700">Hidden/admin engines</p><p class="mt-2 text-sm font-semibold leading-relaxed text-slate-600">Auth Utilization War Room™ and API Integration Hub™ power checks, import/export, and admin review behind the scenes without exposing payer complexity to caregivers or field staff.</p></div>
+              </div>
+            </section>
+          </main>
+
+          <footer class="bg-[#020817] px-6 py-10 text-xs font-medium leading-relaxed text-slate-400 md:px-8">
+            <div class="mx-auto max-w-6xl space-y-3">
+              <p>© 2026 Infinite Pieces. All rights reserved.</p>
+              <p><b class="text-slate-200">Clinical disclaimer:</b> Infinite Suite OS™ supports operations, documentation, review, scheduling, and communication workflows. It does not replace BCBA judgment, clinical supervision, payer review, treatment planning, emergency decision-making, or legal/compliance review.</p>
+              <p><b class="text-slate-200">Financial disclaimer:</b> Estimates are illustrative only and do not guarantee reimbursement, recovered revenue, savings, denial prevention, or retention outcomes.</p>
+              <p><b class="text-rose-300">Security notice:</b> Do not submit PHI through this static demo. Production use requires appropriate HIPAA safeguards, BAAs, backend access controls, tenant scoping, audit logs, retention policies, and incident response procedures.</p>
+            </div>
+          </footer>
+        </div>
+      `;
+    }
+
+    function sliderHTML(label, field, value, min, max, suffix='', prefix='') {
+      return `<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div class="mb-3 flex items-end justify-between gap-3"><label class="text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</label><span class="text-xl font-black text-[#0A192F]">${prefix}${value}${suffix}</span></div><input class="w-full accent-cyan-400" type="range" min="${min}" max="${max}" value="${value}" oninput="setLandingField('${field}', this.value)" /></div>`;
+    }
+    function trustCard(title, body, sym) { return `<div class="rounded-[1.7rem] border border-slate-200 bg-[#F8FAFC] p-6 shadow-sm"><div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0A192F] text-xl font-black text-cyan-300">${sym}</div><h3 class="text-xl font-black text-[#0A192F]">${title}</h3><p class="mt-3 text-sm font-semibold leading-relaxed text-slate-600">${body}</p></div>`; }
+    function coreCard(m, index) { return `<button onclick="tourMockOS(); setTimeout(()=>openModule('${m.id}'), 80)" class="rounded-[1.7rem] border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-xl"><div class="mb-5 flex items-start justify-between"><span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-xl font-black text-cyan-700">${ICON[m.icon]}</span><span class="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">${m.status}</span></div><p class="text-[10px] font-black uppercase tracking-widest text-cyan-700">${index}. ${m.pillar}</p><h3 class="mt-2 text-xl font-black text-[#0A192F]">${m.name}</h3><p class="mt-3 text-sm font-semibold leading-relaxed text-slate-600">${m.purpose}</p><div class="mt-5 rounded-2xl bg-slate-50 px-4 py-3 text-xs font-black text-slate-600">Open in Mock OS →</div></button>`; }
+
+    function portalPage() {
+      const sidebar = state.sidebarCollapsed ? collapsedSidebar() : fullSidebar();
+      return `
+        <div class="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans text-slate-900 fade-in">
+          ${sidebar}
+          <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
+            <header class="z-20 flex h-20 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm md:px-8">
+              <div class="flex min-w-0 items-center gap-3">
+                <button onclick="state.sidebarCollapsed=false; render()" class="rounded-2xl p-2 text-slate-600 hover:bg-slate-100 ${state.sidebarCollapsed ? '' : 'md:hidden'}"><span class="text-xl">☰</span></button>
+                <div><div class="flex flex-wrap items-center gap-2"><h2 class="truncate text-lg font-black text-[#0A192F] md:text-2xl">Infinite Suite OS™</h2><span class="rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-700">Core 7 Provider Apps</span></div><p class="mt-1 hidden text-xs font-semibold text-slate-500 sm:block">Care cancel → Auth preflight → SubPool / Analyst fallback → FieldPocket support → Compliance export.</p></div>
+              </div>
+              <button onclick="state.copilotOpen=true; render()" class="hidden items-center gap-2 rounded-full bg-[#0A192F] px-5 py-3 text-xs font-black text-white shadow-lg sm:flex">✦ Ask Click™</button>
+            </header>
+            ${workSwitchBar()}
+            <section id="provider-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">${state.activeModule ? modulePanel() : dashboardHome()}</section>
+          </main>
+          ${state.copilotOpen ? copilotModal() : ''}
+        </div>
+      `;
+    }
+
+    function collapsedSidebar() {
+      const icons = [[null,'hub','Dashboard'],['scheduler-ai','calendar','Scheduler'],['caregiver-pocket','heart','Care'],['fieldpocket','bolt','FieldPocket'],['subpool','users','SubPool'],['material-maker','wand','Materials'],['compliance-auth','shield','Sentinel'],['analyst-pocket','brain','Analyst'],['auth-war-room','activity','Auth'],['api-integration','workflow','API']];
+      return `<aside class="hidden shrink-0 flex-col items-center bg-[#020817] text-white shadow-2xl md:flex md:w-16"><button onclick="state.sidebarCollapsed=false; render()" class="my-5 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-cyan-300 hover:bg-white/20">☰</button><nav class="flex flex-1 flex-col items-center gap-3 py-2">${icons.map(([id,ic,label]) => `<button onclick="${id ? `openModule('${id}')` : `openModule(null)`}" title="${label}" class="flex h-10 w-10 items-center justify-center rounded-2xl transition ${state.activeModule === id || (!id && !state.activeModule) ? 'bg-[#FBBF24] text-[#020817]' : 'text-slate-400 hover:bg-white/10 hover:text-white'}">${ICON[ic]}</button>`).join('')}</nav></aside>`;
+    }
+
+    function fullSidebar() {
+      const core = MODULES.filter(m => m.core);
+      return `<aside class="fixed inset-y-0 left-0 z-40 flex w-80 shrink-0 flex-col bg-[#020817] text-white shadow-2xl transition md:relative md:translate-x-0 ${state.mobileSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}">
+        <div class="p-6"><div class="flex items-center justify-between gap-3"><div class="flex items-center gap-3"><div class="relative flex h-12 w-12 items-center justify-center rounded-[1.2rem] border border-cyan-400/30 bg-[#0B1121] text-2xl font-black shadow-[0_0_30px_rgba(34,211,238,.22)]">∞</div><div><h1 class="text-sm font-black tracking-widest">INFINITE SUITE</h1><p class="mt-1 text-[10px] font-black uppercase tracking-[.22em] text-cyan-300">Operational Recovery OS</p></div></div><button onclick="state.sidebarCollapsed=true; render()" class="rounded-xl p-2 text-slate-300 hover:bg-white/10">×</button></div><div class="mt-8 rounded-[1.25rem] border border-cyan-400/20 bg-cyan-900/20 p-4"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-400/70">Active Workspace</p><p class="mt-1 text-lg font-black text-white">Demo Clinic: New England Beta</p><div class="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-400"><span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>De-identified demo only</div></div></div>
+        <nav class="custom-scrollbar flex-1 overflow-y-auto py-4"><button onclick="openModule(null)" class="flex w-full items-center gap-3 border-r-4 px-5 py-3 text-sm font-bold transition ${!state.activeModule ? 'border-[#FBBF24] bg-white/5 text-[#FBBF24]' : 'border-transparent text-slate-400 hover:bg-white/5 hover:text-white'}"><span>${ICON.hub}</span> Clinic Dashboard</button><div class="px-5 pb-3 pt-4 text-[10px] font-black uppercase tracking-[.22em] text-slate-500">Core 7 Provider Apps</div>${core.map((m,i) => sidebarItem(m, i+1)).join('')}<div class="mt-5 mx-5 rounded-2xl border border-white/10 bg-white/[.03] p-4"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-300">Hidden/Admin Engines</p><p class="mt-2 text-xs font-semibold leading-relaxed text-slate-400">Auth Utilization preflights recovery. API Integration Hub stages copy/export so clinics keep their current EMR.</p><div class="mt-3 flex flex-wrap gap-2"><button onclick="openModule('auth-war-room')" class="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-black text-slate-300 hover:text-white">Auth</button><button onclick="openModule('api-integration')" class="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-black text-slate-300 hover:text-white">API / CSV</button><button onclick="openModule('program-tree')" class="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-black text-slate-300 hover:text-white">Phase 1B</button></div></div></nav>
+        <div class="border-t border-white/10 p-4 space-y-3"><button onclick="state.copilotOpen=true; render()" class="w-full flex items-center gap-3 rounded-[1.25rem] border border-[#FBBF24]/30 bg-gradient-to-r from-[#FBBF24]/10 to-transparent p-4 hover:from-[#FBBF24]/20 transition text-left"><span class="text-3xl text-[#FBBF24]">✦</span><div><p class="text-sm font-black text-white">Ask Click™ Copilot</p><p class="mt-.5 text-[10px] font-semibold text-amber-200/70">Analyze ROI & workflows</p></div></button><button onclick="exitPortal()" class="w-full py-2 text-xs font-bold text-slate-400 hover:text-white">‹ Exit to Website</button></div>
+      </aside>`;
+    }
+
+    function sidebarItem(m, index) { return `<button onclick="openModule('${m.id}')" class="flex w-full items-center gap-3 border-r-4 px-5 py-3 text-sm font-bold transition ${state.activeModule === m.id ? 'border-[#FBBF24] bg-white/5 text-[#FBBF24]' : 'border-transparent text-slate-400 hover:bg-white/5 hover:text-white'}"><span class="w-5 text-center text-lg">${ICON[m.icon]}</span>${index}. ${m.name}</button>`; }
+
+    function workSwitchBar() {
+      const t = state.timer;
+      return `<div class="border-b border-slate-200 bg-[#0A192F] px-4 py-3 text-white md:px-8"><div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div class="flex min-w-0 items-center gap-3"><div class="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-cyan-300">${ICON.clock}</div><div><p class="text-[10px] font-black uppercase tracking-[.22em] text-cyan-300">Global OS Master Switch</p><p class="text-sm font-black text-white">Timer ${formatStopwatch(t.seconds)} • ${t.status.toUpperCase()} • GPS/geofence: ${t.geofence}</p><p class="text-[10px] font-semibold text-slate-400">Motherboard OS™ owns official start, pause, resume, end, timestamp, GPS packet, and proof metadata.</p></div></div><div class="flex flex-wrap items-center gap-2"><span class="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">${t.gps}</span><button onclick="startTimer()" class="rounded-xl bg-cyan-300 px-4 py-2 text-xs font-black text-[#0A192F] disabled:opacity-50">Start</button><button onclick="pauseTimer()" class="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-xs font-black text-white">Pause</button><button onclick="resumeTimer()" class="rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-xs font-black text-emerald-200">Resume</button><button onclick="endTimer()" class="rounded-xl bg-amber-400 px-4 py-2 text-xs font-black text-[#0A192F]">End</button></div></div></div>`;
+    }
+
+    function dashboardHome() {
+      const core = MODULES.filter(m => m.core);
+      return `<div class="space-y-8 fade-in"><div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#040811] via-[#0A192F] to-[#040811] p-8 text-white shadow-xl"><div class="absolute inset-0 dark-grid-bg opacity-35"></div><div class="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_390px]"><div><div class="mb-4 flex items-center gap-3"><span class="h-3 w-3 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,.8)]"></span><p class="text-[10px] font-black uppercase tracking-[.22em] text-cyan-300">Founding Clinic Trial: Operational Recovery Core</p></div><h1 class="max-w-4xl text-4xl font-black tracking-[-.04em] md:text-5xl">One cancellation.<br/>One recovered, supported session.<br/><span class="bg-gradient-to-r from-cyan-300 to-[#FBBF24] bg-clip-text text-transparent">One review-ready packet.</span></h1><p class="mt-6 max-w-2xl text-base font-medium leading-relaxed text-slate-300">The Core 7 Provider Apps show how a clinic can capture a cancellation, check authorization, route recovery, support staff, keep caregivers informed, and export cleaner readiness packets beside the current EMR.</p><div class="mt-8 flex flex-wrap gap-4"><button onclick="openModule('caregiver-pocket')" class="rounded-2xl bg-cyan-300 px-6 py-4 text-sm font-black text-[#0A192F]">Start recovery loop</button><button onclick="runCopilot('Explain the beta clinic ROI story')" class="rounded-2xl border border-white/20 bg-white/5 px-6 py-4 text-sm font-black text-white">Ask Click™ for ROI</button></div></div><div class="rounded-3xl border border-white/10 bg-white/[.03] p-6"><p class="mb-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Pilot Snapshot</p>${progress('Canceled hours routed','92%','bg-emerald-400')}${progress('SubPool / Analyst fallback','84%','bg-[#FBBF24]')}${progress('Field support active','Live','bg-cyan-400')}${progress('Copy/export readiness','Ready','bg-indigo-400')}<div class="mt-6 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-300">Owner takeaway</p><p class="mt-2 text-sm font-semibold leading-relaxed text-cyan-50">The whole loop is visible: cancellation captured, recovery routed, work supported, staff/caregiver updates reviewed, and proof exported.</p></div></div></div></div><div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">${metric('Canceled Hours','3.0','captured before disappearing','heart','highlight')}${metric('Auth Preflight','Clear','checks before posting','shield')}${metric('3 Recovery Paths','Live','direct, 97156, prep','workflow')}${metric('Field Support','On','RBT handoff ready','bolt')}${metric('BCBA Review','Ready','Analyst Pocket','brain')}${metric('Export Packet','Staged','current EMR stays','file')}</div>${workflowSnapshot()}<section><div class="mb-5 flex items-end justify-between gap-4"><div><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Core 7 Provider Apps</p><h2 class="mt-2 text-2xl font-black text-[#0A192F]">The seven visible modules clinics trial first</h2></div></div><div class="grid grid-cols-1 gap-5 lg:grid-cols-3">${core.map((m,i)=>moduleCard(m,i+1)).join('')}</div></section><div class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_420px]">${recoveryLoopCard()}${auditTrailCard()}</div></div>`;
+    }
+    function progress(label, value, cls) { const width = value === 'Live' || value === 'Ready' ? '92%' : value; return `<div class="mb-5"><div class="mb-1 flex items-end justify-between"><span class="text-sm font-bold text-slate-300">${label}</span><span class="text-xl font-black text-white">${value}</span></div><div class="h-2 w-full overflow-hidden rounded-full bg-white/10"><div class="h-full rounded-full ${cls}" style="width:${width}"></div></div></div>`; }
+    function metric(title,value,sub,ic,highlight='') { return `<div class="rounded-[1.5rem] border p-5 shadow-sm ${highlight ? 'border-cyan-400/30 bg-[#0A192F] text-white' : 'border-slate-200 bg-white'}"><div class="flex items-start justify-between gap-4"><div><p class="text-[10px] font-black uppercase tracking-[.18em] ${highlight ? 'text-cyan-300' : 'text-slate-400'}">${title}</p><p class="mt-2 text-3xl font-black ${highlight ? 'text-white' : 'text-[#0A192F]'}">${value}</p><p class="mt-2 text-xs font-semibold leading-relaxed ${highlight ? 'text-slate-300' : 'text-slate-500'}">${sub}</p></div><span class="flex h-11 w-11 items-center justify-center rounded-2xl ${highlight ? 'bg-cyan-500/20 text-cyan-300' : 'bg-[#0A192F] text-cyan-300'}">${ICON[ic]}</span></div></div>`; }
+    function workflowSnapshot() { return `<section class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm md:p-6"><div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><div><p class="text-[10px] font-black uppercase tracking-[.22em] text-cyan-700">Interactive Demo</p><h2 class="mt-2 text-2xl font-black tracking-tight text-[#0A192F]">A cancellation becomes a recovered, supported, review-ready workflow.</h2><p class="mt-3 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">Keep the current EMR while Infinite Suite OS™ coordinates the operational recovery loop around it.</p></div><div class="flex flex-wrap gap-2"><button onclick="openModule('caregiver-pocket')" class="rounded-2xl bg-[#0A192F] px-4 py-3 text-xs font-black text-white">Start recovery flow</button><button onclick="runCopilot('Show recovered-hour ROI')" class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-xs font-black text-cyan-700">Ask Click™ for ROI</button></div></div><div class="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[1.25fr_.75fr]"><div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5"><p class="mb-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Recovery Loop</p><div class="space-y-3">${FLOW.slice(0,7).map(([num,title,body,id])=>`<button onclick="openModule('${id || ''}')" class="group flex w-full gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-cyan-300 hover:bg-cyan-50"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0A192F] text-xs font-black text-white">${num}</span><span><span class="block text-sm font-black text-[#0A192F]">${title}</span><span class="mt-1 block text-xs font-semibold leading-relaxed text-slate-600">${body}</span></span></button>`).join('')}</div></div><div class="space-y-3">${['Recover the hour','Reduce scramble','Support staff','Inform caregivers','Export cleanly'].map(t=>`<div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-xs font-black text-[#0A192F]">${t}</p><p class="mt-1 text-[11px] font-semibold leading-relaxed text-slate-500">Visible workflow proof for the beta walkthrough.</p></div>`).join('')}<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p class="text-[10px] font-black uppercase tracking-widest text-emerald-700">Trial promise</p><p class="mt-1 text-xs font-bold leading-relaxed text-emerald-900">No forced migration. Run beside the current EMR first.</p></div></div></div></section>`; }
+    function moduleCard(m,index) { return `<button onclick="openModule('${m.id}')" class="group rounded-[2rem] border border-slate-200 bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-cyan-300 hover:shadow-xl"><div class="flex items-start justify-between gap-4"><span class="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-200 bg-cyan-50 text-2xl font-black text-cyan-700">${ICON[m.icon]}</span><span class="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">${m.status}</span></div><p class="mt-5 text-[10px] font-black uppercase tracking-[.18em] text-cyan-600">${index}. ${m.pillar}</p><h3 class="mt-2 text-xl font-black text-[#0A192F]">${m.name}</h3><p class="mt-3 min-h-[4rem] text-sm font-medium leading-relaxed text-slate-600">${m.purpose}</p><div class="mt-5 flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span class="text-xs font-black text-slate-600">Enter workflow</span><span class="text-cyan-600 transition group-hover:translate-x-1">→</span></div></button>`; }
+    function recoveryLoopCard() { return `<div class="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm"><div class="p-5"><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Cancellation to export</p><h3 class="mt-1 text-lg font-black text-[#0A192F]">Operational Recovery Loop</h3><p class="mt-2 text-sm font-semibold leading-relaxed text-slate-500">One cancellation becomes one routed recovery path, one supported work state, one reviewed output, and one export-ready record.</p></div><div class="border-t border-slate-100 p-5"><div class="space-y-5">${FLOW.map(([num,title,desc,id])=>`<button onclick="openModule('${id || ''}')" class="flex w-full gap-4 rounded-2xl p-2 text-left hover:bg-cyan-50"><span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-100 bg-cyan-50 font-black text-cyan-600">${num}</span><span><span class="block font-black text-slate-900">${title}</span><span class="mt-1 block text-sm font-medium text-slate-600">${desc}</span></span></button>`).join('')}</div></div></div>`; }
+    function auditTrailCard() { return `<div class="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm"><div class="p-5"><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Audit-aware event stream</p><h3 class="mt-1 text-lg font-black text-[#0A192F]">Recent Clinic Activity</h3></div><div class="border-t border-slate-100 p-5"><div class="space-y-3">${state.events.length ? state.events.slice(0,8).map(e=>`<div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4"><div><p class="text-xs font-black text-[#0A192F]">${esc(e.type)}</p><p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">App: ${esc(e.module)}</p></div><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">${e.time}</p></div>`).join('') : '<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm font-semibold text-slate-500">No activity recorded yet. Open a module to start the recovery story.</div>'}</div></div></div>`; }
+
+    function modulePanel() {
+      const m = moduleById(state.activeModule);
+      return `<div class="fade-in space-y-5"><div class="flex flex-col gap-3 rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between md:p-5"><button onclick="openModule(null)" class="flex items-center gap-2 text-sm font-black text-slate-500 hover:text-[#0A192F]">← Back to Clinic Dashboard</button><div class="flex flex-wrap items-center gap-2"><span class="rounded-full bg-cyan-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-700 ring-1 ring-cyan-100">${esc(m?.pillar || '')}</span><span class="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 ring-1 ring-emerald-100">${esc(m?.status || '')}</span></div></div>${renderModuleContent(state.activeModule)}</div>`;
+    }
+
+    function moduleShell(title, subtitle, ic, body, color='navy') {
+      return `<div class="space-y-5"><div class="overflow-hidden rounded-[2rem] bg-gradient-to-br ${colorGradient(color)} p-6 text-white shadow-xl"><div class="flex items-center gap-4"><span class="rounded-2xl bg-white/10 p-3 text-3xl ring-1 ring-white/15">${ICON[ic] || '•'}</span><div><p class="text-[10px] font-black uppercase tracking-[.22em] opacity-80">${subtitle}</p><h2 class="text-3xl font-black">${title}</h2></div></div></div>${body}</div>`;
+    }
+    function colorGradient(color) { return color==='gold' ? 'from-amber-500 to-[#FBBF24] text-[#0A192F]' : color==='cyan' ? 'from-cyan-700 to-[#0A192F]' : color==='green' ? 'from-emerald-700 to-[#0A192F]' : color==='purple' ? 'from-purple-900 to-[#0A192F]' : 'from-indigo-950 to-[#0A192F]'; }
+
+    function renderModuleContent(id) {
+      if (id === 'scheduler-ai') return schedulerModule();
+      if (id === 'caregiver-pocket') return careModule();
+      if (id === 'fieldpocket') return fieldModule();
+      if (id === 'subpool') return subpoolModule();
+      if (id === 'material-maker') return materialModule();
+      if (id === 'compliance-auth') return complianceModule();
+      if (id === 'analyst-pocket') return analystModule();
+      if (id === 'auth-war-room') return adminEngineModule('Auth Utilization War Room™','Preflight engine for service codes, date ranges, weekly caps, and recovery path risk checks.', 'activity');
+      if (id === 'api-integration') return adminEngineModule('API Integration Hub™','CSV import/export, copy packets, export history, and future connector staging beside the current EMR.', 'workflow');
+      if (id === 'program-tree') return adminEngineModule('Program Tree™','Expansion target library and protocol tree after recovery overlay is validated.', 'book');
+      if (id === 'dataflow-pro') return adminEngineModule('DataFlow Pro™','Future clinical data capture expansion; not required for the September lost-hour wedge.', 'activity');
+      return '';
+    }
+
+    function schedulerModule() {
+      const s = state.scheduler;
+      const exceptions = s.sessions.filter(x => x.status !== 'scheduled').length;
+      const fillRate = Math.round(((s.sessions.length - exceptions)/s.sessions.length)*100);
+      const calendar = ['Mon 8','Tue 9','Wed 10','Thu 11','Fri 12','Sat 13','Sun 14'].map((d,i)=>{ const sess = s.sessions[i]; return `<div class="flex flex-col"><div class="rounded-t-xl border border-b-0 border-slate-200 bg-slate-50 p-3 text-center"><p class="text-xs font-black uppercase tracking-widest text-slate-500">${d.split(' ')[0]}</p><p class="text-2xl font-light text-slate-800">${d.split(' ')[1]}</p></div><div class="min-h-[260px] flex-1 rounded-b-xl border border-slate-200 bg-white p-2">${sess ? `<button onclick="schedulerCallout(${i})" class="w-full rounded-lg border border-l-4 ${sess.status==='scheduled' ? 'border-l-blue-500 bg-white' : 'border-orange-300 border-l-orange-500 bg-orange-50'} p-3 text-left text-sm shadow-sm"><p class="text-[10px] font-black text-slate-500">${sess.time}</p><p class="font-black text-slate-900">${sess.client}</p><p class="text-[10px] font-semibold text-slate-600">${sess.staff}</p><p class="mt-2 inline-block rounded-full bg-white px-2 py-1 text-[10px] font-black uppercase text-orange-700">${sess.status}</p></button>` : ''}</div></div>`; }).join('');
+      return moduleShell('Scheduler AI™','Real scheduling operations','calendar', `<div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-[#F8FAFC] shadow-sm"><div class="flex border-b border-slate-200 bg-white"><button onclick="state.scheduler.tab='schedule'; render()" class="border-b-4 ${s.tab==='schedule'?'border-[#0A192F] text-[#0A192F]':'border-transparent text-slate-500'} px-5 py-4 text-sm font-black">Schedule</button><button onclick="state.scheduler.tab='dispatch'; render()" class="border-b-4 ${s.tab==='dispatch'?'border-[#0A192F] text-[#0A192F]':'border-transparent text-slate-500'} px-5 py-4 text-sm font-black">Dispatches</button><button onclick="state.scheduler.tab='dashboard'; render()" class="border-b-4 ${s.tab==='dashboard'?'border-[#0A192F] text-[#0A192F]':'border-transparent text-slate-500'} px-5 py-4 text-sm font-black">Dashboard</button><div class="ml-auto px-4 py-3"><button onclick="schedulerAudit()" class="rounded-xl bg-[#0A192F] px-4 py-2 text-xs font-black text-white">Run audit</button></div></div><div class="p-5">${s.tab==='schedule' ? `<div class="space-y-4"><div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4"><h3 class="font-black text-[#0A192F]">Week of 6/8/2026</h3><p class="rounded-xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700">${exceptions} exception(s)</p></div>${s.audit ? `<pre class="whitespace-pre-wrap rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-900">${esc(s.audit)}</pre>` : ''}<div class="grid min-h-[420px] grid-cols-1 gap-3 md:grid-cols-7">${calendar}</div></div>` : s.tab==='dispatch' ? `<div class="space-y-5"><div class="rounded-xl border border-slate-200 bg-white p-6"><h2 class="text-xl font-black text-slate-800">Tri-Channel Dispatch Hub</h2><p class="text-sm font-semibold text-slate-500">Parent cancellations and staff exceptions stream here.</p></div><div class="rounded-xl border border-l-4 border-l-slate-800 bg-white p-6 shadow-sm"><h3 class="text-lg font-black text-slate-800">Client B Coverage Needed</h3><p class="text-sm font-semibold text-slate-600">Today at 13:00 • Clinic</p><div class="mt-4 flex flex-wrap gap-3"><button onclick="dispatchSubpool()" class="rounded-lg bg-cyan-300 px-4 py-2 text-xs font-black uppercase text-[#0A192F]">Dispatch SubPool</button><button onclick="draftParentUpdate()" class="rounded-lg bg-indigo-50 px-4 py-2 text-sm font-black text-indigo-700">Draft Parent Update</button><button onclick="openModule('analyst-pocket')" class="rounded-lg bg-amber-50 px-4 py-2 text-sm font-black text-amber-700">Review 97156 fallback</button></div></div></div>` : `<div class="grid grid-cols-1 gap-4 md:grid-cols-4">${metric('Fill Rate',fillRate+'%','active demo grid','activity')}${metric('Exceptions',String(exceptions),'coverage action','alert')}${metric('Sessions',String(s.sessions.length),'scheduled records','calendar')}${metric('Est. Visible Hours','5.0','demo hours','money')}</div><div class="mt-5 rounded-2xl border border-slate-200 bg-white p-5"><button onclick="schedulerEod()" class="rounded-xl bg-[#0A192F] px-4 py-3 text-xs font-black text-white">Generate EOD summary</button>${s.eod ? `<pre class="mt-4 whitespace-pre-wrap rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">${esc(s.eod)}</pre>` : ''}</div>`}</div></div>`, 'indigo');
+    }
+    function schedulerAudit(){ state.scheduler.audit='AI Schedule Audit Report\n\n• 1 parent cancellation currently unresolved.\n• 3.0 hours are at risk until claimed or rescheduled.\n• Recommended action: dispatch through SubPool™ and alert Analyst Pocket™ for 97156 fallback review.'; emit('Schedule audit generated','Scheduler AI™'); render(); }
+    function schedulerCallout(index){ state.scheduler.sessions[index].status='staff callout'; emit('Session routed to dispatch queue','Scheduler AI™'); render(); }
+    function schedulerEod(){ state.scheduler.eod='End-of-Day Operations Summary\n\n• Schedule fill rate reviewed.\n• Open exceptions routed to recovery workflow.\n• Tomorrow priority: confirm makeup windows and note readiness.'; emit('EOD summary generated','Scheduler AI™'); render(); }
+    function dispatchSubpool(){ emit('Coverage opportunity dispatched to SubPool™','Scheduler AI™'); openModule('subpool'); }
+    function draftParentUpdate(){ emit('Caregiver update drafted','Scheduler AI™'); runCopilot('draft parent update'); }
+
+    function careModule() {
+      const c = state.care;
+      const slots = ['Thursday, 4:00 PM','Friday, 3:00 PM','Saturday, 10:00 AM','BCBA Telehealth · Tomorrow 12:00 PM'];
+      let main = '';
+      if (c.tab==='recovery') {
+        if (c.cancelState==='idle') main = `<div class="mx-auto max-w-3xl rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-sm"><span class="mb-6 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-cyan-700">Upcoming Session</span><h3 class="text-5xl font-black text-[#0A192F]">Today</h3><p class="mt-2 text-xl font-black text-cyan-700">2:00 PM – 5:00 PM</p><div class="my-8 inline-flex flex-wrap justify-center gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm font-bold text-slate-700"><span>RBT: Emma R.</span><span>Home Session</span><span>Recovery preflight internal</span></div><div class="mx-auto mb-5 grid max-w-md grid-cols-1 gap-3 sm:grid-cols-2"><button onclick="toggleCare('telehealth')" class="rounded-2xl border p-3 text-xs font-black ${c.telehealth?'border-purple-200 bg-purple-50 text-purple-700':'border-slate-200 bg-slate-50 text-slate-500'}">BCBA telehealth: ${c.telehealth?'Yes':'No'}</button><button onclick="toggleCare('substitute')" class="rounded-2xl border p-3 text-xs font-black ${c.substitute?'border-emerald-200 bg-emerald-50 text-emerald-700':'border-slate-200 bg-slate-50 text-slate-500'}">Substitute consent: ${c.substitute?'Allowed':'Primary only'}</button></div><button onclick="state.care.cancelState='choices'; render()" class="w-full max-w-md rounded-2xl border border-rose-200 bg-rose-50 py-4 text-sm font-black text-rose-700">Cancel / Find Recovery Options</button></div>`;
+        else if (c.cancelState==='choices') main = `<div class="mx-auto max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-sm"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-amber-200 bg-amber-50 text-4xl text-amber-600">!</div><h3 class="mb-3 text-4xl font-black text-[#0A192F]">Let’s protect the hour</h3><p class="mx-auto mb-6 max-w-lg text-sm font-semibold leading-relaxed text-slate-600">Care Pocket captures simple preferences. Scheduler AI™ handles auth, staffing, and fallback logic internally.</p><div class="grid gap-3 sm:grid-cols-2">${slots.map(slot=>`<button onclick="submitCareCancel('${slot}')" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center transition hover:border-emerald-300 hover:bg-emerald-50"><span class="block text-sm font-black text-[#0A192F]">${slot}</span><span class="mt-3 inline-block rounded bg-emerald-500 px-3 py-1 text-[10px] font-black text-white">Send to Scheduler AI™</span></button>`).join('')}</div></div>`;
+        else main = `<div class="mx-auto max-w-2xl rounded-[2rem] border border-emerald-200 bg-emerald-50 p-8 text-center shadow-sm"><div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-emerald-200 bg-white text-5xl text-emerald-600">✓</div><h3 class="mb-2 text-4xl font-black text-[#0A192F]">Recovery Request Sent</h3><p class="mb-6 text-sm font-semibold text-emerald-900">Selected: <span class="font-black">${esc(c.slot)}</span></p><div class="grid gap-3 md:grid-cols-3">${['Scheduler AI™ notified','Auth preflight hidden','SubPool / Analyst fallback ready'].map(x=>`<div class="rounded-2xl border border-emerald-200 bg-white p-4 text-xs font-black uppercase tracking-widest text-emerald-700">${x}</div>`).join('')}</div><div class="mt-6 flex flex-wrap justify-center gap-3"><button onclick="openModule('scheduler-ai')" class="rounded-2xl bg-[#0A192F] px-5 py-3 text-xs font-black text-white">Open Scheduler AI™</button><button onclick="state.care.cancelState='idle'; render()" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-black text-slate-700">Reset demo</button></div></div>`;
+      } else if (c.tab==='updates') main = `<div class="mx-auto max-w-3xl space-y-4">${c.feed.map(item=>`<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="font-black text-[#0A192F]">${esc(item)}</p><p class="mt-2 text-xs font-semibold text-slate-500">Visible only to linked caregiver/client.</p></div>`).join('')}</div>`;
+      else main = `<div class="mx-auto max-w-3xl rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-purple-600">Caregiver-friendly support</p><h3 class="mt-2 text-3xl font-black text-[#0A192F]">Plain-language home practice</h3><pre class="mt-6 whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-6 text-sm font-semibold leading-relaxed text-slate-700">Parent-friendly strategy draft:\n\n• Use a First/Then statement: First shoes, then blocks.\n• Show the break card before frustration rises.\n• Reinforce calm requesting immediately.\n• Tell the team what worked at home.</pre></div>`;
+      return moduleShell('Care Pocket™','Caregiver-side cancellation and secure updates','heart', `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]"><div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm"><div class="flex flex-wrap gap-2 border-b border-slate-100 bg-white p-5"><button onclick="state.care.tab='recovery'; render()" class="rounded-2xl px-4 py-3 text-xs font-black ${c.tab==='recovery'?'bg-[#0A192F] text-white':'bg-white text-slate-500 ring-1 ring-slate-200'}">Cancel / Recover</button><button onclick="state.care.tab='updates'; render()" class="rounded-2xl px-4 py-3 text-xs font-black ${c.tab==='updates'?'bg-[#0A192F] text-white':'bg-white text-slate-500 ring-1 ring-slate-200'}">Daily Board</button><button onclick="state.care.tab='strategy'; render()" class="rounded-2xl px-4 py-3 text-xs font-black ${c.tab==='strategy'?'bg-[#0A192F] text-white':'bg-white text-slate-500 ring-1 ring-slate-200'}">Strategy Coach</button></div><div class="min-h-[620px] bg-gradient-to-br from-rose-50 via-white to-cyan-50 p-5 md:p-8">${main}</div></div><div class="space-y-5"><div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-rose-500">Caregiver recovery profile</p><div class="mt-4 grid gap-3">${miniLight('Reason',c.reason)}${miniLight('Telehealth',c.telehealth?'Open':'Not selected')}${miniLight('Substitute consent',c.substitute?'Allowed':'Primary only')}${miniLight('Auth language','Hidden from caregiver')}</div></div><div class="rounded-[2rem] border border-amber-200 bg-amber-50 p-5"><p class="text-sm font-black text-amber-900">Access rule</p><p class="mt-2 text-sm font-semibold leading-relaxed text-amber-800">Wrong caregiver sees no linked updates. Never show another child’s posts, schedule, photo, or document.</p></div></div></div>`, 'gold');
+    }
+    function toggleCare(field){ state.care[field] = !state.care[field]; render(); }
+    function submitCareCancel(slot){ state.care.slot=slot; state.care.cancelState='done'; state.care.feed.unshift('Cancellation submitted • '+slot+' selected'); emit('Caregiver cancellation converted to structured recovery request','Care Pocket™'); render(); }
+    function miniLight(label,value){ return `<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3"><p class="text-[9px] font-black uppercase tracking-widest text-slate-400">${label}</p><p class="mt-1 text-xs font-black text-[#0A192F]">${esc(value)}</p></div>`; }
+
+    function subpoolModule() {
+      const s = state.subpool; const selected = s.shifts.find(x=>x.id===s.selected) || s.shifts[0];
+      return moduleShell('SubPool™ Marketplace','Clinical recovery board','users', `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]"><div class="space-y-5"><div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm"><div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><p class="text-[10px] font-black uppercase tracking-widest text-cyan-600">Clinical recovery only</p><h3 class="mt-1 text-2xl font-black text-[#0A192F]">No automatic payroll or cash-out</h3><p class="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-600">RBT direct makeup and BCBA 97156 fallback stay here. Material Maker™ prep/admin routes out.</p></div><div class="flex rounded-2xl border border-slate-200 bg-slate-50 p-1">${['scheduler','rbt','bcba'].map(role=>`<button onclick="state.subpool.role='${role}'; render()" class="rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest ${s.role===role?'bg-[#0A192F] text-white':'bg-white text-slate-500'}">${role}</button>`).join('')}</div></div></div><div class="grid grid-cols-1 gap-4 md:grid-cols-4">${lightMetric('Open clinical',s.shifts.filter(x=>x.status==='open'&&x.type!=='redirect').length,'calendar')}${lightMetric('RBT direct',s.shifts.filter(x=>x.type==='rbt'&&x.status==='open').length,'users')}${lightMetric('BCBA 97156',s.shifts.filter(x=>x.type==='bcba'&&x.status==='open').length,'brain')}${lightMetric('Claimed',s.shifts.filter(x=>x.status==='claimed').length,'check')}</div><div class="grid grid-cols-1 gap-4 lg:grid-cols-3">${s.shifts.map(shift=>subpoolCard(shift)).join('')}</div><div class="rounded-[2rem] border border-amber-200 bg-amber-50 p-5"><p class="text-sm font-black text-amber-900">Incentive safety rule</p><p class="mt-2 text-sm font-semibold leading-relaxed text-amber-800">Points, recognition, or payroll/admin exports are optional clinic decisions. SubPool™ never auto-cashes rewards.</p></div></div><div class="space-y-5"><div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-600">Selected opportunity</p><h3 class="mt-1 text-2xl font-black text-[#0A192F]">${selected.title}</h3><p class="mt-2 text-sm font-semibold leading-relaxed text-slate-600">${selected.type==='redirect'?'This is not a SubPool clinical shift. Route to Material Maker™ after admin approval.':'Claiming requires credential fit, capacity, caregiver consent, and Motherboard OS™ verification.'}</p><div class="mt-5 grid grid-cols-2 gap-3">${miniLight('Service',selected.code)}${miniLight('Status',selected.status)}${miniLight('Match',selected.type==='redirect'?'Admin review':selected.match+'/100')}${miniLight('Ledger',selected.points)}</div><div class="mt-5 grid gap-2"><button onclick="claimSubpool()" class="rounded-2xl bg-[#0A192F] px-4 py-3 text-xs font-black text-white">${selected.type==='redirect'?'Route to Material Maker™':'Claim clinical recovery'}</button><button onclick="runCopilot('show match reasoning')" class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-xs font-black text-cyan-700">Show match reasoning</button><button onclick="runCopilot('draft caregiver continuity')" class="rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-xs font-black text-purple-700">Draft caregiver continuity</button></div></div><div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Live recovery feed</p><div class="mt-4 max-h-[360px] space-y-3 overflow-auto">${s.feed.map(item=>`<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs font-semibold leading-relaxed text-slate-600">${esc(item)}</div>`).join('')}</div></div></div></div>`, 'gold');
+    }
+    function lightMetric(label,value,ic){ return `<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><span class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-200 bg-cyan-50 text-cyan-700">${ICON[ic]}</span><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">${label}</p><p class="mt-1 text-3xl font-black text-[#0A192F]">${value}</p></div>`; }
+    function subpoolCard(shift){ return `<button onclick="state.subpool.selected='${shift.id}'; render()" class="rounded-[1.5rem] border bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${state.subpool.selected===shift.id?'border-cyan-300 ring-4 ring-cyan-100':'border-slate-200'}"><div class="mb-4 flex items-start justify-between gap-3"><span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-200 bg-cyan-50 text-cyan-700">${shift.type==='bcba'?ICON.brain:shift.type==='redirect'?ICON.wand:ICON.users}</span><span class="rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${shift.status==='claimed'?'border-emerald-200 bg-emerald-50 text-emerald-700':shift.type==='redirect'?'border-amber-200 bg-amber-50 text-amber-700':'border-cyan-200 bg-cyan-50 text-cyan-700'}">${shift.type==='redirect'?'Route out':shift.status}</span></div><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">${shift.code} • ${shift.client}</p><h4 class="mt-2 text-lg font-black text-[#0A192F]">${shift.title}</h4><p class="mt-2 text-xs font-semibold leading-relaxed text-slate-500">${shift.date} • ${shift.time}</p><div class="mt-4 space-y-2">${miniLight('Auth',shift.auth)}${miniLight('Consent',shift.consent)}${miniLight('Match',shift.type==='redirect'?'Admin review':shift.match+'/100')}</div></button>`; }
+    function claimSubpool(){ const selected = state.subpool.shifts.find(x=>x.id===state.subpool.selected); if (!selected) return; if (selected.type==='redirect'){ state.subpool.feed.unshift('Routed to Material Maker™ — prep/admin fallback outside SubPool.'); emit('Material Maker fallback routed outside SubPool','SubPool™'); openModule('material-maker'); return; } selected.status='claimed'; state.subpool.feed.unshift(`${selected.title} claimed by ${state.subpool.role.toUpperCase()} view.`); emit(`${selected.title} claimed through SubPool`,'SubPool™'); render(); }
+
+    function materialModule() {
+      const m = state.material;
+      const tools = [
+        ['tokenboard','Token Board','spark','Visual Tools'],
+        ['schedule','Visual Schedule','calendar','Visual Tools'],
+        ['socialstory','Social Story','book','Visual Tools'],
+        ['visualaids','Visual Aids','file','Visual Tools'],
+        ['activities','Activity Maker','wand','Visual Tools'],
+        ['clinicalvisuals','Clinic Decor','image','Visual Tools'],
+        ['dtt','DTT Dual Sheet','file','Clinical Data Sheets'],
+        ['net','NET Dual Sheet','spark','Clinical Data Sheets'],
+        ['prt','PRT Dual Sheet','target','Clinical Data Sheets'],
+        ['ta','Task Analysis','check','Clinical Data Sheets'],
+        ['packet','Review Packet','shield','Clinic Review']
+      ];
+      const groups = [...new Set(tools.map(t => t[3]))];
+      return moduleShell('Material Maker™','AI-assisted material generation — built into demo','wand', `
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[330px_1fr]">
+          <aside class="rounded-[2rem] border border-white/10 bg-[#020817] p-5 text-white shadow-xl">
+            <div class="mb-5 rounded-2xl border border-purple-300/20 bg-purple-300/10 p-4">
+              <p class="text-[10px] font-black uppercase tracking-widest text-purple-200">Live demo module</p>
+              <p class="mt-2 text-sm font-bold leading-relaxed text-slate-200">This is the built-in Material Maker™ workflow, not the four-card mock. It creates token boards, schedules, stories, visual aids, activities, clinic decor, data sheets, flashcards, and review packets.</p>
+            </div>
+            ${groups.map(group => `<div class="mb-5"><p class="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-600">${group}</p><div class="space-y-1">${tools.filter(t => t[3] === group).map(([id,label,ic]) => `<button onclick="mmTab('${id}')" class="flex w-full items-center gap-3 rounded-xl border-l-4 px-4 py-3 text-left text-sm font-bold transition ${m.tab===id?'border-[#FBBF24] bg-white/10 text-cyan-300':'border-transparent text-slate-400 hover:bg-white/5 hover:text-white'}"><span>${ICON[ic] || '•'}</span>${label}</button>`).join('')}</div></div>`).join('')}
+            <div class="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4"><p class="text-xs font-black text-amber-200">Draft material only — clinic/BCBA review required before clinical use.</p></div>
+          </aside>
+          <main class="min-w-0 space-y-5">
+            <div class="flex flex-col gap-3 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+              <div><p class="text-[10px] font-black uppercase tracking-[.22em] text-purple-600">Material Maker™ workspace</p><h3 class="mt-1 text-2xl font-black text-[#0A192F]">${mmTitle()}</h3><p class="mt-2 max-w-3xl text-sm font-semibold leading-relaxed text-slate-600">${esc(m.status || 'Ready')}</p></div>
+              <div class="flex flex-wrap gap-2"><button onclick="mmBuildPacket()" class="rounded-xl bg-[#0A192F] px-4 py-3 text-xs font-black text-white">Build review packet</button><button onclick="mmRouteCompliance()" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-black text-emerald-700">Route to Sentinel™</button></div>
+            </div>
+            ${materialPanel()}
+          </main>
+        </div>`, 'purple');
+    }
+
+    function mmTitle() {
+      const labels = { tokenboard:'Print-ready Token Board', schedule:'4-Step Visual Schedule', socialstory:'Social Story Generator', visualaids:'First/Then + Visual Cards', activities:'Activity Maker', clinicalvisuals:'Clinic Decor & Visuals', dtt:'DTT Dual Data Sheet', net:'NET Dual Data Sheet', prt:'PRT Dual Data Sheet', ta:'Task Analysis Sheet', packet:'Clinic Review Packet' };
+      return labels[state.material.tab] || 'Material Maker™';
+    }
+    function mmTab(tab) { state.material.tab = tab; state.material.status = 'Opened ' + mmTitle() + '.'; render(); }
+    function mmSet(field, value) { state.material[field] = value; }
+    function mmSetSchedule(index, value) { state.material.scheduleInputs[index] = value; }
+    function mmSvg(label = 'Visual Support', aspect = '1:1') {
+      const clean = String(label || 'Visual Support').replace(/<[^>]*>/g,'').replace(/[{}$`]/g,'').slice(0,52);
+      const wide = aspect === '16:9'; const w = wide ? 960 : 720; const h = wide ? 540 : 720;
+      const hue = Array.from(clean).reduce((sum,ch)=>sum+ch.charCodeAt(0),0) % 360;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="hsl(${hue},85%,88%)"/><stop offset="1" stop-color="hsl(${(hue+70)%360},90%,92%)"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0A192F" flood-opacity=".18"/></filter></defs><rect width="100%" height="100%" rx="42" fill="url(#bg)"/><circle cx="${w*.2}" cy="${h*.22}" r="${Math.min(w,h)*.13}" fill="#22D3EE" opacity=".38"/><circle cx="${w*.78}" cy="${h*.18}" r="${Math.min(w,h)*.10}" fill="#FBBF24" opacity=".52"/><rect x="${w*.17}" y="${h*.32}" width="${w*.66}" height="${h*.34}" rx="32" fill="#fff" filter="url(#shadow)"/><path d="M${w*.34} ${h*.51} Q${w*.5} ${h*.36} ${w*.66} ${h*.51}" fill="none" stroke="#0A192F" stroke-width="18" stroke-linecap="round"/><circle cx="${w*.42}" cy="${h*.46}" r="${Math.min(w,h)*.044}" fill="#22D3EE"/><circle cx="${w*.58}" cy="${h*.46}" r="${Math.min(w,h)*.044}" fill="#FBBF24"/><text x="50%" y="${h*.78}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="${wide ? 34 : 40}" font-weight="900" fill="#0A192F">${clean}</text><text x="50%" y="${h*.86}" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="${wide ? 18 : 22}" font-weight="800" fill="#64748B">review-required demo visual</text></svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+    function mmInput(label, field, placeholder = '') { const value = state.material[field] || ''; return `<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</span><input value="${esc(value)}" oninput="mmSet('${field}', this.value)" placeholder="${esc(placeholder)}" class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold text-[#0A192F] outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100" /></label>`; }
+    function mmArea(label, field, rows = 3, placeholder = '') { const value = state.material[field] || ''; return `<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</span><textarea rows="${rows}" oninput="mmSet('${field}', this.value)" placeholder="${esc(placeholder)}" class="custom-scrollbar w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold leading-relaxed text-[#0A192F] outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100">${esc(value)}</textarea></label>`; }
+    function mmSelect(label, field, options) { const value = state.material[field]; return `<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</span><select onchange="mmSet('${field}', this.value); render()" class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold text-[#0A192F] outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100">${options.map(o => `<option value="${esc(o[0])}" ${o[0]===value?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`; }
+
+    function materialPanel() {
+      const tab = state.material.tab;
+      if (tab === 'tokenboard') return mmTokenBoardPanel();
+      if (tab === 'schedule') return mmSchedulePanel();
+      if (tab === 'socialstory') return mmSocialStoryPanel();
+      if (tab === 'visualaids') return mmVisualAidsPanel();
+      if (tab === 'activities') return mmActivityPanel();
+      if (tab === 'clinicalvisuals') return mmClinicalVisualsPanel();
+      if (['dtt','net','prt','ta'].includes(tab)) return mmDataSheetPanel(tab);
+      if (tab === 'packet') return mmReviewPacketPanel();
+      return `<div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">Select a Material Maker™ tool.</div>`;
+    }
+
+    function mmTokenBoardPanel() {
+      const m = state.material;
+      const data = m.tokenBoardData || {};
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]">
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-purple-600">Generate token board</p><div class="mt-5 space-y-4">${mmInput('Child interest / theme','tokenTheme','Deep space, robots, trains...')}${mmInput('Target reward','rewardTheme','iPad, bubbles, walk outside...')}<div class="grid grid-cols-2 gap-2"><button onclick="mmTokenCount(5)" class="rounded-xl border px-4 py-3 text-sm font-black ${m.tokenCount===5?'border-cyan-300 bg-cyan-50 text-cyan-700':'border-slate-200 bg-slate-50 text-slate-600'}">5 tokens</button><button onclick="mmTokenCount(10)" class="rounded-xl border px-4 py-3 text-sm font-black ${m.tokenCount===10?'border-cyan-300 bg-cyan-50 text-cyan-700':'border-slate-200 bg-slate-50 text-slate-600'}">10 tokens</button></div><button onclick="mmGenerateTokenBoard()" class="w-full rounded-xl bg-purple-700 px-5 py-3.5 text-sm font-black text-white">✦ Generate print-ready board</button><button onclick="state.material.tokens=Array(state.material.tokenCount).fill(false); render()" class="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-black text-slate-700">Reset tokens</button></div></section>
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><div class="relative overflow-hidden rounded-3xl border border-slate-200 p-5" style="background-image:url(${data.bgUrl || mmSvg(m.tokenTheme + ' background','16:9')});background-size:cover;background-position:center"><div class="absolute inset-0 bg-white/10"></div><div class="relative z-10 flex items-start justify-between gap-4"><div><p class="text-[10px] font-black uppercase tracking-widest text-white drop-shadow">Material Maker™ board</p><h3 class="mt-2 text-4xl font-black uppercase tracking-tight text-white drop-shadow" style="-webkit-text-stroke:1px #0A192F">${esc(data.title || `${m.tokenTheme} Token Board`)}</h3><p class="mt-2 text-lg font-black text-white drop-shadow" style="-webkit-text-stroke:.5px #0A192F">I am working for: ${esc(m.rewardTheme)}</p></div><div class="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-white shadow-xl"><img src="${data.rewardImgUrl || mmSvg(m.rewardTheme || 'Reward')}" class="h-full w-full object-contain p-1" /></div></div><div class="relative z-10 mt-8 grid grid-cols-5 gap-3">${m.tokens.map((filled,i)=>`<button onclick="toggleToken(${i})" class="aspect-square rounded-2xl border-4 border-white bg-white/80 p-2 text-4xl shadow-lg backdrop-blur-sm transition hover:scale-105">${filled?`<img src="${data.imgUrl || mmSvg(m.tokenTheme + ' token')}" class="h-full w-full object-contain"/>`:'☆'}</button>`).join('')}</div></div><div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4"><p class="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Cutout tokens</p><div class="grid grid-cols-5 gap-3">${Array.from({length:m.tokenCount},(_,i)=>`<div class="aspect-square rounded-2xl border border-slate-200 bg-white p-2 shadow-sm"><img src="${data.imgUrl || mmSvg(m.tokenTheme + ' token')}" class="h-full w-full object-contain" /></div>`).join('')}</div></div></section>
+      </div>`;
+    }
+    function mmTokenCount(count) { state.material.tokenCount = count; state.material.tokens = Array(count).fill(false); state.material.status = `${count}-token board selected.`; render(); }
+    function mmGenerateTokenBoard() { const m = state.material; m.tokenBoardData = { title:`${m.tokenTheme || 'My'} Token Board`, bgUrl:mmSvg(`${m.tokenTheme || 'Theme'} background`, '16:9'), imgUrl:mmSvg(`${m.tokenTheme || 'Token'} token`), rewardImgUrl:mmSvg(m.rewardTheme || 'Reward') }; m.tokens = Array(m.tokenCount).fill(false); m.status = 'Generated print-ready token board with cutout tokens.'; emit('Material Maker generated token board','Material Maker™'); render(); }
+
+    function mmSchedulePanel() {
+      const m = state.material;
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-600">4-step visual schedule</p><div class="mt-5 space-y-4">${m.scheduleInputs.map((v,i)=>`<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">Activity ${i+1}</span><input value="${esc(v)}" oninput="mmSetSchedule(${i}, this.value)" class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold text-[#0A192F]" /></label>`).join('')} ${mmSelect('Image style','scheduleStyle',[['cartoon','Cartoon style'],['realistic','Realistic photo-style placeholder']])}<button onclick="mmGenerateSchedule()" class="w-full rounded-xl bg-cyan-500 px-5 py-3.5 text-sm font-black text-[#020817]">Generate visual schedule</button></div></section><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><h3 class="mb-5 text-3xl font-black uppercase tracking-widest text-[#0A192F]">My Schedule</h3><div class="space-y-4">${(m.scheduleItems.length?m.scheduleItems:m.scheduleInputs.map((text,i)=>({text,url:mmSvg(text||'Activity')}))).map((item,i)=>`<div class="flex items-center gap-5 rounded-3xl border border-slate-200 bg-slate-50 p-4"><div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#0A192F] text-2xl font-black text-white">${i+1}</div><div class="h-28 w-28 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src="${item.url || mmSvg(item.text)}" class="h-full w-full object-cover"/></div><p class="text-2xl font-black uppercase text-slate-800">${esc(item.text || 'Activity')}</p></div>`).join('')}</div></section></div>`;
+    }
+    function mmGenerateSchedule() { const m=state.material; m.scheduleItems = m.scheduleInputs.filter(Boolean).map(text => ({ text, url:mmSvg(text, '1:1'), style:m.scheduleStyle })); m.status = 'Generated 4-step visual schedule.'; emit('Material Maker generated visual schedule','Material Maker™'); render(); }
+
+    function mmSocialStoryPanel() {
+      const m = state.material; const pages = m.socialStoryData?.pages || [];
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Social story generator</p><div class="mt-5 space-y-4">${mmInput('Child name','storyName','Client A')}${mmArea('Topic','storyTopic',4,'Waiting, sharing, transitions...')}<button onclick="mmGenerateSocialStory()" class="w-full rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-black text-white">Generate social story</button></div></section><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><h3 class="mb-5 text-3xl font-black text-[#0A192F]">${esc(m.socialStoryData?.title || 'Draft Social Story')}</h3>${pages.length?`<div class="grid grid-cols-1 gap-4 md:grid-cols-2">${pages.map((p,i)=>`<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center"><div class="mb-4 h-52 overflow-hidden rounded-2xl bg-white shadow-sm"><img src="${p.imgUrl}" class="h-full w-full object-cover"/></div><p class="text-xl font-black leading-snug text-[#0A192F]">${esc(p.text)}</p><p class="mt-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Page ${i+1}</p></div>`).join('')}</div>`:`<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-slate-400">Generate a story to preview pages.</div>`}</section></div>`;
+    }
+    function mmGenerateSocialStory() { const m=state.material; const name=m.storyName||'I'; const topic=m.storyTopic||'something new'; const sentences=[`Sometimes ${topic.toLowerCase()} can feel hard.`,`I can pause and take a deep breath.`,`I can ask my team for help.`,`I am doing my best work.`]; m.socialStoryData={title:`${name} Learns About ${topic}`, pages:sentences.map((text,i)=>({text,imgUrl:mmSvg(text)}))}; m.status='Generated 4-page social story draft for clinic review.'; emit('Material Maker generated social story draft','Material Maker™'); render(); }
+
+    function mmVisualAidsPanel() {
+      const m=state.material; const data=m.visualAidData;
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-600">Visual aids</p><div class="mt-5 space-y-4">${mmSelect('Aid type','visualAidType',[['firstThen','First / Then board'],['singleCard','Single visual card']])}${m.visualAidType==='firstThen'?`${mmInput('First activity','firstText','Wash hands')}${mmInput('Then activity','thenText','Blocks')}`:mmInput('Card text','singleCardText','Stop')}<button onclick="mmGenerateVisualAid()" class="w-full rounded-xl bg-cyan-500 px-5 py-3.5 text-sm font-black text-[#020817]">Generate visual aid</button></div></section><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">${data?mmRenderVisualAid(data):`<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-16 text-center text-slate-400">Generate a visual aid to preview it.</div>`}</section></div>`;
+    }
+    function mmGenerateVisualAid(){ const m=state.material; if(m.visualAidType==='firstThen') m.visualAidData={type:'firstThen', first:{text:m.firstText,url:mmSvg(m.firstText)}, then:{text:m.thenText,url:mmSvg(m.thenText)}}; else m.visualAidData={type:'singleCard', single:{text:m.singleCardText,url:mmSvg(m.singleCardText)}}; m.status='Generated visual aid draft.'; emit('Material Maker generated visual aid','Material Maker™'); render(); }
+    function mmRenderVisualAid(data){ if(data.type==='firstThen') return `<div><h3 class="mb-6 text-center text-5xl font-black uppercase tracking-widest text-[#0A192F]">First / Then</h3><div class="grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto_1fr]"><div class="rounded-3xl border-4 border-emerald-400 bg-emerald-50 p-4 text-center"><img src="${data.first.url}" class="mb-4 aspect-square w-full rounded-2xl object-cover"/><p class="text-4xl font-black text-emerald-800">FIRST</p><p class="mt-2 text-2xl font-black text-[#0A192F]">${esc(data.first.text)}</p></div><div class="flex items-center justify-center text-6xl font-black text-[#0A192F]">→</div><div class="rounded-3xl border-4 border-blue-400 bg-blue-50 p-4 text-center"><img src="${data.then.url}" class="mb-4 aspect-square w-full rounded-2xl object-cover"/><p class="text-4xl font-black text-blue-800">THEN</p><p class="mt-2 text-2xl font-black text-[#0A192F]">${esc(data.then.text)}</p></div></div></div>`; return `<div class="mx-auto max-w-xl rounded-[2rem] border-8 border-[#0A192F] bg-white p-8 text-center"><img src="${data.single.url}" class="mx-auto mb-8 aspect-square w-full max-w-md rounded-3xl object-cover"/><p class="text-6xl font-black uppercase tracking-widest text-[#0A192F]">${esc(data.single.text)}</p></div>`; }
+
+    function mmActivityPanel() {
+      const m=state.material; const data=m.activityData;
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Activity maker</p><div class="mt-5 space-y-4">${mmSelect('Activity type','activityType',[['coloring','Coloring page / line art'],['maze','Simple maze'],['dots','Connect the dots'],['cutout','Cut-and-paste'],['craft','5-step craft']])}${mmInput('Subject / theme','activityTheme','Under the sea')}<button onclick="mmGenerateActivity()" class="w-full rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-black text-white">Generate activity</button></div></section><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">${data?mmRenderActivity(data):`<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-16 text-center text-slate-400">Generate an activity to preview it.</div>`}</section></div>`;
+    }
+    function mmGenerateActivity(){ const m=state.material; if(m.activityType==='craft'){ m.activityData={type:'craft',title:`${m.activityTheme} Craft`,materials:['Paper','Crayons','Glue','Scissors with supervision'],steps:['Gather materials','Color the pieces','Cut on the dotted lines','Glue pieces together','Show finished work'],images:Array.from({length:5},(_,i)=>mmSvg(`${m.activityTheme} craft step ${i+1}`))}; } else { m.activityData={type:'worksheet',title:`${m.activityTheme} ${m.activityType}`,url:mmSvg(`${m.activityType} worksheet ${m.activityTheme}`,'16:9')}; } m.status='Generated activity worksheet/craft draft.'; emit('Material Maker generated activity','Material Maker™'); render(); }
+    function mmRenderActivity(data){ if(data.type==='craft') return `<div><h3 class="text-4xl font-black uppercase tracking-widest text-[#0A192F]">${esc(data.title)}</h3><div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="mb-2 text-xs font-black uppercase tracking-widest text-slate-500">Materials</p><ul class="list-disc pl-5 text-sm font-bold text-slate-700">${data.materials.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="mt-5 space-y-4">${data.steps.map((step,i)=>`<div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0A192F] text-xl font-black text-white">${i+1}</span><img src="${data.images[i]}" class="h-24 w-24 rounded-2xl object-cover"/><p class="text-xl font-black text-[#0A192F]">${esc(step)}</p></div>`).join('')}</div></div>`; return `<div><h3 class="mb-5 text-4xl font-black uppercase tracking-widest text-[#0A192F]">${esc(data.title)}</h3><img src="${data.url}" class="w-full rounded-3xl border border-slate-200 object-cover"/><div class="mt-5 h-40 rounded-2xl border-2 border-dashed border-slate-300 bg-white"></div></div>`; }
+
+    function mmClinicalVisualsPanel() {
+      const m=state.material; const data=m.cvData;
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-fuchsia-600">Clinic decor & visuals</p><div class="mt-5 space-y-4">${mmSelect('Visual type','cvType',[['calendar','Monthly calendar'],['days','Days of the week'],['readiness','School readiness rules'],['stations','Center / station signs']])}${mmInput('Theme','cvTheme','Space, Dinosaurs, Ocean...')}<button onclick="mmGenerateClinicalVisual()" class="w-full rounded-xl bg-fuchsia-500 px-5 py-3.5 text-sm font-black text-[#020817]">Generate clinic visual</button></div></section><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">${data?mmRenderClinicalVisual(data):`<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-16 text-center text-slate-400">Generate clinic decor to preview it.</div>`}</section></div>`;
+    }
+    function mmGenerateClinicalVisual(){ const m=state.material; if(m.cvType==='stations') m.cvData={type:'stations',stations:['Sensory Area','Block Center','Reading Nook','Art Station'].map(s=>({text:s,url:mmSvg(`${s} ${m.cvTheme}`)}))}; else if(m.cvType==='readiness') m.cvData={type:'readiness',title:'Ready to Learn',rules:['Listening ears','Safe hands','Walking feet','Kind words','Ask for help'],url:mmSvg(`classroom rules ${m.cvTheme}`)}; else m.cvData={type:m.cvType,title:m.cvType==='days'?'Days of the Week':'Monthly Calendar',url:mmSvg(`${m.cvType} ${m.cvTheme}`,'16:9')}; m.status='Generated clinic decor visual.'; emit('Material Maker generated clinic visual','Material Maker™'); render(); }
+    function mmRenderClinicalVisual(data){ if(data.type==='stations') return `<div class="grid grid-cols-1 gap-5 md:grid-cols-2">${data.stations.map(st=>`<div class="rounded-3xl border-4 border-[#0A192F] bg-white p-5 text-center"><img src="${st.url}" class="mb-4 aspect-video w-full rounded-2xl object-cover"/><p class="text-4xl font-black uppercase text-[#0A192F]">${esc(st.text)}</p></div>`).join('')}</div>`; if(data.type==='readiness') return `<div class="mx-auto max-w-2xl text-center"><h3 class="mb-5 text-5xl font-black uppercase text-[#0A192F]">${esc(data.title)}</h3><img src="${data.url}" class="mx-auto mb-6 aspect-video w-full rounded-3xl object-cover"/>${data.rules.map((r,i)=>`<div class="mb-3 flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#0A192F] font-black text-white">${i+1}</span><p class="text-2xl font-black text-[#0A192F]">${esc(r)}</p></div>`).join('')}</div>`; return `<div><h3 class="mb-5 text-5xl font-black uppercase tracking-widest text-[#0A192F]">${esc(data.title)}</h3><img src="${data.url}" class="mb-5 w-full rounded-3xl object-cover"/>${data.type==='calendar'?`<div class="grid grid-cols-7 gap-2">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="rounded-xl bg-[#0A192F] py-3 text-center text-sm font-black text-white">${d}</div>`).join('')}${Array.from({length:35},()=>`<div class="h-20 rounded-xl border border-slate-300 bg-white"></div>`).join('')}</div>`:`<div class="grid grid-cols-1 gap-3 md:grid-cols-2">${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(d=>`<div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center text-3xl font-black text-[#0A192F]">${d}</div>`).join('')}</div>`}</div>`; }
+
+    function mmDataSheetPanel(type) {
+      const m=state.material; const data=m.sheetData && m.sheetData.type===type ? m.sheetData : null;
+      return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[340px_1fr]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Clinical planner</p><div class="mt-5 space-y-4">${mmInput('Program 1 details','planInput1','Receptive colors')}${mmInput('Program 2 details','planInput2','Expressive labels')}<button onclick="mmDraftSheet('${type}')" class="w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-black text-white">Auto-draft ${type.toUpperCase()} forms</button><button onclick="mmGenerateFlashcards()" class="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-black text-slate-700">Generate flashcards</button></div></section><section class="space-y-5"><div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">${data?mmRenderSheet(data):`<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-16 text-center text-slate-400">Draft forms to preview ${type.toUpperCase()} data sheets.</div>`}</div>${m.flashcards?.length?`<div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="mb-4 text-[10px] font-black uppercase tracking-widest text-cyan-700">Generated visual cues / flashcards</p><div class="grid grid-cols-1 gap-4 md:grid-cols-3">${m.flashcards.map(card=>`<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center"><img src="${card.url}" class="mb-3 aspect-square w-full rounded-xl object-cover"/><p class="text-sm font-black text-[#0A192F]">${esc(card.text)}</p></div>`).join('')}</div></div>`:''}</section></div>`;
+    }
+    function mmDraftSheet(type){ const m=state.material; const p1=m.planInput1||'Program 1'; const p2=m.planInput2||'Program 2'; const makeRows=(base)=>Array.from({length:10},(_,i)=>`${base} target ${i+1}`); const programs=[p1,p2].map((skill,idx)=>({skill,goal:`Learner will demonstrate ${skill.toLowerCase()} with 80–90% independence across 3 sessions.`,rows:makeRows(skill),mastery:'80–90% across 3 consecutive sessions',reinforcers:'Token board, praise, preferred activity'})); m.sheetData={type,programs}; m.flashcards=[]; m.status=`Drafted ${type.toUpperCase()} dual data sheet with two programs and 20 rows.`; emit(`Material Maker drafted ${type.toUpperCase()} data sheet`,'Material Maker™'); render(); }
+    function mmRenderSheet(data){ return `<div><div class="mb-5 flex items-end justify-between gap-3 border-b-4 border-[#0A192F] pb-3"><h3 class="text-3xl font-black uppercase tracking-widest text-[#0A192F]">${data.type.toUpperCase()} Data Sheet</h3><p class="text-xs font-black uppercase tracking-widest text-slate-500">BCBA review required</p></div><div class="space-y-8">${data.programs.map((prog,pIdx)=>`<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2"><div>${miniLight('Skill Area',prog.skill)}</div><div>${miniLight('Mastery',prog.mastery)}</div></div><p class="mb-4 text-sm font-semibold text-slate-700">${esc(prog.goal)}</p><table class="w-full overflow-hidden rounded-xl bg-white text-sm"><thead><tr class="bg-[#0A192F] text-white"><th class="p-2 text-left">#</th><th class="p-2 text-left">Target / SD / Step</th><th class="p-2">Ind</th><th class="p-2">Prompt</th><th class="p-2">Error</th></tr></thead><tbody>${prog.rows.map((row,i)=>`<tr class="border-b border-slate-200"><td class="p-2 font-bold text-slate-400">${i+1}</td><td class="p-2 font-semibold text-slate-700">${esc(row)}</td><td class="p-2 text-center">□</td><td class="p-2 text-center">□</td><td class="p-2 text-center">□</td></tr>`).join('')}</tbody></table></div>`).join('')}</div></div>`; }
+    function mmGenerateFlashcards(){ const m=state.material; if(!m.sheetData){ m.status='Draft a data sheet before generating flashcards.'; render(); return; } m.flashcards=m.sheetData.programs.flatMap(p=>p.rows.slice(0,6).map(row=>({text:row,url:mmSvg(row)}))); m.status='Generated visual cue cards from active data sheet.'; emit('Material Maker generated flashcards from data sheet','Material Maker™'); render(); }
+
+    function mmReviewPacketPanel(){ const m=state.material; return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_380px]"><section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-emerald-700">Clinic review packet</p><h3 class="mt-2 text-2xl font-black text-[#0A192F]">Everything generated here is draft-only until reviewed.</h3><pre class="custom-scrollbar mt-5 max-h-[560px] overflow-auto whitespace-pre-wrap rounded-2xl bg-[#0B1121] p-5 text-xs font-bold leading-relaxed text-cyan-100">${esc(JSON.stringify(m.reviewPacket || mmPacketData(), null, 2))}</pre><div class="mt-5 flex flex-wrap gap-3"><button onclick="mmBuildPacket()" class="rounded-xl bg-[#0A192F] px-5 py-3 text-xs font-black text-white">Refresh packet</button><button onclick="mmCopyPacket()" class="rounded-xl border border-cyan-200 bg-cyan-50 px-5 py-3 text-xs font-black text-cyan-700">Copy packet</button></div></section><aside class="rounded-[2rem] border border-amber-200 bg-amber-50 p-6"><p class="text-sm font-black text-amber-900">Safety boundary</p><p class="mt-2 text-sm font-semibold leading-relaxed text-amber-800">Material Maker™ can create materials fast, but clinical use requires BCBA/clinic review, consent-aware routing, and current-program alignment.</p></aside></div>`; }
+    function mmPacketData(){ const m=state.material; return { packetId:'material-maker-demo-'+Date.now(), module:'Material Maker™', tokenBoard:m.tokenBoardData?.title||null, scheduleItems:m.scheduleItems?.map(x=>x.text)||[], socialStory:m.socialStoryData?.title||null, dataSheet:m.sheetData?m.sheetData.type.toUpperCase():null, flashcards:m.flashcards?.length||0, activity:m.activityData?.title||null, visualAid:m.visualAidData?.type||null, clinicVisual:m.cvData?.title||null, guardrails:['Draft material only','BCBA/clinic review required','No PHI in public demo','Production image generation must run server-side','Route reviewed artifacts through Compliance Sentinel™'] }; }
+    function mmBuildPacket(){ state.material.reviewPacket = mmPacketData(); state.material.tab='packet'; state.material.status='Built Material Maker™ review packet.'; emit('Material Maker review packet built','Material Maker™'); render(); }
+    function mmCopyPacket(){ const text = JSON.stringify(state.material.reviewPacket || mmPacketData(), null, 2); copyPocketText(text); emit('Material Maker packet copied','Material Maker™'); }
+    function mmRouteCompliance(){ state.compliance.checklist.bcba = false; state.compliance.checklist.export = false; emit('Material Maker packet routed to Compliance Sentinel™','Material Maker™'); openModule('compliance-auth'); }
+    function toggleToken(i){ state.material.tokens[i] = !state.material.tokens[i]; emit('Token board interaction captured','Material Maker™'); render(); }
+    function copyPocketText(text){ try { navigator.clipboard?.writeText(String(text || '')); } catch(e) {} }
+
+    function complianceModule() {
+      const c = state.compliance;
+      const checks = [ ['recovered','Session recovered'], ['staff','Staff eligible'], ['auth','Auth preflight'], ['caregiver','Caregiver informed'], ['note','RBT note submitted'], ['bcba','BCBA review complete'], ['export','Export packet ready'] ];
+      return moduleShell('Compliance Sentinel™','Readiness and proof packet review','shield', `<div class="space-y-5"><div class="grid grid-cols-1 gap-4 md:grid-cols-4">${metric('Recovered','3.0','hours protected','clock')}${metric('Auth Guard','Clear','inside window','shield')}${metric('Note Gate',c.ready?'Ready':'Open','review needed','file')}${metric('BCBA Review',c.ready?'Complete':'Needed','before export','brain')}</div><div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_380px]"><div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-widest text-emerald-700">Recovered session checklist</p><h3 class="mt-2 text-2xl font-black text-[#0A192F]">Review-ready packet status</h3><div class="mt-6 space-y-3">${checks.map(([key,label])=>`<button onclick="toggleCompliance('${key}')" class="flex w-full items-center justify-between rounded-2xl border ${c.checklist[key]?'border-emerald-200 bg-emerald-50':'border-slate-200 bg-slate-50'} p-4 text-left"><span class="font-black ${c.checklist[key]?'text-emerald-900':'text-slate-600'}">${label}</span><span class="font-black">${c.checklist[key]?'✓':'○'}</span></button>`).join('')}</div><button onclick="markComplianceReady()" class="mt-6 rounded-2xl bg-[#0A192F] px-5 py-3 text-xs font-black text-white">Mark packet ready</button></div><div class="rounded-[2rem] border border-cyan-200 bg-cyan-50 p-6"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-700">Proof packet</p><pre class="mt-4 whitespace-pre-wrap rounded-2xl bg-white p-4 text-xs font-bold leading-relaxed text-slate-700">${esc(JSON.stringify({ session:'Client B recovered session', readiness:c.ready?'export_ready':'needs_review', checklist:c.checklist, disclaimer:'Readiness support only; not legal/payer guarantee.' }, null, 2))}</pre></div></div></div>`, 'green');
+    }
+    function toggleCompliance(key){ state.compliance.checklist[key] = !state.compliance.checklist[key]; render(); }
+    function markComplianceReady(){ Object.keys(state.compliance.checklist).forEach(k=>state.compliance.checklist[k]=true); state.compliance.ready=true; emit('Compliance Sentinel marked packet export-ready','Compliance Sentinel™'); render(); }
+
+    function fieldModule() {
+      const f = state.field;
+      const tabs = [['crisis','Crisis Protocol','shield','Field safety'],['safeSnap','Safe Capture','image','Field safety'],['board','Care Pocket Update','file','Field safety'],['quick','Quick Intervention','bolt','RBT support'],['ab','A-B Analyzer','file','RBT support'],['mentor','Program Mentor','check','RBT support'],['objective','Objective Note','file','RBT support'],['play','Ideas for Play','spark','Caregiver-friendly'],['parent','Caregiver Guide','users','Caregiver-friendly'],['templates','Behavior Templates','book','History'],['vault',`Secure Vault (${f.vault.length})`,'lock','History']];
+      const groups = [...new Set(tabs.map(t=>t[3]))];
+      return moduleShell('FieldPocket™','RBT field support overlay','bolt', `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[320px_1fr]"><aside class="rounded-[2rem] border border-white/10 bg-[#020817] p-5 text-white shadow-xl"><div class="mb-5 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-300">Motherboard OS™ context</p><p class="mt-2 text-sm font-black text-white">Demo Client A • recovered session</p><p class="mt-1 text-xs font-semibold text-slate-400">Official timer/GPS stays in Global OS Master Switch.</p></div><div class="mb-5 grid grid-cols-2 gap-2">${['rbt','caregiver','bcba','admin'].map(role=>`<button onclick="state.field.role='${role}'; render()" class="rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest ${f.role===role?'bg-cyan-300 text-[#020817]':'bg-white/5 text-slate-400 hover:text-white'}">${role}</button>`).join('')}</div>${groups.map(group=>`<div class="mb-5"><p class="mb-2 text-[10px] font-black uppercase tracking-widest text-slate-600">${group}</p><div class="space-y-1">${tabs.filter(t=>t[3]===group).map(([id,label,ic])=>`<button onclick="state.field.tab='${id}'; render()" class="flex w-full items-center gap-3 rounded-xl border-l-4 px-4 py-3 text-left text-sm font-bold transition ${f.tab===id?'border-[#FBBF24] bg-white/10 text-cyan-300':'border-transparent text-slate-400 hover:bg-white/5 hover:text-white'}"><span>${ICON[ic]}</span>${label}</button>`).join('')}</div></div>`).join('')}</aside><section class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm md:p-6"><div class="mb-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-center md:justify-between"><div><p class="text-[10px] font-black uppercase tracking-widest text-cyan-700">Draft support only</p><h3 class="mt-1 text-2xl font-black text-[#0A192F]">${tabs.find(t=>t[0]===f.tab)?.[1] || 'FieldPocket™'}</h3></div><button onclick="openModule('caregiver-pocket')" class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-xs font-black text-cyan-700">Route to Care Pocket™</button></div>${fieldPanel()}</section></div>`, 'cyan');
+    }
+    function fieldPanel(){ const f=state.field; const forms=f.forms;
+      if (f.tab==='result' && f.result) return draftResultHTML(f.result,'copyFieldResult()','saveFieldResult()','postFieldResult()','resetFieldResult()',f.result.type!=='board');
+      if (f.tab==='crisis') return `<div class="space-y-5"><div class="rounded-2xl border border-rose-200 bg-rose-50 p-5"><p class="text-[10px] font-black uppercase tracking-widest text-rose-700">Field safety boundary</p><h3 class="mt-1 text-2xl font-black text-[#0A192F]">Crisis & Safety Protocol</h3><p class="mt-2 text-sm font-semibold leading-relaxed text-rose-900">Show clinic-approved protocol content only. Do not invent crisis instructions.</p></div>${['Trigger/agitation — reduce language and offer break/help/water.','Escalation — follow clinic-approved safety procedures.','Active crisis — safety first, follow emergency protocol.','Recovery — allow neutral downtime and rebuild with low-demand success.'].map((x,i)=>`<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div class="flex gap-4"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0A192F] text-xs font-black text-white">${i+1}</span><p class="text-sm font-semibold leading-relaxed text-slate-700">${x}</p></div></div>`).join('')}</div>`;
+      if (f.tab==='safeSnap') return safeSnapPanel();
+      if (f.tab==='board') return `<div class="space-y-5">${textarea('RBT shorthand / field note','field.forms.board',forms.board,4)}<button onclick="makeFieldDraft('board')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Draft Care Pocket update</button></div>`;
+      if (f.tab==='quick') return `<div class="space-y-5">${textarea('Target behavior','field.forms.behavior',forms.behavior,3)}${select('Function hypothesis for review','field.forms.functionText',forms.functionText,['Unknown / Multiple','Escape / Avoidance','Access to Tangibles','Attention','Sensory / Automatic'])}<button onclick="makeFieldDraft('quick')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Draft support strategy</button></div>`;
+      if (f.tab==='ab') return `<div class="space-y-5">${textarea('Antecedent','field.forms.antecedent',forms.antecedent,3)}${textarea('Behavior','field.forms.abBehavior',forms.abBehavior,3)}<button onclick="makeFieldDraft('ab')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Analyze support pattern</button></div>`;
+      if (f.tab==='mentor') return `<div class="space-y-5">${input('Program name','field.forms.program',forms.program)}${input('Current target','field.forms.target',forms.target)}${textarea('Interests / motivators','field.forms.interests',forms.interests,3)}<button onclick="makeFieldDraft('mentor')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Get implementation ideas</button></div>`;
+      if (f.tab==='objective') return `<div class="space-y-5">${textarea('Subjective draft','field.forms.objective',forms.objective,5)}<button onclick="makeFieldDraft('objective')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Translate to objective language</button></div>`;
+      if (f.tab==='play') return `<div class="space-y-5">${textarea('Current situation','field.forms.play',forms.play,3)}${input('Interests','field.forms.interests',forms.interests)}<button onclick="makeFieldDraft('play')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Draft play ideas</button></div>`;
+      if (f.tab==='parent') return `<div class="space-y-5">${textarea('Caregiver coaching topic','field.forms.parent',forms.parent,3)}<button onclick="makeFieldDraft('parent')" class="rounded-xl bg-[#0A192F] px-5 py-3 text-sm font-black text-white">Draft caregiver guide</button></div>`;
+      if (f.tab==='templates') return `<div class="grid grid-cols-1 gap-4 md:grid-cols-2">${[['Physical Aggression','Forceful contact toward people or objects.','Unknown / Multiple'],['Elopement','Leaving assigned instructional or safety area.','Access / Escape review'],['Task Refusal','Dropping or pushing materials after demands.','Escape / Avoidance'],['Property Destruction','Throwing, tearing, or sweeping materials.','Unknown / Multiple']].map(([name,context,fn])=>`<button onclick="useFieldTemplate('${escAttr(context)}','${escAttr(fn)}')" class="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm hover:border-cyan-300"><h3 class="font-black text-[#0A192F]">${name}</h3><p class="mt-2 text-sm font-semibold text-slate-600">${context}</p><span class="mt-3 inline-block rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-black uppercase text-slate-500">${fn}</span></button>`).join('')}</div>`;
+      if (f.tab==='vault') return f.vault.length ? `<div class="space-y-3">${f.vault.map((item,i)=>`<button onclick="openFieldVault(${i})" class="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm"><p class="font-black text-[#0A192F]">${esc(item.title)}</p><p class="mt-1 text-xs font-semibold text-slate-500">${new Date(item.createdAt).toLocaleString()}</p></button>`).join('')}</div>` : `<div class="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center text-sm font-semibold text-slate-400">Secure Vault is empty.</div>`;
+    }
+    function escAttr(value){ return esc(value).replace(/&#39;/g,'\''); }
+    function safeSnapPanel(){ const snap=state.field.snap; return `<div class="space-y-5"><div class="rounded-2xl border border-cyan-200 bg-cyan-50 p-5"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-700">Safe Capture</p><h3 class="mt-1 text-2xl font-black text-[#0A192F]">Consent-aware media workflow</h3><p class="mt-2 text-sm font-semibold leading-relaxed text-cyan-950">Checks media consent, caregiver linkage, staff assignment, and unknown/extra face risk before Care Pocket posting.</p></div><div class="grid grid-cols-1 gap-3 md:grid-cols-4">${['Media consent','Staff assigned','Caregiver linked','Unknown face blocker'].map(x=>`<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p class="text-xs font-black text-emerald-900">✓ ${x}</p></div>`).join('')}</div><div class="overflow-hidden rounded-3xl border border-white/10 bg-[#020817] shadow-xl"><div class="flex min-h-[320px] items-center justify-center p-8 text-center">${snap==='idle'?`<div><div class="mx-auto mb-4 text-6xl text-cyan-300">▧</div><h3 class="text-xl font-black text-white">Ready to capture</h3><p class="mt-2 max-w-md text-sm font-semibold text-slate-400">Simulate authorized image or blocked image with another client/unknown face.</p></div>`:snap==='scanning'?`<div><div class="mx-auto mb-4 text-6xl text-cyan-300">⌁</div><h3 class="text-xl font-black text-white">Running Safe Capture preflight...</h3></div>`:snap==='safe'?`<div><div class="mx-auto mb-4 text-6xl text-emerald-300">✓</div><h3 class="text-xl font-black text-white">Authorized capture</h3><p class="mt-2 text-sm font-semibold text-emerald-100">Ready to queue to linked Care Pocket feed.</p></div>`:snap==='blocked'?`<div><div class="mx-auto mb-4 text-6xl text-rose-300">!</div><h3 class="text-xl font-black text-white">Upload blocked</h3><p class="mt-2 text-sm font-semibold text-rose-100">Possible unauthorized/unknown face detected. Raw media is not posted.</p></div>`:`<div><div class="mx-auto mb-4 text-6xl text-emerald-300">✓</div><h3 class="text-xl font-black text-white">Posted safely</h3><p class="mt-2 text-sm font-semibold text-emerald-100">Care Pocket update queued with linked-client visibility only.</p></div>`}</div><div class="flex flex-wrap justify-center gap-3 border-t border-white/10 p-5">${snap==='idle'?`<button onclick="runSafeSnap('authorized')" class="rounded-xl bg-cyan-300 px-5 py-3 text-xs font-black text-[#0A192F]">Simulate authorized photo</button><button onclick="runSafeSnap('extra')" class="rounded-xl bg-rose-500 px-5 py-3 text-xs font-black text-white">Simulate extra face block</button>`:''}${snap==='safe'?`<button onclick="state.field.snap='posted'; emit('fieldPocket.dailyBoardUpdateSent','FieldPocket™'); render()" class="rounded-xl bg-emerald-500 px-5 py-3 text-xs font-black text-white">Queue to Care Pocket</button>`:''}${['safe','blocked','posted'].includes(snap)?`<button onclick="state.field.snap='idle'; render()" class="rounded-xl border border-white/10 bg-white/10 px-5 py-3 text-xs font-black text-white">Reset Safe Capture</button>`:''}</div></div></div>`; }
+    function runSafeSnap(mode){ state.field.snap='scanning'; emit('fieldPocket.safeSnapCaptured','FieldPocket™'); render(); setTimeout(()=>{ state.field.snap=mode==='extra'?'blocked':'safe'; emit(mode==='extra'?'fieldPocket.safeSnapBlocked':'fieldPocket.safeSnapAuthorized','FieldPocket™'); render(); },700); }
+    function makeFieldDraft(type){ const f=state.field.forms; const map={board:['Caregiver-friendly Daily Board update',`Draft caregiver update:\n\nToday we practiced communication and transition support.\n${f.board}\n\nCaregiver version:\n“Great work today — we practiced using communication before transitions and celebrated calm participation.”`],quick:['Rapid intervention support',`Target behavior: ${f.behavior}\nLikely function to review: ${f.functionText}\n\nDraft steps:\n• Reduce extra language.\n• Present a visual choice or first/then support.\n• Reinforce replacement response immediately.\n• Collect ABC data if the pattern repeats.\n• Call BCBA if safety risk, intensity, or frequency increases.`],ab:['A-B data pattern draft',`Antecedent: ${f.antecedent}\nBehavior: ${f.abBehavior}\n\nDraft interpretation:\n• Behavior occurred after transition/demand context.\n• Possible escape/avoidance should be reviewed, not assumed.\n• Add transition warning and prompt communication before demand.`],mentor:['Program Mentor support prompt',`Program: ${f.program}\nTarget: ${f.target}\nInterests: ${f.interests}\n\nTips:\n• Start with rapport.\n• Embed target into a short routine.\n• Prompt only according to approved plan.\n• Reinforce replacement response quickly.`],objective:['Objective note translation',`Original draft:\n${f.objective}\n\nObjective rewrite:\nWhen access to the preferred item ended, the learner did not follow the presented task demand and engaged in refusal behavior. Staff used visual support and prompted a replacement request. Document exact duration, frequency, prompt level, and response to intervention before final submission.`],play:['Ideas for play support prompt',`Situation: ${f.play}\nInterests: ${f.interests}\n\nTry:\n• Offer two preferred choices.\n• Turn the preferred item into request more/help/open/go.\n• Add a silly action, then pause and wait.\n• Reinforce safe communication attempts.`],parent:['Caregiver BST guide draft',`Topic: ${f.parent}\n\nStructure:\n1. Explain in simple language.\n2. Model once.\n3. Practice with caregiver.\n4. Give specific feedback.\n5. Plan one home practice moment.`]}; const [title,body]=map[type]||map.quick; state.field.result={id:`${type}-${Date.now()}`,type,title,body:body+'\n\nAI draft — requires human review. FieldPocket™ supports the approved plan; it does not replace BCBA judgment.',createdAt:new Date().toISOString()}; state.field.tab='result'; emit(type==='board'?'fieldPocket.dailyBoardUpdateDrafted':'fieldPocket.supportStrategyDrafted','FieldPocket™'); render(); }
+    function copyFieldResult(){ copyPocketText(state.field.result?.body||''); emit('fieldPocket.artifactCopiedForExport','FieldPocket™'); }
+    function saveFieldResult(){ if(state.field.result){ state.field.vault.unshift(state.field.result); emit('fieldPocket.artifactSavedToVault','FieldPocket™'); render(); } }
+    function postFieldResult(){ if(state.field.result?.type==='board'){ emit('fieldPocket.dailyBoardUpdateSent','FieldPocket™'); runCopilot('Care Pocket update queued'); } }
+    function resetFieldResult(){ state.field.result=null; state.field.tab='crisis'; render(); }
+    function useFieldTemplate(context, fn){ state.field.forms.behavior=context; state.field.forms.functionText=fn; state.field.tab='quick'; render(); }
+    function openFieldVault(i){ state.field.result=state.field.vault[i]; state.field.tab='result'; render(); }
+
+    function analystModule() {
+      const a=state.analyst; const tabs=[['dashboard','Command Center','activity'],['telehealth','BCBA Telehealth','users'],['plan','Plan Synthesizer','file'],['fba','FBA Drafter','target'],['soap','SOAP Notes','file'],['comms','Parent Comms','file'],['task','Task Analysis','check'],['program','Program Creator','workflow'],['library','Expert Library','book'],['review','Clinical Coach','shield'],['packet',`Export Packet (${a.artifacts.length})`,'file']];
+      return moduleShell('Analyst Pocket™','BCBA review and clinical drafting workspace','brain', `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[320px_1fr]"><aside class="rounded-[2rem] border border-white/10 bg-[#020817] p-5 text-white shadow-xl"><div class="mb-5 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-300">Core 7 Sync</p><p class="mt-2 text-sm font-bold leading-relaxed text-slate-200">Claims BCBA fallback, drafts artifacts, and routes readiness to Compliance Sentinel™.</p></div>${tabs.map(([id,label,ic])=>`<button onclick="state.analyst.tab='${id}'; render()" class="mb-1 flex w-full items-center gap-3 rounded-xl border-l-4 px-4 py-3 text-left text-sm font-bold transition ${a.tab===id?'border-[#FBBF24] bg-white/10 text-cyan-300':'border-transparent text-slate-400 hover:bg-white/5 hover:text-white'}"><span>${ICON[ic]}</span>${label}</button>`).join('')}</aside><section class="min-w-0">${analystPanel()}</section></div>`, 'indigo');
+    }
+    function analystPanel(){ const a=state.analyst; const f=a.forms;
+      if(a.tab==='dashboard') return `<div class="space-y-6"><div class="rounded-3xl border border-slate-200 bg-[#0B1121] p-8 text-white shadow-xl"><p class="text-[10px] font-black uppercase tracking-[.24em] text-cyan-300">Phase 2 BCBA workspace</p><h1 class="mt-3 max-w-4xl text-4xl font-black leading-tight tracking-tight">Clinical drafting, BCBA fallback recovery, and review-ready export.</h1><p class="mt-4 max-w-3xl text-sm font-semibold leading-relaxed text-slate-300">Analyst Pocket™ supports the Core 7 by claiming telehealth fallback opportunities and routing readiness back to Compliance Sentinel™.</p></div><div class="grid grid-cols-1 gap-4 md:grid-cols-4">${metric('Active Caseload','3','demo clients','users')}${metric('Draft Artifacts',String(a.artifacts.length),'review required','file')}${metric('BCBA Fallbacks',String(a.telehealth.filter(x=>x.status!=='claimed').length),'open/review','brain')}${metric('Readiness','Draft-safe','human review','shield')}</div><div class="grid grid-cols-1 gap-4 md:grid-cols-4">${[['plan','Draft treatment plan','file'],['fba','Draft FBA','target'],['program','Create protocol','workflow'],['review','Run clinical review','shield']].map(([id,label,ic])=>`<button onclick="state.analyst.tab='${id}'; render()" class="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50"><span class="mb-3 block text-2xl text-cyan-600">${ICON[ic]}</span><p class="font-black text-[#0A192F]">${label}</p><p class="mt-1 text-xs font-semibold text-slate-500">Create BCBA-reviewable draft support.</p></button>`).join('')}</div></div>`;
+      if(a.tab==='telehealth') return `<div class="space-y-4">${a.telehealth.map(item=>`<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"><div><p class="text-[10px] font-black uppercase tracking-widest text-amber-600">${item.code} parent training fallback</p><h3 class="mt-1 text-xl font-black text-[#0A192F]">${item.client}</h3><p class="mt-1 text-sm font-semibold text-slate-500">${item.date} • ${item.time}</p></div><span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${item.status==='claimed'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}">${item.status}</span></div><p class="mt-4 text-sm font-semibold leading-relaxed text-slate-600">${item.reason}</p><p class="mt-2 text-[10px] font-black uppercase tracking-widest text-cyan-700">${item.auth}</p><button onclick="claimAnalystTelehealth('${item.id}')" class="mt-4 rounded-xl bg-[#0A192F] px-5 py-3 text-xs font-black text-white ${item.status==='claimed'?'opacity-40':''}">${item.status==='claimed'?'Claimed':'Claim as BCBA fallback'}</button></div>`).join('')}</div>`;
+      if(a.tab==='artifact' && a.selected) return draftResultHTML(a.selected,'copyAnalystArtifact()','noop()','routeAnalystToCompliance()','state.analyst.tab=\'packet\'; render()',false);
+      if(a.tab==='packet') return `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]"><div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><h2 class="text-2xl font-black text-[#0A192F]">Analyst Export Packet</h2><pre class="custom-scrollbar mt-5 max-h-[560px] overflow-auto whitespace-pre-wrap rounded-2xl bg-[#0B1121] p-5 text-xs font-bold leading-relaxed text-cyan-100">${esc(JSON.stringify({packetId:'analyst-packet-demo', module:'Analyst Pocket™', artifactCount:a.artifacts.length, openTelehealth:a.telehealth.filter(x=>x.status!=='claimed').length, guardrails:['Drafts require BCBA review','AI does not replace clinical judgment','Compliance Sentinel reviews readiness before export','Current EMR remains source of record']},null,2))}</pre><button onclick="copyPocketText('Analyst packet copied'); emit('analyst.packetExported','Analyst Pocket™');" class="mt-5 rounded-xl bg-[#0A192F] px-5 py-3 text-xs font-black text-white">Copy/export packet</button></div><div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><h3 class="text-lg font-black text-[#0A192F]">Draft artifacts</h3><div class="mt-4 space-y-3">${a.artifacts.length?a.artifacts.map((art,i)=>`<button onclick="openAnalystArtifact(${i})" class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left"><p class="font-black text-[#0A192F]">${esc(art.title)}</p><p class="mt-1 text-xs font-semibold text-slate-500">${esc(art.type)}</p></button>`).join(''):'<div class="rounded-2xl border border-dashed border-slate-300 py-12 text-center text-sm font-semibold text-slate-400">No artifacts yet.</div>'}</div></div></div>`;
+      const formHTML = analystForm(a.tab,f);
+      const titles={plan:['Treatment Plan Synthesizer','Draft treatment plan support.','Create treatment plan draft'],fba:['FBA Drafter','Create FBA support and function-hypothesis review questions.','Create FBA draft'],soap:['SOAP Notes','Turn shorthand into reviewable SOAP note support.','Create SOAP draft'],comms:['Parent Communication','Translate clinical shorthand into caregiver-friendly update draft.','Create communication draft'],task:['Task Analysis','Draft step chains and route visuals to Material Maker™.','Create task analysis draft'],program:['Program Creator','Create Program Tree™ / current EMR-ready protocol drafts.','Create protocol draft'],library:['Expert Library','Demo-safe extraction from internal clinical support prompts.','Create library extraction'],review:['Clinical Coach','Audit wording for measurable, replacement-skill-oriented language.','Run clinical review']};
+      const [title,body,button]=titles[a.tab]||titles.plan;
+      return `<div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div class="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-5"><p class="text-[10px] font-black uppercase tracking-widest text-cyan-700">AI draft — BCBA review required</p><h2 class="mt-1 text-2xl font-black text-[#0A192F]">${title}</h2><p class="mt-2 text-sm font-semibold leading-relaxed text-slate-600">${body}</p></div><div class="space-y-5">${formHTML}<button onclick="makeAnalystDraft('${a.tab}')" class="rounded-xl bg-[#0A192F] px-6 py-3.5 text-sm font-black text-white">✦ ${button}</button></div></div>`;
+    }
+    function analystForm(tab,f){ if(tab==='plan') return `${input('Client','analyst.forms.client',f.client)}<div class="grid grid-cols-1 gap-5 md:grid-cols-3">${input('Age','analyst.forms.age',f.age)}${input('Diagnosis','analyst.forms.dx',f.dx)}${input('Intensity','analyst.forms.intensity',f.intensity)}</div>${textarea('Target behaviors','analyst.forms.behaviors',f.behaviors,3)}${textarea('Skill domains','analyst.forms.skills',f.skills,3)}`; if(tab==='fba') return `${input('Client','analyst.forms.client',f.client)}${textarea('Target behavior','analyst.forms.fbaBehavior',f.fbaBehavior,3)}${select('Hypothesized function','analyst.forms.fbaFunction',f.fbaFunction,['Escape / Avoidance','Access to Tangibles','Social Attention','Sensory / Automatic','Multiple / Synthesized'])}${textarea('Antecedents','analyst.forms.antecedents',f.antecedents,3)}${textarea('Consequences','analyst.forms.consequences',f.consequences,3)}`; if(tab==='soap') return `${input('Client','analyst.forms.client',f.client)}${textarea('Raw notes','analyst.forms.soap',f.soap,7)}`; if(tab==='comms') return `${input('Client','analyst.forms.client',f.client)}${textarea('Clinical notes / incident details','analyst.forms.comms',f.comms,7)}`; if(tab==='task') return `${input('Target skill','analyst.forms.task',f.task)}${select('Chaining method','analyst.forms.chaining',f.chaining||'Forward chaining',['Forward chaining','Backward chaining','Total task presentation'])}<button onclick="openModule('material-maker')" class="rounded-xl border border-cyan-200 bg-cyan-50 px-5 py-3 text-xs font-black text-cyan-700">Route visuals to Material Maker™</button>`; if(tab==='program') return `${textarea('Target skill','analyst.forms.program',f.program,3)}<button onclick="openModule('program-tree')" class="rounded-xl border border-cyan-200 bg-cyan-50 px-5 py-3 text-xs font-black text-cyan-700">Route to Program Tree™</button>`; if(tab==='library') return textarea('Search query','analyst.forms.library',f.library,5); if(tab==='review') return textarea('Clinical text','analyst.forms.review',f.review,8); return ''; }
+    function makeAnalystDraft(type){ const f=state.analyst.forms; const bodyMap={plan:`DRAFT ABA Treatment Plan Support\n\nClient: ${f.client}\nAge: ${f.age}\nDiagnosis: ${f.dx}\nIntensity to review: ${f.intensity}\n\nMedical necessity summary:\n${f.client} demonstrates needs related to ${f.behaviors}. Skill acquisition priorities include ${f.skills}.\n\nAI draft — BCBA review required before clinical use or EMR export.`,fba:`DRAFT Functional Behavior Assessment Support\n\nClient: ${f.client}\nTarget behavior: ${f.fbaBehavior}\nHypothesized function for review: ${f.fbaFunction}\n\nAntecedent pattern: ${f.antecedents}\nConsequence pattern: ${f.consequences}\n\nAI draft — BCBA review required.`,soap:`DRAFT SOAP Note Support\n\nS — context: Session reviewed.\n\nO — Objective data:\n${f.soap}\n\nA — Learner demonstrated replacement communication and required visual support.\n\nP — Continue FCT and transition previews.`,comms:`Subject: Today’s therapy update\n\nToday we practiced communication and transitions.\n\nSource note: ${f.comms}\n\nAI draft — clinic review required before caregiver send.`,task:`DRAFT Task Analysis Support\n\nTarget skill: ${f.task}\n\nSuggested chain:\n1. Orient to materials.\n2. Start first step with visual prompt.\n3. Complete action with least intrusive prompt.\n4. Check completion.\n5. Move to next step.\n6. Contact reinforcement.`,program:`DRAFT Program Protocol Support\n\nTarget: ${f.program}\n\n• Define opportunity clearly.\n• Prompt according to approved plan.\n• Reinforce replacement response.\n• Record independence, prompt level, and context.`,library:`Library Extraction\n\nQuery: ${f.library}\n\nCheck active 97156 authorization, caregiver participation, BCBA credential, documentation, and payer-specific telehealth rules before export.`,review:`Clinical Peer Review\n\nOriginal:\n${f.review}\n\nFlags:\n• Replace broad labels with observable topography.\n• Add measurement, context, mastery, and generalization criteria.\n• Make replacement skills clear.\n\nSuggested rewrite:\nDuring transition demands, learner will request break/help using approved communication response in 80% of opportunities across 3 consecutive sessions.`}; const titles={plan:'Draft Treatment Plan',fba:'Draft FBA Summary',soap:'Draft SOAP Note',comms:'Draft Parent Communication',task:'Draft Task Analysis',program:'Draft Program Protocol',library:'Library Extraction',review:'Clinical Peer Review'}; const art={id:`${type}-${Date.now()}`,type,title:`${titles[type]} — ${type==='program'?f.program:f.client}`,body:bodyMap[type]+'\n\nAI draft — requires BCBA/human review.',createdAt:new Date().toISOString(),reviewRequired:true}; state.analyst.artifacts.unshift(art); state.analyst.selected=art; state.analyst.tab='artifact'; emit(`analyst.${type}Drafted`,'Analyst Pocket™'); render(); }
+    function claimAnalystTelehealth(id){ const item=state.analyst.telehealth.find(x=>x.id===id); if(item){ item.status='claimed'; item.claimedBy='Demo BCBA'; emit('analyst.telehealthOpportunityClaimed','Analyst Pocket™'); render(); } }
+    function openAnalystArtifact(i){ state.analyst.selected=state.analyst.artifacts[i]; state.analyst.tab='artifact'; render(); }
+    function copyAnalystArtifact(){ copyPocketText(state.analyst.selected?.body||''); emit('analyst.artifactCopiedForExport','Analyst Pocket™'); }
+    function routeAnalystToCompliance(){ emit('Analyst artifact routed to Compliance Sentinel™','Analyst Pocket™'); openModule('compliance-auth'); }
+    function noop(){}
+
+    function draftResultHTML(result, copyFn, saveFn, postFn, resetFn, postDisabled) { return `<div class="space-y-5"><div class="rounded-2xl border border-cyan-200 bg-cyan-50 p-4"><p class="text-[10px] font-black uppercase tracking-[.22em] text-cyan-700">AI draft — human review required</p><h3 class="mt-1 text-xl font-black text-[#0A192F]">${esc(result.title)}</h3><p class="mt-1 text-xs font-semibold text-slate-600">Created ${new Date(result.createdAt).toLocaleString()}</p></div><pre class="custom-scrollbar max-h-[520px] overflow-auto whitespace-pre-wrap rounded-2xl border border-slate-200 bg-white p-5 text-sm font-semibold leading-relaxed text-slate-700 shadow-sm">${esc(result.body)}</pre><div class="grid grid-cols-1 gap-3 sm:grid-cols-4"><button onclick="${resetFn}" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-black text-slate-700">Back / reset</button><button onclick="${copyFn}" class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-xs font-black text-cyan-700">Copy/export</button><button onclick="${saveFn}" class="rounded-xl bg-[#0A192F] px-4 py-3 text-xs font-black text-white">Save draft</button><button onclick="${postFn}" ${postDisabled?'disabled':''} class="rounded-xl bg-emerald-500 px-4 py-3 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40">Route/post</button></div></div>`; }
+    function input(label,path,value){ return `<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</span><input value="${esc(value)}" oninput="updateInput('${path}', this.value)" class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold text-[#0A192F] outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100" /></label>`; }
+    function textarea(label,path,value,rows=4){ return `<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</span><textarea rows="${rows}" oninput="updateInput('${path}', this.value)" class="custom-scrollbar w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold leading-relaxed text-[#0A192F] outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100">${esc(value)}</textarea></label>`; }
+    function select(label,path,value,options){ return `<label class="block"><span class="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-500">${label}</span><select onchange="updateInput('${path}', this.value)" class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold text-[#0A192F] outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100">${options.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`; }
+
+    function adminEngineModule(title, desc, ic){ return moduleShell(title,'Hidden/admin support engine',ic, `<div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_420px]"><div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm"><p class="text-[10px] font-black uppercase tracking-[.2em] text-cyan-600">No-migration backend bridge</p><h3 class="mt-2 text-2xl font-black text-[#0A192F]">${title} is admin infrastructure, not a daily caregiver field app.</h3><p class="mt-3 text-sm font-semibold leading-relaxed text-slate-600">${desc}</p><div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">${miniLight('Visibility','Owner/Admin')}${miniLight('Trial mode','CSV/copy')}${miniLight('Secrets/PHI','Backend only')}</div></div><div class="rounded-[2rem] border border-amber-200 bg-amber-50 p-6"><p class="text-sm font-black text-amber-900">Engineering handoff</p><p class="mt-2 text-sm font-semibold leading-relaxed text-amber-800">Wire as admin/unlocked panels inside Scheduler AI™, Compliance Sentinel™, or Admin Settings. Do not expose payer/API complexity to caregivers or field staff.</p></div></div>`, 'navy'); }
+
+    function copilotModal(){ return `<div class="fixed inset-0 z-50 flex items-start justify-center bg-[#020617]/70 p-4 pt-8 backdrop-blur-md md:pt-16"><div class="max-h-[86vh] w-full max-w-3xl overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-white shadow-2xl"><div class="flex items-center justify-between bg-[#0A192F] p-5 text-white"><div class="flex items-center gap-3"><div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#0A192F] font-black">∞</div><div><h2 class="text-lg font-black">Click™ Copilot</h2><p class="text-xs font-semibold text-slate-300">Ask about recovery, trust, ROI, or app workflow.</p></div></div><button onclick="state.copilotOpen=false; render()" class="rounded-full p-2 text-slate-300 hover:bg-white/10 hover:text-white">×</button></div><div class="max-h-[calc(86vh-88px)] overflow-y-auto p-5 md:p-6"><div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4"><p class="text-[10px] font-black uppercase tracking-[.18em] text-slate-400">Active context</p><p class="mt-1 text-sm font-bold text-[#0A192F]">${state.activeModule ? moduleById(state.activeModule)?.name : 'Clinic Dashboard'}</p></div><div class="mt-5 flex flex-col gap-3 sm:flex-row"><input value="${esc(state.copilotQuery)}" oninput="state.copilotQuery=this.value" onkeydown="if(event.key==='Enter') runCopilot(this.value)" placeholder="Try: recover this cancellation, explain ROI, trust layer, analyst, field support..." class="min-h-[48px] flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100" /><button onclick="runCopilot()" class="rounded-2xl bg-[#0A192F] px-6 py-3 text-sm font-black text-white">Ask Click™</button></div><div class="mt-4 flex flex-wrap gap-2">${['Show recovered-hour ROI','Explain Core 7 workflow','Trust & consent layer','Analyst + FieldPocket roles'].map(q=>`<button onclick="state.copilotQuery='${q}'; runCopilot('${q}')" class="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:border-cyan-300 hover:text-cyan-700">${q}</button>`).join('')}</div><div class="mt-6 rounded-[1.5rem] border border-cyan-100 bg-cyan-50/60 p-5"><p class="text-[10px] font-black uppercase tracking-[.18em] text-cyan-700">Copilot response</p><p class="mt-3 whitespace-pre-wrap text-sm font-semibold leading-relaxed text-slate-700">${esc(state.copilotResponse)}</p></div></div></div></div>`; }
+
+
+    function getPortalScrollSnapshot() {
+      const scrollArea = document.getElementById('provider-scroll-area');
+      return {
+        portalTop: scrollArea ? scrollArea.scrollTop : 0,
+        windowTop: window.scrollY || document.documentElement.scrollTop || 0
+      };
+    }
+
+    function restorePortalScrollSnapshot(snapshot) {
+      const shouldScrollToTop = !!state.__scrollToTop;
+      state.__scrollToTop = false;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const scrollArea = document.getElementById('provider-scroll-area');
+          if (scrollArea) {
+            scrollArea.scrollTop = shouldScrollToTop ? 0 : (snapshot?.portalTop || 0);
+          }
+
+          // Only move the browser window on major route/module changes.
+          // Do NOT force window scroll on every in-module click.
+          if (shouldScrollToTop && state.route === 'portal') {
+            window.scrollTo(0, 0);
+          } else if (state.route !== 'portal' && snapshot && typeof snapshot.windowTop === 'number') {
+            window.scrollTo(0, snapshot.windowTop);
+          }
+        });
+      });
+    }
+
+    function stableRender() {
+      render();
+    }
+
+
+    function shouldReplaceNode(fromNode, toNode) {
+      if (!fromNode || !toNode) return true;
+      if (fromNode.nodeType !== toNode.nodeType) return true;
+      if (fromNode.nodeType === Node.ELEMENT_NODE && fromNode.tagName !== toNode.tagName) return true;
+      return false;
+    }
+
+    function syncAttributes(fromEl, toEl) {
+      if (!fromEl || !toEl || fromEl.nodeType !== Node.ELEMENT_NODE || toEl.nodeType !== Node.ELEMENT_NODE) return;
+
+      // Remove old attrs.
+      Array.from(fromEl.attributes).forEach(attr => {
+        if (!toEl.hasAttribute(attr.name)) fromEl.removeAttribute(attr.name);
+      });
+
+      // Add/update new attrs.
+      Array.from(toEl.attributes).forEach(attr => {
+        if (fromEl.getAttribute(attr.name) !== attr.value) fromEl.setAttribute(attr.name, attr.value);
+      });
+
+      // Keep form controls responsive without blanking the whole app.
+      if (fromEl instanceof HTMLInputElement && toEl instanceof HTMLInputElement) {
+        if (document.activeElement !== fromEl && fromEl.value !== toEl.value) fromEl.value = toEl.value;
+        fromEl.checked = toEl.checked;
+      }
+      if (fromEl instanceof HTMLTextAreaElement && toEl instanceof HTMLTextAreaElement) {
+        if (document.activeElement !== fromEl && fromEl.value !== toEl.value) fromEl.value = toEl.value;
+      }
+      if (fromEl instanceof HTMLSelectElement && toEl instanceof HTMLSelectElement) {
+        if (document.activeElement !== fromEl) fromEl.value = toEl.value;
+      }
+    }
+
+    function morphNode(fromNode, toNode) {
+      if (shouldReplaceNode(fromNode, toNode)) {
+        fromNode.replaceWith(toNode.cloneNode(true));
+        return;
+      }
+
+      if (fromNode.nodeType === Node.TEXT_NODE) {
+        if (fromNode.nodeValue !== toNode.nodeValue) fromNode.nodeValue = toNode.nodeValue;
+        return;
+      }
+
+      syncAttributes(fromNode, toNode);
+
+      const fromChildren = Array.from(fromNode.childNodes);
+      const toChildren = Array.from(toNode.childNodes);
+      const max = Math.max(fromChildren.length, toChildren.length);
+
+      for (let i = 0; i < max; i++) {
+        const fromChild = fromNode.childNodes[i];
+        const toChild = toChildren[i];
+
+        if (!fromChild && toChild) {
+          fromNode.appendChild(toChild.cloneNode(true));
+        } else if (fromChild && !toChild) {
+          fromNode.removeChild(fromChild);
+          i--;
+        } else if (fromChild && toChild) {
+          morphNode(fromChild, toChild);
+        }
+      }
+    }
+
+    function morphProviderRoot(providerEl, html) {
+      const template = document.createElement('template');
+      template.innerHTML = html.trim();
+      const nextRoot = template.content.firstElementChild;
+
+      if (!providerEl.firstElementChild || !nextRoot) {
+        providerEl.innerHTML = html;
+        return;
+      }
+
+      morphNode(providerEl.firstElementChild, nextRoot);
+    }
+
+
+    function render(){
+      const landingEl = document.getElementById('landing-page');
+      const providerEl = document.getElementById('provider-root');
+      const snapshot = getPortalScrollSnapshot();
+
+      if (state.route === 'portal') {
+        if (landingEl) landingEl.style.display = 'none';
+        if (providerEl) {
+          providerEl.style.display = 'block';
+          providerEl.classList.add('provider-stable');
+          morphProviderRoot(providerEl, portalPage());
+          restorePortalScrollSnapshot(snapshot);
+        }
+      } else {
+        if (providerEl) {
+          providerEl.style.display = 'none';
+          providerEl.innerHTML = '';
+        }
+        if (landingEl) landingEl.style.display = '';
+      }
+      window.state = state;
+    }
+
+    window.addEventListener('hashchange', () => {
+      if (location.hash === '#provider-portal' || location.hash === '#mock-os') {
+        setRoute('portal');
+        return;
+      }
+      const providerEl = document.getElementById('provider-root');
+      if (providerEl && providerEl.style.display !== 'none') {
+        setRoute('landing');
+      }
+    });
+
+    render();
+
+  </script>
+
+</body>
+</html>
