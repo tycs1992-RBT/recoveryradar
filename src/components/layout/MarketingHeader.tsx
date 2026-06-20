@@ -14,8 +14,8 @@ export function MarketingHeader() {
         <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
           <Link href="/calculator">Lost Hours Calculator</Link>
           <Link href="/quiz">Operations Quiz</Link>
-          <a href="/provider-portal">Provider Portal</a>
-          <a href="/current-demo/index.html">Original Demo</a>
+          <Link href="/provider-portal">Provider Portal</Link>
+          <Link href="/current-demo/index.html">Original Demo</Link>
         </nav>
         <div className="flex items-center gap-2">
           <Link
@@ -24,12 +24,12 @@ export function MarketingHeader() {
           >
             Team login
           </Link>
-          <a
+          <Link
             href="/provider-portal"
             className="rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-soft transition hover:bg-slate-800"
           >
             Provider Portal
-          </a>
+          </Link>
         </div>
       </div>
     </header>
