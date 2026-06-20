@@ -23,6 +23,25 @@ type LeadRow = {
   selected?: boolean;
 };
 
+type EnrichedLeadRow = Pick<LeadRow, "id"> & Partial<LeadRow>;
+
+type EnrichmentResponse = {
+  enriched?: EnrichedLeadRow[];
+  error?: string;
+};
+
+type LeadSearchResponse = {
+  leads?: LeadRow[];
+  notice?: string;
+  errors?: Array<{ query: string; status?: number; message: string }>;
+  error?: string;
+};
+
+type HubSpotSyncResponse = {
+  results?: Record<string, unknown>;
+  error?: string;
+};
+
 function csvEscape(value: unknown) {
   const text = String(value ?? "");
   if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
@@ -102,9 +121,9 @@ export function LeadMachine() {
           extraQueries: extraQueriesText.split("\n").map((line) => line.trim()).filter(Boolean)
         })
       });
-      const data = await response.json();
+      const data = (await response.json()) as LeadSearchResponse;
       if (!response.ok) throw new Error(data.error ?? "Lead search failed");
-      setLeads((data.leads ?? []).map((lead: LeadRow) => ({ ...lead, selected: true })));
+      setLeads((data.leads ?? []).map((lead) => ({ ...lead, selected: true })));
       setNotice(data.notice ?? "Leads returned. Review before outreach.");
       setErrors(data.errors ?? []);
     } catch (error) {
@@ -128,13 +147,15 @@ export function LeadMachine() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leads: withWebsites })
       });
-      const data = await response.json();
+      const data = (await response.json()) as EnrichmentResponse;
       if (!response.ok) throw new Error(data.error ?? "Website enrichment failed");
-      const lookup = new Map((data.enriched ?? []).map((item: any) => [item.id, item]));
-      setLeads((prev) => prev.map((lead) => {
-        const enriched = lookup.get(lead.id) as any;
-        return enriched ? { ...lead, ...enriched } : lead;
-      }));
+      const lookup = new Map<string, EnrichedLeadRow>((data.enriched ?? []).map((item) => [item.id, item]));
+      setLeads((prev) =>
+        prev.map((lead) => {
+          const enriched = lookup.get(lead.id);
+          return enriched ? { ...lead, ...enriched } : lead;
+        })
+      );
       setNotice("Website enrichment complete. Review emails/contact forms before outreach.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Website enrichment failed");
@@ -151,11 +172,11 @@ export function LeadMachine() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(lead)
       });
-      const data = await response.json();
+      const data = (await response.json()) as HubSpotSyncResponse;
       if (!response.ok) throw new Error(data.error ?? "HubSpot sync failed");
       const warnings = Object.entries(data.results ?? {})
         .filter(([key]) => key.toLowerCase().includes("error"))
-        .map(([key, value]) => `${key}: ${value}`);
+        .map(([key, value]) => `${key}: ${String(value)}`);
       setNotice(warnings.length ? `HubSpot partial sync complete for ${lead.businessName}. ${warnings.join(" | ")}` : `HubSpot sync complete for ${lead.businessName}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "HubSpot sync failed");
