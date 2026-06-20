@@ -37,7 +37,7 @@ type PageMap = {
   priorityScore: number;
 };
 
-type Calendar = { day: number; type: string; title: string; keyword: string; owner: string; status: string; cta: string };
+type CalendarItem = { day: number; type: string; title: string; keyword: string; owner: string; status: string; cta: string };
 type LocalSeo = { location: string; keyword: string; slug: string; title: string; h1: string; angle: string };
 type Competitor = { competitor: string; keyword: string; pageIdea: string; angle: string; risk: string; cta: string };
 type LeadBridge = { leadQuery: string; matchingKeywords: string[]; outreachAngle: string; landingPage: string };
@@ -46,10 +46,33 @@ type Analysis = {
   notice?: string;
   opportunities: Opportunity[];
   pageMap: PageMap[];
-  calendar: Calendar[];
+  calendar: CalendarItem[];
   localSeo: LocalSeo[];
   competitors: Competitor[];
   leadBridge: LeadBridge[];
+};
+
+type SerpResult = {
+  results?: Array<{ title?: string; link?: string; snippet?: string }>;
+  notice?: string;
+  error?: string;
+};
+
+type WebsiteAuditResult = {
+  url?: string;
+  title?: string;
+  metaDescription?: string;
+  h1?: string[];
+  h2?: string[];
+  checks?: Array<{ label: string; passed: boolean; detail: string }>;
+  recommendations?: string[];
+  error?: string;
+};
+
+type SearchConsoleResult = {
+  opportunities?: Array<{ query: string; clicks?: number; impressions?: number; ctr?: number; position?: number; recommendation?: string }>;
+  notice?: string;
+  error?: string;
 };
 
 const tabs = [
@@ -65,6 +88,10 @@ const tabs = [
   "Search Console"
 ] as const;
 
+type Tab = (typeof tabs)[number];
+
+const seedNiches = ["ABA clinic software", "ABA scheduling software", "CentralReach alternative", "ABA cancellation management", "how to open an ABA clinic", "custom cabinet maker", "bulk phone buyers"];
+
 function csvEscape(value: unknown) {
   const text = String(value ?? "");
   if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
@@ -75,31 +102,29 @@ function downloadCsv(filename: string, headers: string[], rows: unknown[][]) {
   const csv = [headers.map(csvEscape).join(","), ...rows.map((row) => row.map(csvEscape).join(","))].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
   URL.revokeObjectURL(url);
 }
 
 function downloadJson(filename: string, data: unknown) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
   URL.revokeObjectURL(url);
 }
 
 function copyText(text: string) {
-  navigator.clipboard?.writeText(text);
+  void navigator.clipboard?.writeText(text);
 }
 
-const seedNiches = ["ABA clinic software", "ABA scheduling software", "CentralReach alternative", "ABA cancellation management", "how to open an ABA clinic", "custom cabinet maker", "bulk phone buyers"];
-
 export function SEOGrowthSuite() {
-  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Import + Score");
+  const [activeTab, setActiveTab] = useState<Tab>("Import + Score");
   const [niche, setNiche] = useState("ABA clinic software");
   const [locationsText, setLocationsText] = useState("Florida\nNew Hampshire\nMassachusetts\nTexas\nCalifornia");
   const [csvText, setCsvText] = useState("");
@@ -108,12 +133,12 @@ export function SEOGrowthSuite() {
   const [notice, setNotice] = useState("Import a Google Keyword Planner CSV or generate seed keywords to build your SEO, ads, landing page, local SEO, and content roadmap.");
   const [selectedKeyword, setSelectedKeyword] = useState("");
   const [serpKeyword, setSerpKeyword] = useState("ABA scheduling software");
-  const [serpResult, setSerpResult] = useState<any>(null);
+  const [serpResult, setSerpResult] = useState<SerpResult | null>(null);
   const [auditUrl, setAuditUrl] = useState("https://demo.infinitepieces.ai");
   const [auditKeyword, setAuditKeyword] = useState("ABA operational recovery");
-  const [auditResult, setAuditResult] = useState<any>(null);
+  const [auditResult, setAuditResult] = useState<WebsiteAuditResult | null>(null);
   const [gscCsv, setGscCsv] = useState("");
-  const [gscResult, setGscResult] = useState<any>(null);
+  const [gscResult, setGscResult] = useState<SearchConsoleResult | null>(null);
 
   const selectedOpportunity = useMemo(() => {
     if (!analysis?.opportunities.length) return null;
@@ -133,7 +158,7 @@ export function SEOGrowthSuite() {
           csv: source === "csv" ? csvText : ""
         })
       });
-      const data = await response.json();
+      const data = (await response.json()) as Analysis & { error?: string };
       if (!response.ok) throw new Error(data.error ?? "SEO analysis failed");
       setAnalysis(data);
       setSelectedKeyword(data.opportunities?.[0]?.keyword ?? "");
@@ -147,30 +172,27 @@ export function SEOGrowthSuite() {
 
   async function handleFile(file: File | null) {
     if (!file) return;
-    const text = await file.text();
-    setCsvText(text);
+    setCsvText(await file.text());
   }
 
   async function checkSerp() {
-    setSerpResult({ loading: true });
+    setSerpResult({ notice: "Checking SERP..." });
     const response = await fetch("/api/serp-checker", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ keyword: serpKeyword, num: 10 })
     });
-    const data = await response.json();
-    setSerpResult(data);
+    setSerpResult((await response.json()) as SerpResult);
   }
 
   async function auditWebsite() {
-    setAuditResult({ loading: true });
+    setAuditResult({ recommendations: ["Running website audit..."] });
     const response = await fetch("/api/website-audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: auditUrl, targetKeyword: auditKeyword })
     });
-    const data = await response.json();
-    setAuditResult(data);
+    setAuditResult((await response.json()) as WebsiteAuditResult);
   }
 
   async function importSearchConsole() {
@@ -179,8 +201,7 @@ export function SEOGrowthSuite() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ csv: gscCsv })
     });
-    const data = await response.json();
-    setGscResult(data);
+    setGscResult((await response.json()) as SearchConsoleResult);
   }
 
   return (
@@ -257,36 +278,40 @@ export function SEOGrowthSuite() {
       )}
 
       {activeTab === "SERP Checker" && (
-        <section className="card">
+        <section className="card space-y-5">
           <h3 className="text-2xl font-black text-slate-950">SERP checker + content gaps</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Checks top Google results through Custom Search when configured. Use this to see what Google already ranks and how your page can be different.</p>
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row"><input className="input" value={serpKeyword} onChange={(e) => setSerpKeyword(e.target.value)} /><button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" onClick={checkSerp}>Check SERP</button></div>
-          {serpResult && <pre className="mt-5 max-h-[560px] overflow-auto rounded-3xl bg-slate-950 p-5 text-xs leading-6 text-slate-100">{JSON.stringify(serpResult, null, 2)}</pre>}
+          <div className="flex flex-wrap gap-3">
+            <input className="input max-w-xl" value={serpKeyword} onChange={(e) => setSerpKeyword(e.target.value)} />
+            <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" onClick={checkSerp}>Check SERP</button>
+          </div>
+          <ResultBox data={serpResult} />
         </section>
       )}
 
-      {activeTab === "Keyword → Page Map" && <PageMapView analysis={analysis} />}
-      {activeTab === "Content Calendar" && <CalendarView calendar={analysis?.calendar ?? []} />}
-      {activeTab === "Local SEO" && <LocalSeoView rows={analysis?.localSeo ?? []} />}
-      {activeTab === "Competitor Radar" && <CompetitorView rows={analysis?.competitors ?? []} />}
-      {activeTab === "Lead Bridge" && <LeadBridgeView rows={analysis?.leadBridge ?? []} />}
+      {activeTab === "Keyword → Page Map" && <ListSection title="Keyword-to-page map" rows={analysis?.pageMap ?? []} />}
+      {activeTab === "Content Calendar" && <ListSection title="30-day content calendar" rows={analysis?.calendar ?? []} />}
+      {activeTab === "Local SEO" && <ListSection title="Local SEO page ideas" rows={analysis?.localSeo ?? []} />}
+      {activeTab === "Competitor Radar" && <ListSection title="Competitor and alternative keyword radar" rows={analysis?.competitors ?? []} />}
+      {activeTab === "Lead Bridge" && <ListSection title="Lead query to keyword bridge" rows={analysis?.leadBridge ?? []} />}
 
       {activeTab === "Website Audit" && (
-        <section className="card">
+        <section className="card space-y-5">
           <h3 className="text-2xl font-black text-slate-950">Website audit</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Scan your deployed page for title, meta description, headings, calculator CTAs, Provider Portal CTA, and no-migration language.</p>
-          <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.6fr)_auto]"><input className="input" value={auditUrl} onChange={(e) => setAuditUrl(e.target.value)} /><input className="input" value={auditKeyword} onChange={(e) => setAuditKeyword(e.target.value)} /><button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" onClick={auditWebsite}>Audit</button></div>
-          {auditResult && <pre className="mt-5 max-h-[560px] overflow-auto rounded-3xl bg-slate-950 p-5 text-xs leading-6 text-slate-100">{JSON.stringify(auditResult, null, 2)}</pre>}
+          <div className="grid gap-3 lg:grid-cols-2">
+            <input className="input" value={auditUrl} onChange={(e) => setAuditUrl(e.target.value)} />
+            <input className="input" value={auditKeyword} onChange={(e) => setAuditKeyword(e.target.value)} />
+          </div>
+          <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" onClick={auditWebsite}>Audit website</button>
+          <ResultBox data={auditResult} />
         </section>
       )}
 
       {activeTab === "Search Console" && (
-        <section className="card">
+        <section className="card space-y-5">
           <h3 className="text-2xl font-black text-slate-950">Search Console CSV import</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">After launch, export Search Console performance data and paste it here. Prioritize high-impression keywords with low CTR or positions 5-20.</p>
-          <textarea className="input mt-5 min-h-48 font-mono text-xs" value={gscCsv} onChange={(e) => setGscCsv(e.target.value)} placeholder={'Query,Clicks,Impressions,CTR,Position\naba scheduling software,4,900,0.4%,12.3'} />
-          <button className="mt-4 rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" onClick={importSearchConsole} disabled={!gscCsv.trim()}>Import Search Console CSV</button>
-          {gscResult && <pre className="mt-5 max-h-[560px] overflow-auto rounded-3xl bg-slate-950 p-5 text-xs leading-6 text-slate-100">{JSON.stringify(gscResult, null, 2)}</pre>}
+          <textarea className="input min-h-44 font-mono text-xs" value={gscCsv} onChange={(e) => setGscCsv(e.target.value)} placeholder="Paste Search Console export CSV here" />
+          <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" onClick={importSearchConsole}>Analyze Search Console CSV</button>
+          <ResultBox data={gscResult} />
         </section>
       )}
     </div>
@@ -294,31 +319,82 @@ export function SEOGrowthSuite() {
 }
 
 function KeywordTable({ opportunities, onSelect }: { opportunities: Opportunity[]; onSelect: (keyword: string) => void }) {
-  return <div className="mt-5 max-h-[620px] overflow-auto rounded-3xl border border-slate-200"><table className="min-w-[1100px] w-full bg-white text-sm"><thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-500"><tr><th className="p-3">Keyword</th><th className="p-3">Intent</th><th className="p-3">Volume</th><th className="p-3">Competition</th><th className="p-3">Score</th><th className="p-3">Page</th><th className="p-3">Action</th></tr></thead><tbody className="divide-y divide-slate-100">{opportunities.map((item) => <tr key={item.keyword}><td className="p-3 font-black text-slate-950">{item.keyword}<p className="font-normal text-slate-500">{item.cluster}</p></td><td className="p-3 capitalize">{item.intent}</td><td className="p-3">{item.avgMonthlySearches ?? "estimate"}</td><td className="p-3">{item.competition ?? "unknown"}</td><td className="p-3"><span className="rounded-full bg-emerald-100 px-3 py-1 font-black text-emerald-900">{item.priorityScore}</span></td><td className="p-3 font-semibold">{item.recommendedPage}</td><td className="p-3"><button className="font-black underline" onClick={() => onSelect(item.keyword)}>Build page</button></td></tr>)}{!opportunities.length && <tr><td className="p-8 text-center text-slate-500" colSpan={7}>Generate or import keywords first.</td></tr>}</tbody></table></div>;
+  return (
+    <div className="mt-6 overflow-x-auto rounded-3xl border border-slate-200">
+      <table className="min-w-[900px] w-full bg-white text-sm">
+        <thead className="bg-slate-50 text-left text-xs font-black uppercase text-slate-500">
+          <tr><th className="px-4 py-3">Keyword</th><th className="px-4 py-3">Intent</th><th className="px-4 py-3">Cluster</th><th className="px-4 py-3">Priority</th><th className="px-4 py-3">Page</th><th className="px-4 py-3">Action</th></tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {opportunities.map((item) => (
+            <tr key={item.keyword}>
+              <td className="px-4 py-3 font-black text-slate-950">{item.keyword}</td>
+              <td className="px-4 py-3">{item.intent}</td>
+              <td className="px-4 py-3">{item.cluster}</td>
+              <td className="px-4 py-3">{item.priorityScore}</td>
+              <td className="px-4 py-3">{item.recommendedPage}</td>
+              <td className="px-4 py-3"><button className="font-black underline" onClick={() => onSelect(item.keyword)}>Build page</button></td>
+            </tr>
+          ))}
+          {!opportunities.length && <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500">Generate or import keywords first.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function PagePlan({ item }: { item: Opportunity }) {
-  const md = `# ${item.h1}\n\nSEO title: ${item.pageTitle}\nURL: ${item.recommendedPage}\nMeta: ${item.metaDescription}\n\n## Outline\n${item.outline.map((o) => `- ${o}`).join("\n")}\n\n## FAQs\n${item.faq.map((q) => `- ${q}`).join("\n")}\n\nCTA: ${item.cta}`;
-  return <div className="space-y-5"><div className="flex justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wide text-slate-400">{item.keyword}</p><h3 className="mt-1 text-2xl font-black text-slate-950">{item.pageTitle}</h3></div><button className="rounded-full border border-slate-200 px-4 py-2 text-xs font-black" onClick={() => copyText(md)}>Copy brief</button></div><dl className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl bg-white p-4"><dt className="label">URL</dt><dd className="font-black">{item.recommendedPage}</dd></div><div className="rounded-2xl bg-white p-4"><dt className="label">Priority</dt><dd className="font-black">{item.priorityScore}/100</dd></div><div className="rounded-2xl bg-white p-4 sm:col-span-2"><dt className="label">Meta description</dt><dd>{item.metaDescription}</dd></div></dl><div><p className="label">Outline</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">{item.outline.map((o) => <li key={o}>{o}</li>)}</ul></div><div><p className="label">FAQ</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">{item.faq.map((q) => <li key={q}>{q}</li>)}</ul></div><div><p className="label">Ad headlines</p><div className="mt-2 flex flex-wrap gap-2">{item.adHeadlines.map((h) => <span className="badge" key={h}>{h}</span>)}</div></div></div>;
+  const plan = [
+    `URL: ${item.recommendedPage}`,
+    `Title: ${item.pageTitle}`,
+    `H1: ${item.h1}`,
+    `Meta: ${item.metaDescription}`,
+    `CTA: ${item.cta}`,
+    `Outline: ${item.outline.join(" | ")}`,
+    `FAQ: ${item.faq.join(" | ")}`,
+    `Internal links: ${item.internalLinks.join(", ")}`
+  ].join("\n");
+
+  return (
+    <div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">{item.intent} · {item.cluster}</p>
+          <h3 className="mt-2 text-2xl font-black text-slate-950">{item.pageTitle}</h3>
+        </div>
+        <button className="rounded-full border border-slate-200 px-4 py-2 text-xs font-black" onClick={() => copyText(plan)}>Copy plan</button>
+      </div>
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl bg-white p-4"><p className="label">Recommended URL</p><p className="mt-1 font-black">{item.recommendedPage}</p></div>
+        <div className="rounded-2xl bg-white p-4"><p className="label">Priority score</p><p className="mt-1 font-black">{item.priorityScore}</p></div>
+        <div className="rounded-2xl bg-white p-4 lg:col-span-2"><p className="label">Meta description</p><p className="mt-1">{item.metaDescription}</p></div>
+      </div>
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        <TextList title="Outline" items={item.outline} />
+        <TextList title="FAQ" items={item.faq} />
+        <TextList title="Ad headlines" items={item.adHeadlines} />
+        <TextList title="Internal links" items={item.internalLinks} />
+      </div>
+    </div>
+  );
 }
 
-function PageMapView({ analysis }: { analysis: Analysis | null }) {
-  const pageMap = analysis?.pageMap ?? [];
-  return <section className="card"><div className="flex justify-between"><h3 className="text-2xl font-black text-slate-950">Keyword-to-page map</h3><button className="rounded-full border border-slate-200 px-4 py-2 text-xs font-black" disabled={!pageMap.length} onClick={() => downloadCsv("keyword-page-map.csv", ["Slug", "Primary keyword", "Secondary keywords", "Intent", "Title", "H1", "Meta", "Score"], pageMap.map((p) => [p.slug, p.primaryKeyword, p.secondaryKeywords.join("; "), p.intent, p.title, p.h1, p.metaDescription, p.priorityScore]))}>Export CSV</button></div><div className="mt-5 grid gap-4">{pageMap.map((p) => <article key={p.slug} className="rounded-3xl border border-slate-200 p-4"><div className="flex flex-wrap justify-between gap-3"><h4 className="font-black text-slate-950">{p.slug}</h4><span className="badge">{p.priorityScore}/100</span></div><p className="mt-2 font-semibold">Primary: {p.primaryKeyword}</p><p className="mt-1 text-sm text-slate-600">Secondary: {p.secondaryKeywords.join(", ") || "None"}</p><p className="mt-2 text-sm text-slate-600">{p.metaDescription}</p></article>)}{!pageMap.length && <p className="text-slate-500">Generate keywords first.</p>}</div></section>;
+function TextList({ title, items }: { title: string; items: string[] }) {
+  return <div className="rounded-2xl bg-white p-4"><p className="label">{title}</p><ul className="mt-2 space-y-1 text-sm text-slate-700">{items.map((item) => <li key={item}>• {item}</li>)}</ul></div>;
 }
 
-function CalendarView({ calendar }: { calendar: Calendar[] }) {
-  return <section className="card"><h3 className="text-2xl font-black text-slate-950">30-day content calendar</h3><div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{calendar.map((item) => <article className="rounded-3xl border border-slate-200 p-4" key={`${item.day}-${item.keyword}`}><span className="badge">Day {item.day} · {item.type}</span><h4 className="mt-3 font-black text-slate-950">{item.title}</h4><p className="mt-2 text-sm text-slate-600">Keyword: {item.keyword}</p><p className="mt-2 text-xs text-slate-500">Owner: {item.owner} · Status: {item.status}</p></article>)}{!calendar.length && <p className="text-slate-500">Generate keywords first.</p>}</div></section>;
+function ListSection({ title, rows }: { title: string; rows: Array<Record<string, unknown>> }) {
+  return (
+    <section className="card">
+      <h3 className="text-2xl font-black text-slate-950">{title}</h3>
+      <div className="mt-5 grid gap-3">
+        {rows.map((row, index) => <pre key={index} className="overflow-x-auto rounded-2xl bg-slate-50 p-4 text-xs text-slate-700">{JSON.stringify(row, null, 2)}</pre>)}
+        {!rows.length && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-500">Generate SEO data first.</p>}
+      </div>
+    </section>
+  );
 }
 
-function LocalSeoView({ rows }: { rows: LocalSeo[] }) {
-  return <section className="card"><h3 className="text-2xl font-black text-slate-950">Local SEO mode</h3><div className="mt-5 grid gap-3">{rows.slice(0, 60).map((row) => <article key={`${row.location}-${row.keyword}`} className="rounded-3xl border border-slate-200 p-4"><div className="flex flex-wrap gap-2"><span className="badge">{row.location}</span><span className="badge">{row.slug}</span></div><h4 className="mt-3 font-black text-slate-950">{row.title}</h4><p className="mt-2 text-sm text-slate-600">{row.angle}</p></article>)}{!rows.length && <p className="text-slate-500">Generate keywords first.</p>}</div></section>;
-}
-
-function CompetitorView({ rows }: { rows: Competitor[] }) {
-  return <section className="card"><h3 className="text-2xl font-black text-slate-950">Competitor radar</h3><div className="mt-5 grid gap-4 md:grid-cols-2">{rows.map((row) => <article key={`${row.competitor}-${row.keyword}`} className="rounded-3xl border border-slate-200 p-4"><span className="badge">{row.competitor}</span><h4 className="mt-3 font-black text-slate-950">{row.keyword}</h4><p className="mt-2 text-sm text-slate-600">{row.angle}</p><p className="mt-2 text-xs font-bold text-amber-700">Guardrail: {row.risk}</p><p className="mt-2 text-sm font-black">CTA: {row.cta}</p></article>)}{!rows.length && <p className="text-slate-500">Generate keywords first.</p>}</div></section>;
-}
-
-function LeadBridgeView({ rows }: { rows: LeadBridge[] }) {
-  return <section className="card"><h3 className="text-2xl font-black text-slate-950">Lead + keyword bridge</h3><p className="mt-3 text-sm text-slate-600">Use keywords to decide what landing page and outreach angle belongs with each lead query.</p><div className="mt-5 grid gap-4">{rows.map((row) => <article key={row.leadQuery} className="rounded-3xl border border-slate-200 p-4"><h4 className="font-black text-slate-950">{row.leadQuery}</h4><p className="mt-2 text-sm text-slate-600">{row.outreachAngle}</p><p className="mt-2 text-sm font-black">Landing page: {row.landingPage}</p><div className="mt-2 flex flex-wrap gap-2">{row.matchingKeywords.map((kw) => <span className="badge" key={kw}>{kw}</span>)}</div></article>)}{!rows.length && <p className="text-slate-500">Generate keywords first.</p>}</div></section>;
+function ResultBox({ data }: { data: unknown }) {
+  return <pre className="max-h-[520px] overflow-auto rounded-3xl bg-slate-950 p-5 text-xs leading-5 text-slate-100">{JSON.stringify(data ?? { message: "No results yet." }, null, 2)}</pre>;
 }
