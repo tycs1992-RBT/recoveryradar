@@ -70,8 +70,8 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <p className="mt-1 truncate text-sm font-bold text-slate-900" title={email}>{email}</p>
             <p className="text-xs text-slate-500">Role: {roleLabel(role)}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <a href="/" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-50">Public site</a>
-              <a href="/api/auth/signout" className="rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">Sign out</a>
+              <Link href="/" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-50">Public site</Link>
+              <Link href="/api/auth/signout" className="rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">Sign out</Link>
             </div>
           </div>
         </details>
