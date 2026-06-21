@@ -1,26 +1,39 @@
-# Recovery Radar / Infinite Suite OS Demo
+# Recovery Radar / Infinite Suite OS
 
-This is the combined public demo + private lead workspace for Infinite Pieces AI.
+This repository is the original Recovery Radar project with the lean Infinite Suite OS offer incorporated directly into the main app. It is not a separate ZIP/build anymore.
+
+## Product structure
+
+- **Infinite Suite OS™** = the ABA operational recovery product.
+- **Recovery Radar™** = the private growth, lead, SEO, CRM and outreach machine that sells it.
+
+Primary market line:
+
+> Competitors manage the record. Infinite recovers the hour.
+
+Primary product position:
+
+> Keep your current EMR. Add Infinite Suite OS™ beside it.
 
 ## What public visitors see
 
-The public sees the Infinite Suite OS public demo flow:
+The public site is designed for `https://www.infinitepieces.ai`:
 
-- `/` — branded public homepage with current Infinite Pieces AI visuals.
-- `/calculator` — Lost Hours Calculator.
+- `/` — public homepage with no-migration positioning and Founding Clinic pricing.
+- `/calculator` — Lost Hours Calculator using clinic-level estimates only.
 - `/quiz` — ABA Operations Stack Quiz.
-- `/provider-portal` — Provider Portal mock OS wrapper with a back button to the public demo.
+- `/provider-portal` — Provider Portal mock OS walkthrough.
 - Public Recovery Advisor chatbot on the homepage.
 
 Public visitors do **not** see the private Recovery Radar workspace unless they sign in.
 
-## What you and Mark see after login
+## What the private team sees after login
 
 The private workspace is protected by NextAuth:
 
 - `/dashboard`
-- `/lead-machine` — business lead list builder for names, phones, websites, addresses, CSV export and HubSpot sync
-- `/lead-finder` — public buyer-intent signal crawler
+- `/lead-machine` — business lead list builder using Google Places for names, phones, websites, addresses and CSV export
+- `/lead-finder` — public buyer-intent signal crawler using SerpApi when configured
 - `/keyword-radar` — keyword research, page building, SERP checks and SEO planning
 - `/seo-command-center` — full SEO growth suite direct route
 - `/crm`
@@ -32,6 +45,53 @@ The private workspace is protected by NextAuth:
 - `/settings`
 
 Private APIs for leads, outreach tasks, intent finder, exports, analytics, content generation and lead scoring are also protected.
+
+## Pricing model
+
+Do not charge per staff user.
+
+Use:
+
+- Per active learner
+- Unlimited staff seats
+- Unlimited caregiver seats
+
+### Design Partner Beta
+
+- 1–2 clinics only
+- 90 days free
+- structured feedback required
+- monthly recovered-hour scorecard required
+- permission to use anonymized outcomes if successful
+
+### Founding Clinic Trial
+
+- $15 per active learner/month
+- $500/month minimum
+- unlimited staff seats
+- unlimited caregiver seats
+- no implementation fee for founding cohort
+- 3-month pilot
+- recovered-hour scorecard included
+
+### Standard Phase 1
+
+- $20 per active learner/month
+- $750/month minimum
+- unlimited staff seats
+- unlimited caregiver seats
+- optional implementation fee later
+
+## Clean-slate data policy
+
+This build is configured to avoid fake production data:
+
+- no fictional leads
+- no fake tasks
+- no fake analytics
+- no mock CRM pipeline rows
+
+If an API key is missing, the app should return a clean warning or empty state instead of fictional leads.
 
 ## Local setup
 
@@ -51,57 +111,71 @@ npm run db:seed
 npm run dev
 ```
 
-If Docker is not working, skip `db:push` and `db:seed` and run `npm run dev`; many pages will still work with mock/demo data.
+## Production setup
+
+The live stack should be:
+
+- GitHub main branch
+- Vercel hosting
+- Neon/Postgres database
+- Cloudflare DNS for `www.infinitepieces.ai`
+
+Required live environment variables belong in Vercel, not only in local `.env`.
 
 ## Login
 
-Default local demo login:
+Default local workspace login:
 
 ```txt
 Email: founders@infinitepieces.ai
 Password: infinitemark2026
 ```
 
-Change these in `.env` before deploying.
+Change these in Vercel before treating the workspace as production secure.
 
-
-## Lead and keyword machine
-
-The latest build includes the practical lead spreadsheet and SEO machine:
-
-- `/lead-machine` finds businesses with Google Places and exports CSVs.
-- `/keyword-radar` and `/seo-command-center` import Google Keyword Planner CSVs, score keywords, build SEO page briefs, map keywords to URLs, generate a 30-day content calendar, create local SEO page ideas, check SERPs, audit websites, and import Search Console CSVs.
-
-Useful optional keys:
+## Lead and keyword machine keys
 
 ```env
 GOOGLE_PLACES_API_KEY="your-places-key"
-GOOGLE_SEARCH_API_KEY="your-custom-search-key"
-GOOGLE_SEARCH_CX="your-programmable-search-engine-id"
+SERPAPI_API_KEY="your-serpapi-key"
+OPENAI_API_KEY="your-openai-key"
 HUBSPOT_PRIVATE_APP_TOKEN="your-hubspot-private-app-token"
 RESEND_API_KEY="your-resend-api-key"
 ```
 
-See `docs/SEO_GROWTH_SUITE.md` for the keyword workflow.
-
-## Cloudflare setup
-
-For demo.infinitepieces.ai, set:
+Google Custom Search is optional fallback only:
 
 ```env
-NEXTAUTH_URL="https://demo.infinitepieces.ai"
-NEXT_PUBLIC_SITE_URL="https://demo.infinitepieces.ai"
-NEXTAUTH_SECRET="a-long-random-secret"
-DEMO_ADMIN_EMAIL="admin@infinitepieces.ai"
-DEMO_ADMIN_PASSWORD="your-private-shared-password-for-you-and-mark"
+GOOGLE_SEARCH_API_KEY="optional-custom-search-key"
+GOOGLE_SEARCH_CX="optional-programmable-search-engine-id"
 ```
 
-You can put the whole app behind Cloudflare DNS/proxy. The public homepage, calculator, quiz, chatbot and provider portal stay public. The private workspace stays behind the app login. You can add Cloudflare Access later for a second security layer.
+## Compliance behavior
 
-## Sign out
+The public calculator, quiz and chatbot should not collect PHI. Use clinic-level counts, rates and workflow descriptions only.
 
-Inside the private workspace, expand the lower-left account panel and click **Sign out**. You can also visit `/api/auth/signout`.
+Use language like:
 
-## Chatbot behavior
+- privacy-aware
+- HIPAA-conscious
+- role-based access
+- consent-aware workflows
+- audit-readiness
+
+Do not say:
+
+- guaranteed HIPAA compliant
+- guaranteed payer approved
+- guaranteed billing compliant
 
 The Recovery Advisor can answer general ABA operations, cancellation/callout recovery, caregiver communication, documentation readiness, field-average and Infinite Suite OS workflow questions. It should not collect PHI, provide patient-specific clinical advice, replace a BCBA, or make legal/compliance guarantees.
+
+## Strategic docs
+
+- `docs/PRICING_AND_OFFER.md`
+- `docs/GROWTH_MACHINE_30_DAY_PLAN.md`
+- `docs/COMPLIANCE_GUARDRAILS.md`
+- `docs/PRODUCT_READINESS_AUDIT.md`
+- `docs/MARK_PROPOSAL.md`
+- `docs/DANIEL_PROPOSAL.md`
+- `docs/FINAL_STRATEGY.md`
