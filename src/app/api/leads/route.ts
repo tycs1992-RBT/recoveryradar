@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { mockLeads } from "@/lib/mock-data";
 import { scoreLead } from "@/lib/lead-scoring";
 
 const leadSchema = z.object({
@@ -19,7 +18,7 @@ const leadSchema = z.object({
 
 export async function GET() {
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ leads: mockLeads, source: "mock" });
+    return NextResponse.json({ leads: [], source: "clean_slate", warning: "DATABASE_URL is not configured." });
   }
 
   try {
@@ -31,7 +30,7 @@ export async function GET() {
     return NextResponse.json({ leads, source: "database" });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ leads: mockLeads, source: "mock", error: "Database query failed; mock leads returned." });
+    return NextResponse.json({ leads: [], source: "database_error", error: "Database query failed; no fallback sample leads returned." });
   }
 }
 
@@ -53,7 +52,7 @@ export async function POST(request: Request) {
   });
 
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ lead: { ...input, leadScore: scoring.score }, scoring, persisted: false });
+    return NextResponse.json({ lead: { ...input, leadScore: scoring.score }, scoring, persisted: false, warning: "DATABASE_URL is not configured." });
   }
 
   try {
