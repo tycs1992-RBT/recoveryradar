@@ -8,6 +8,17 @@ type SearchItem = {
   snippet?: string;
 };
 
+type SerpApiOrganicResult = {
+  title?: string;
+  link?: string;
+  snippet?: string;
+};
+
+type SerpApiResponse = {
+  organic_results?: SerpApiOrganicResult[];
+  error?: string;
+};
+
 function inferSignal(text: string) {
   const lower = text.toLowerCase();
   if (lower.includes("opening") || lower.includes("new clinic") || lower.includes("opening soon") || lower.includes("expands")) return "new_clinic";
@@ -43,11 +54,70 @@ async function getKeywords(groupName: string) {
 
 function cleanGoogleError(text: string) {
   try {
-    const parsed = JSON.parse(text) as { error?: { message?: string; status?: string; details?: unknown[] } };
+    const parsed = JSON.parse(text) as { error?: { message?: string; status?: string } };
     return parsed.error?.message ?? parsed.error?.status ?? text.slice(0, 700);
   } catch {
     return text.slice(0, 700);
   }
+}
+
+function normalizeResults(items: SearchItem[], query: string, keyword: string) {
+  return items.map((item) => {
+    const title = item.title ?? "Untitled public result";
+    const snippet = item.snippet ?? "";
+    return {
+      keyword,
+      query,
+      title,
+      link: item.link ?? "#",
+      snippet,
+      suggestedSignal: inferSignal(`${title} ${snippet}`),
+      inferredCompany: guessCompany(title),
+      nextStep: "Open source URL, verify ABA relevance, record only public business contact information, then add to CRM manually."
+    };
+  });
+}
+
+async function searchWithSerpApi(query: string, keyword: string, location: string, maxResults: number, apiKey: string) {
+  const url = new URL("https://serpapi.com/search");
+  url.searchParams.set("engine", "google");
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("q", query);
+  url.searchParams.set("num", String(maxResults));
+  url.searchParams.set("gl", "us");
+  if (location) url.searchParams.set("location", location);
+
+  const response = await fetch(url, { next: { revalidate: 3600 } });
+  const data = (await response.json()) as SerpApiResponse;
+
+  if (!response.ok || data.error) {
+    throw new Error(data.error ?? `SerpApi request failed with status ${response.status}`);
+  }
+
+  const items: SearchItem[] = (data.organic_results ?? []).map((item) => ({
+    title: item.title,
+    link: item.link,
+    snippet: item.snippet
+  }));
+
+  return normalizeResults(items, query, keyword);
+}
+
+async function searchWithGoogleCustom(query: string, keyword: string, maxResults: number, apiKey: string, cx: string) {
+  const url = new URL("https://www.googleapis.com/customsearch/v1");
+  url.searchParams.set("key", apiKey);
+  url.searchParams.set("cx", cx);
+  url.searchParams.set("q", query);
+  url.searchParams.set("num", String(maxResults));
+
+  const response = await fetch(url, { next: { revalidate: 3600 } });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Google Custom Search failed with status ${response.status}: ${cleanGoogleError(errorText)}`);
+  }
+
+  const data = (await response.json()) as { items?: SearchItem[] };
+  return normalizeResults(data.items ?? [], query, keyword);
 }
 
 export async function POST(request: Request) {
@@ -65,8 +135,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Keyword group '${groupName}' not found` }, { status: 404 });
   }
 
-  const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
-  const cx = process.env.GOOGLE_SEARCH_CX;
+  const serpApiKey = process.env.SERPAPI_API_KEY;
+  const googleApiKey = process.env.GOOGLE_SEARCH_API_KEY;
+  const googleCx = process.env.GOOGLE_SEARCH_CX;
 
   const results: Array<{
     keyword: string;
@@ -79,66 +150,34 @@ export async function POST(request: Request) {
     nextStep: string;
   }> = [];
 
-  if (!apiKey || !cx) {
+  if (!serpApiKey && (!googleApiKey || !googleCx)) {
     return NextResponse.json({
       queryGroup: groupName,
       results: [],
-      notice: "GOOGLE_SEARCH_API_KEY or GOOGLE_SEARCH_CX is not configured in this environment. No sample crawler results are returned in clean-slate mode.",
-      configurationNeeded: ["GOOGLE_SEARCH_API_KEY", "GOOGLE_SEARCH_CX"]
+      notice: "SERPAPI_API_KEY is not configured, and Google Custom Search credentials are also missing. No sample crawler results are returned in clean-slate mode.",
+      configurationNeeded: ["SERPAPI_API_KEY"]
     });
   }
 
   for (const keyword of keywords) {
     const query = `${keyword} ${location}`.trim();
-    const url = new URL("https://www.googleapis.com/customsearch/v1");
-    url.searchParams.set("key", apiKey);
-    url.searchParams.set("cx", cx);
-    url.searchParams.set("q", query);
-    url.searchParams.set("num", String(maxResults));
 
     try {
-      const response = await fetch(url, { next: { revalidate: 3600 } });
-      if (!response.ok) {
-        const errorText = await response.text();
-        const cleanError = cleanGoogleError(errorText);
-        results.push({
-          keyword,
-          query,
-          title: `Search failed for “${query}”`,
-          link: "#",
-          snippet: `Google Custom Search failed with status ${response.status}: ${cleanError}`,
-          suggestedSignal: "manual_review_required",
-          inferredCompany: "",
-          nextStep: "Fix GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_CX, API restrictions, billing/quota, or Custom Search API access."
-        });
-        continue;
-      }
-
-      const data = (await response.json()) as { items?: SearchItem[] };
-      for (const item of data.items ?? []) {
-        const title = item.title ?? "Untitled public result";
-        const snippet = item.snippet ?? "";
-        results.push({
-          keyword,
-          query,
-          title,
-          link: item.link ?? "#",
-          snippet,
-          suggestedSignal: inferSignal(`${title} ${snippet}`),
-          inferredCompany: guessCompany(title),
-          nextStep: "Open source URL, verify ABA relevance, record only public business contact information, then add to CRM manually."
-        });
+      if (serpApiKey) {
+        results.push(...await searchWithSerpApi(query, keyword, location, maxResults, serpApiKey));
+      } else if (googleApiKey && googleCx) {
+        results.push(...await searchWithGoogleCustom(query, keyword, maxResults, googleApiKey, googleCx));
       }
     } catch (error) {
       results.push({
         keyword,
         query,
-        title: `Error searching for “${query}”`,
+        title: `Search failed for “${query}”`,
         link: "#",
-        snippet: error instanceof Error ? error.message : "Unknown search error",
+        snippet: error instanceof Error ? error.message : "Search request failed.",
         suggestedSignal: "manual_review_required",
         inferredCompany: "",
-        nextStep: "Retry or investigate search configuration."
+        nextStep: "Check SERPAPI_API_KEY in Vercel environment variables, account quota, or API access."
       });
     }
   }
@@ -146,6 +185,8 @@ export async function POST(request: Request) {
   return NextResponse.json({
     queryGroup: groupName,
     results,
-    notice: "Public search results returned through Google Custom Search when API access is configured. Review sources manually before adding leads."
+    notice: serpApiKey
+      ? "Public search results returned through SerpApi Google Search. Review sources manually before adding leads."
+      : "Public search results returned through Google Custom Search. Review sources manually before adding leads."
   });
 }
