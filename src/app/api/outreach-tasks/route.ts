@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { mockTasks } from "@/lib/mock-data";
 
 const taskTypeSchema = z.enum(["CONNECTION_NOTE", "INMAIL", "EMAIL_FOLLOWUP", "CALL"]);
 const statusSchema = z.enum(["PENDING", "APPROVED", "SENT", "COMPLETED", "CANCELLED"]);
@@ -30,16 +29,9 @@ function parseNullableDate(value?: string | null) {
   return date;
 }
 
-function toIsoDate(value?: Date | string | null) {
-  if (!value) return null;
-  const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
-}
-
 export async function GET() {
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ tasks: mockTasks, source: "mock" });
+    return NextResponse.json({ tasks: [], source: "clean_slate", warning: "DATABASE_URL is not configured." });
   }
 
   try {
@@ -51,7 +43,7 @@ export async function GET() {
     return NextResponse.json({ tasks, source: "database" });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ tasks: mockTasks, source: "mock", error: "Database task query failed; mock tasks returned." });
+    return NextResponse.json({ tasks: [], source: "database_error", error: "Database task query failed; no sample tasks returned." });
   }
 }
 
@@ -67,23 +59,7 @@ export async function POST(request: Request) {
   const dueDate = parseNullableDate(input.dueDate);
 
   if (!process.env.DATABASE_URL) {
-    const task = {
-      id: `task_${Math.random().toString(36).slice(2, 10)}`,
-      leadId: input.leadId,
-      taskType: input.taskType,
-      dueDate: toIsoDate(dueDate),
-      due: dueDate ? dueDate.toLocaleDateString() : "No due date",
-      status: "PENDING",
-      assignedTo: input.assignedTo ?? "Ty | Infinite Pieces AI",
-      messageTemplateId: input.messageTemplateId ?? null,
-      generatedMessage: input.generatedMessage ?? null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lead: null,
-      messageTemplate: null
-    };
-
-    return NextResponse.json({ task, persisted: false, notification: "Task created in mock mode. Connect Postgres to persist it." });
+    return NextResponse.json({ error: "DATABASE_URL is not configured. Cannot persist outreach task." }, { status: 500 });
   }
 
   try {
@@ -117,11 +93,7 @@ export async function PATCH(request: Request) {
   const input = parsed.data;
 
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({
-      task: { ...input, updatedAt: new Date().toISOString() },
-      persisted: false,
-      notification: "Task updated in mock mode. Connect Postgres to persist updates."
-    });
+    return NextResponse.json({ error: "DATABASE_URL is not configured. Cannot persist task update." }, { status: 500 });
   }
 
   try {
