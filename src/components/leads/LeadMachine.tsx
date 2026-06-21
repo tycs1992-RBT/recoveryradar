@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ScorePill } from "@/components/ui/ScorePill";
+import { EditableNumberInput } from "@/components/ui/EditableNumberInput";
 
 type LeadRow = {
   id: string;
@@ -208,7 +209,7 @@ export function LeadMachine() {
           </label>
           <label className="block space-y-2">
             <span className="label">Max results</span>
-            <input className="input" type="number" min={1} max={200} value={maxResults} onChange={(event) => setMaxResults(Number(event.target.value))} />
+            <EditableNumberInput className="input" min={1} max={200} value={maxResults} onChange={setMaxResults} />
           </label>
           <label className="block space-y-2">
             <span className="label">Extra search phrases, one per line</span>
