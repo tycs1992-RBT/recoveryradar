@@ -41,6 +41,15 @@ async function getKeywords(groupName: string) {
   return staticGroup ? [...staticGroup.keywords] : [];
 }
 
+function cleanGoogleError(text: string) {
+  try {
+    const parsed = JSON.parse(text) as { error?: { message?: string; status?: string; details?: unknown[] } };
+    return parsed.error?.message ?? parsed.error?.status ?? text.slice(0, 700);
+  } catch {
+    return text.slice(0, 700);
+  }
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const groupName = String(body?.groupName ?? "").trim();
@@ -71,24 +80,11 @@ export async function POST(request: Request) {
   }> = [];
 
   if (!apiKey || !cx) {
-    for (const keyword of keywords) {
-      const query = `${keyword} ${location}`.trim();
-      results.push({
-        keyword,
-        query,
-        title: `Mock public result for “${query}”`,
-        link: "https://example.com/mock-public-result",
-        snippet: "Configure GOOGLE_SEARCH_API_KEY and GOOGLE_SEARCH_CX to run public-source discovery. This mock result is safe for testing.",
-        suggestedSignal: "manual_review_required",
-        inferredCompany: "",
-        nextStep: "Review source manually before creating a lead."
-      });
-    }
-
     return NextResponse.json({
       queryGroup: groupName,
-      results,
-      notice: "Search keys are not configured. Mock public-result previews returned. No external search was performed."
+      results: [],
+      notice: "GOOGLE_SEARCH_API_KEY or GOOGLE_SEARCH_CX is not configured in this environment. No sample crawler results are returned in clean-slate mode.",
+      configurationNeeded: ["GOOGLE_SEARCH_API_KEY", "GOOGLE_SEARCH_CX"]
     });
   }
 
@@ -103,15 +99,17 @@ export async function POST(request: Request) {
     try {
       const response = await fetch(url, { next: { revalidate: 3600 } });
       if (!response.ok) {
+        const errorText = await response.text();
+        const cleanError = cleanGoogleError(errorText);
         results.push({
           keyword,
           query,
           title: `Search failed for “${query}”`,
           link: "#",
-          snippet: "Google Custom Search request failed.",
+          snippet: `Google Custom Search failed with status ${response.status}: ${cleanError}`,
           suggestedSignal: "manual_review_required",
           inferredCompany: "",
-          nextStep: "Check API quota or credentials."
+          nextStep: "Fix GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_CX, API restrictions, billing/quota, or Custom Search API access."
         });
         continue;
       }
@@ -148,6 +146,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     queryGroup: groupName,
     results,
-    notice: "Public search results returned through Google Custom Search. Review sources manually before adding leads."
+    notice: "Public search results returned through Google Custom Search when API access is configured. Review sources manually before adding leads."
   });
 }
