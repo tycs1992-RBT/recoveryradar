@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calculateLostHours,
   calculatorInputSchema,
@@ -161,6 +161,17 @@ export function LostHoursCalculator() {
   );
 }
 
+function normalizeNumberDraft(value: number) {
+  return Number.isFinite(value) ? String(value) : "";
+}
+
+function clampNumber(value: number, min?: number, max?: number) {
+  let next = value;
+  if (typeof min === "number" && next < min) next = min;
+  if (typeof max === "number" && next > max) next = max;
+  return next;
+}
+
 function NumberField({
   label,
   value,
@@ -180,6 +191,32 @@ function NumberField({
   prefix?: string;
   suffix?: string;
 }) {
+  const [draft, setDraft] = useState(() => normalizeNumberDraft(value));
+
+  useEffect(() => {
+    setDraft(normalizeNumberDraft(value));
+  }, [value]);
+
+  function commitDraft(rawDraft = draft) {
+    const trimmed = rawDraft.trim();
+    if (!trimmed) {
+      const fallback = typeof min === "number" ? min : 0;
+      setDraft(normalizeNumberDraft(fallback));
+      onChange(fallback);
+      return;
+    }
+
+    const parsed = Number(trimmed);
+    if (!Number.isFinite(parsed)) {
+      setDraft(normalizeNumberDraft(value));
+      return;
+    }
+
+    const clamped = clampNumber(parsed, min, max);
+    setDraft(normalizeNumberDraft(clamped));
+    onChange(clamped);
+  }
+
   return (
     <label className="space-y-2">
       <span className="label">{label}</span>
@@ -187,12 +224,20 @@ function NumberField({
         {prefix ? <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">{prefix}</span> : null}
         <input
           type="number"
+          inputMode="decimal"
           className={`input ${prefix ? "pl-8" : ""} ${suffix ? "pr-16" : ""}`}
-          value={value}
+          value={draft}
           min={min}
           max={max}
           step={step}
-          onChange={(event) => onChange(Number(event.target.value))}
+          onChange={(event) => {
+            const raw = event.target.value;
+            setDraft(raw);
+            if (raw.trim() === "" || raw === "-" || raw === ".") return;
+            const parsed = Number(raw);
+            if (Number.isFinite(parsed)) onChange(parsed);
+          }}
+          onBlur={() => commitDraft()}
         />
         {suffix ? <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">{suffix}</span> : null}
       </div>
