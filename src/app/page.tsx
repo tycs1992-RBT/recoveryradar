@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { MarketingHeader } from "@/components/layout/MarketingHeader";
 import { coreMessage, coreModules } from "@/lib/constants";
+import { offer } from "@/lib/pricing";
 
 const visualAssets = {
   hero: "/brand-assets/hero_every_hour_recovered.png",
@@ -27,14 +28,14 @@ export default function HomePage() {
           <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:py-24">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-cyan-800">
-                ● Infinite Suite OS™ operational recovery demo
+                ● Operational Recovery Core for ABA clinics
               </div>
               <h1 className="mt-6 max-w-5xl text-5xl font-black tracking-tight text-slate-950 sm:text-7xl">
-                How many ABA hours did your clinic lose last week?
+                {offer.marketLine}
               </h1>
-              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">{coreMessage}</p>
+              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">{offer.positioning}</p>
               <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-slate-600">
-                This public demo helps ABA clinic owners, founders, clinical directors, schedulers and operators estimate cancellation/callout leakage, ask operational recovery questions, and enter the mock Provider Portal.
+                Recover lost hours, reduce scheduler scramble, support staff, improve caregiver communication, and create cleaner proof packets without starting with a full EMR migration.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">Calculate lost hours</Link>
@@ -48,17 +49,63 @@ export default function HomePage() {
             <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-[0_24px_90px_rgba(6,17,37,.18)]">
               <img src={visualAssets.hero} alt="Infinite Pieces AI recovery workflow visual" className="w-full rounded-[1.5rem] object-cover" />
               <div className="mt-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
-                <p className="font-black text-slate-950">One clear wedge</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {[
-                    "Recover lost hours",
-                    "Support staff",
-                    "Keep caregivers informed",
-                    "Review-ready workflows"
-                  ].map((chip) => (
-                    <span key={chip} className="rounded-full bg-slate-100 px-3 py-2 text-xs font-black text-slate-700">{chip}</span>
-                  ))}
-                </div>
+                <p className="font-black text-slate-950">Founding Clinic Trial</p>
+                <p className="mt-2 text-2xl font-black text-slate-950">$15 per active learner/month</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">$500/month minimum · unlimited staff seats · unlimited caregiver seats · no implementation fee · 3-month pilot · recovered-hour scorecard included.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Founding offer</p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Priced around active learners and recovered operational value.</h2>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
+              Infinite Suite OS™ is not priced to punish staff growth, RBT turnover, substitutes, supervisors, caregivers, or floaters. It is priced around active learners and the operational value recovered beside the clinic’s current EMR.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            {offer.plans.map((plan) => (
+              <article key={plan.name} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">{plan.name}</p>
+                <p className="mt-4 text-3xl font-black text-slate-950">{plan.price}</p>
+                {plan.subprice ? <p className="mt-2 text-sm font-black text-cyan-800">{plan.subprice}</p> : null}
+                <ul className="mt-5 space-y-3 text-sm font-semibold leading-6 text-slate-600">
+                  {plan.details.map((detail) => <li key={detail}>• {detail}</li>)}
+                </ul>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-6 text-cyan-950">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">Sales math</p>
+            <p className="mt-3 text-lg font-black">If Infinite recovers only 3 sessions/month × 3 hours/session × $80/hour, that is $720/month in recovered value.</p>
+            <p className="mt-2 text-sm font-semibold leading-6">A $500–$750/month product can justify itself by recovering only a few missed sessions.</p>
+          </div>
+        </section>
+
+        <section className="bg-slate-50 py-16">
+          <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
+              <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Buyer objections</p>
+              <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Keep the EMR. Add the recovery layer.</h2>
+              <div className="mt-6 space-y-5">
+                {offer.objections.map(([question, answer]) => (
+                  <div key={question} className="rounded-2xl bg-slate-50 p-4">
+                    <p className="font-black text-slate-950">“{question}”</p>
+                    <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-soft">
+              <img src={visualAssets.workflow} alt="Recovery, trust, support and export visual" className="w-full rounded-[1.5rem] object-cover" />
+              <div className="p-5">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">Core transformation</p>
+                <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">Recover → Trust → Support → Export</h2>
+                <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">
+                  A canceled session should not automatically become a lost hour. Infinite Suite OS™ shows how one disruption can be routed into a recovered, supported, documented, review-ready workflow beside the current EMR.
+                </p>
               </div>
             </div>
           </div>
@@ -69,7 +116,7 @@ export default function HomePage() {
             <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Public visitor path</p>
             <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Let clinics explore the recovery idea without exposing the private workspace.</h2>
             <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
-              The public can use the calculator, quiz, Recovery Advisor chatbot and Provider Portal. The internal lead finder, CRM, tasks and outreach workspace remain behind sign-in for you and Mark.
+              The public can use the calculator, quiz, Recovery Advisor chatbot and Provider Portal. The internal lead finder, CRM, tasks and outreach workspace remain behind sign-in for you, Mark and Daniel.
             </p>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -83,35 +130,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-slate-50 py-16">
-          <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-soft">
-              <img src={visualAssets.workflow} alt="Recovery, trust, support and export visual" className="w-full rounded-[1.5rem] object-cover" />
-            </div>
-            <div className="rounded-[2rem] bg-slate-950 p-8 text-white shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-cyan-200">Core transformation</p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight">Recover → Trust → Support → Export</h2>
-              <p className="mt-5 text-base font-semibold leading-8 text-slate-300">
-                A canceled session should not automatically become a lost hour. Infinite Suite OS™ shows how one disruption can be routed into a recovered, supported, documented, review-ready workflow beside the current EMR.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/calculator" className="rounded-full bg-cyan-300 px-5 py-3 text-sm font-black text-slate-950">Calculate lost hours</Link>
-                <Link href="/provider-portal" className="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white">Enter Provider Portal</Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Private team workspace</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">You and Mark can sign in separately from the public demo.</h2>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Recovery Radar™ is the growth machine that sells Infinite Suite OS™.</h2>
             <p className="mt-5 text-base font-semibold leading-8 text-slate-600">
-              The private workspace contains the lead finder, CRM, task inbox, outreach drafts and campaign tools. It can sit behind Cloudflare and a shared credential for now, while the public sees only the demo, calculator, quiz and Recovery Advisor.
+              The private workspace contains the Lead Machine, Intent Crawler, Keyword Radar, SEO Command Center, CRM, task inbox, outreach drafts and campaign tools. It gives Mark a real workflow while Daniel hardens backend, auth, RBAC, tenant scoping, audit logs and integrations.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/login?callbackUrl=/dashboard" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white">Team login</Link>
-              <a href="/current-demo/index.html" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">Open original uploaded demo</a>
+              <Link href="/current-demo/index.html" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">Open original uploaded demo</Link>
             </div>
           </div>
           <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-soft">
