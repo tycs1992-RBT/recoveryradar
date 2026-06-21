@@ -45,41 +45,6 @@ function cityStateFromAddress(address?: string) {
   return parts.slice(-2).join(", ");
 }
 
-function mockLeads(businessType: string, location: string): LeadMachineLead[] {
-  return [
-    {
-      id: `mock-${slug(businessType)}-1`,
-      businessName: `Bright Path ${businessType}`,
-      website: "https://example.com",
-      phone: "+1 555-0101",
-      address: `100 Main St, ${location}`,
-      cityState: location,
-      googleMapsUrl: "https://maps.google.com",
-      rating: 4.7,
-      reviewCount: 54,
-      businessStatus: "OPERATIONAL",
-      sourceQuery: `${businessType} ${location}`,
-      leadScore: 85,
-      notes: "Mock lead. Add GOOGLE_PLACES_API_KEY to return live Google Places results."
-    },
-    {
-      id: `mock-${slug(businessType)}-2`,
-      businessName: `Regional ${businessType} Center`,
-      website: "https://example.org",
-      phone: "+1 555-0125",
-      address: `250 Market Ave, ${location}`,
-      cityState: location,
-      googleMapsUrl: "https://maps.google.com",
-      rating: 4.3,
-      reviewCount: 22,
-      businessStatus: "OPERATIONAL",
-      sourceQuery: `${businessType} ${location}`,
-      leadScore: 75,
-      notes: "Mock lead. Use this layout for CSV export and HubSpot review."
-    }
-  ];
-}
-
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const parsed = requestSchema.safeParse(body);
@@ -100,10 +65,11 @@ export async function POST(request: Request) {
 
   if (!apiKey) {
     return NextResponse.json({
-      source: "mock",
-      notice: "GOOGLE_PLACES_API_KEY is not configured. Returning mock leads. Enable Places API to search real business listings.",
-      leads: mockLeads(businessType, location)
-    });
+      source: "not_configured",
+      notice: "GOOGLE_PLACES_API_KEY is not configured in this environment. No sample leads are returned in production clean-slate mode.",
+      leads: [],
+      errors: [{ query: `${businessType} ${location}`, message: "Missing GOOGLE_PLACES_API_KEY" }]
+    }, { status: 200 });
   }
 
   const fieldMask = [
