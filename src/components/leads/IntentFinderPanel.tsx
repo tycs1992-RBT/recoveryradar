@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { keywordGroups } from "@/lib/constants";
+import { EditableNumberInput } from "@/components/ui/EditableNumberInput";
 
 type SearchPreview = {
   title: string;
@@ -107,7 +108,7 @@ export function IntentFinderPanel() {
             </label>
             <label className="space-y-2 block">
               <span className="label">Max results per keyword</span>
-              <input type="number" min={1} max={10} className="input" value={maxResults} onChange={(event) => setMaxResults(Number(event.target.value))} />
+              <EditableNumberInput className="input" min={1} max={10} value={maxResults} onChange={setMaxResults} />
             </label>
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <p className="text-xs font-black uppercase tracking-wide text-slate-400">Queries in this group</p>
@@ -180,7 +181,7 @@ export function IntentFinderPanel() {
             ))
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-              Run the intent crawler to preview public signals. Without Google API keys, this endpoint returns safe mock previews.
+              Run the intent crawler to preview public signals. Configure SerpApi or Google Custom Search in Vercel for live results.
             </div>
           )}
         </div>
