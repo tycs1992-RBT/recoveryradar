@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { mockLeads } from "@/lib/mock-data";
 import { toCsv } from "@/lib/utils";
 
 export async function GET() {
-  let rows: Array<Record<string, unknown>> = mockLeads.map((lead) => ({ ...lead }));
+  let rows: Array<Record<string, unknown>> = [];
 
   if (process.env.DATABASE_URL) {
     try {
@@ -26,7 +25,7 @@ export async function GET() {
         nextStep: lead.nextStep
       }));
     } catch {
-      rows = mockLeads.map((lead) => ({ ...lead }));
+      rows = [];
     }
   }
 
@@ -34,7 +33,7 @@ export async function GET() {
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=recovery-radar-leads.csv"
+      "Content-Disposition": "attachment; filename=recovery-radar-live-leads.csv"
     }
   });
 }
