@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarketingHeader } from "@/components/layout/MarketingHeader";
-import { landingPages, type LandingPageSlug } from "@/lib/constants";
+import { allLandingPages, type MarketingLandingPageSlug } from "@/lib/seo-pages";
 
 export async function generateStaticParams() {
-  return Object.keys(landingPages).map((slug) => ({ slug }));
+  return Object.keys(allLandingPages).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const page = landingPages[slug as LandingPageSlug];
+  const page = allLandingPages[slug as MarketingLandingPageSlug];
   if (!page) return {};
   return {
     title: page.metaTitle,
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = landingPages[slug as LandingPageSlug];
+  const page = allLandingPages[slug as MarketingLandingPageSlug];
   if (!page) notFound();
 
   return (
@@ -29,13 +29,13 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <main>
         <section className="bg-white">
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Recovery Radar™ landing page</p>
+            <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Infinite Suite OS™ SEO landing page</p>
             <h1 className="mt-5 max-w-5xl text-5xl font-black tracking-tight text-slate-950 sm:text-7xl">{page.hero}</h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">{page.subheadline}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">{page.primaryCta}</Link>
-              <Link href="/quiz" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">{page.secondaryCta}</Link>
-              <a href="https://demo.infinitepieces.ai" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">Enter Provider Portal</a>
+              <Link href="/provider-portal" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">{page.secondaryCta}</Link>
+              <Link href="/founding-clinic-beta" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">Founding Clinic Trial</Link>
             </div>
           </div>
         </section>
@@ -48,6 +48,9 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
             <p className="mt-4 text-base leading-8 text-slate-600">
               Infinite Suite OS™ layers recovery workflows over the clinic’s current EMR so teams can identify lost authorized hours, route makeup sessions, support staff, inform caregivers and prepare cleaner documentation.
             </p>
+            <div className="mt-6 rounded-2xl bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-950">
+              Competitors manage the record. Infinite recovers the hour. The first goal is not migration; the first goal is measurable recovery value.
+            </div>
           </article>
 
           <article className="card">
@@ -95,6 +98,12 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
                   <p className="mt-2 text-sm font-black text-slate-950">{step}</p>
                 </div>
               ))}
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/aba-clinic-software" className="badge bg-slate-50">ABA clinic software</Link>
+              <Link href="/aba-cancellation-management" className="badge bg-slate-50">ABA cancellation management</Link>
+              <Link href="/aba-scheduling-software" className="badge bg-slate-50">ABA scheduling software</Link>
+              <Link href="/active-learner-pricing" className="badge bg-slate-50">Active-learner pricing</Link>
             </div>
           </div>
         </section>
