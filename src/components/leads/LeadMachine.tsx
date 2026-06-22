@@ -43,29 +43,39 @@ type HubSpotSyncResponse = {
   error?: string;
 };
 
+const leadExportHeaders = [
+  "Business Name",
+  "Phone",
+  "Website",
+  "Public Emails",
+  "Contact Form URL",
+  "Address",
+  "City/State",
+  "Google Maps URL",
+  "Rating",
+  "Review Count",
+  "Lead Score",
+  "Source Query",
+  "Notes"
+];
+
 function csvEscape(value: unknown) {
   const text = String(value ?? "");
   if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
   return text;
 }
 
-function downloadCsv(filename: string, rows: LeadRow[]) {
-  const headers = [
-    "Business Name",
-    "Phone",
-    "Website",
-    "Public Emails",
-    "Contact Form URL",
-    "Address",
-    "City/State",
-    "Google Maps URL",
-    "Rating",
-    "Review Count",
-    "Lead Score",
-    "Source Query",
-    "Notes"
-  ];
-  const body = rows.map((lead) => [
+function htmlEscape(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function leadExportValues(lead: LeadRow) {
+  return [
     lead.businessName,
     lead.phone,
     lead.website,
@@ -79,15 +89,62 @@ function downloadCsv(filename: string, rows: LeadRow[]) {
     lead.leadScore,
     lead.sourceQuery,
     `${lead.notes ?? ""} ${lead.enrichmentNotes ?? ""}`.trim()
-  ].map(csvEscape).join(","));
-  const csv = [headers.map(csvEscape).join(","), ...body].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  ];
+}
+
+function downloadBlob(filename: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadCsv(filename: string, rows: LeadRow[]) {
+  const body = rows.map((lead) => leadExportValues(lead).map(csvEscape).join(","));
+  const csv = [leadExportHeaders.map(csvEscape).join(","), ...body].join("\n");
+  downloadBlob(filename, csv, "text/csv;charset=utf-8");
+}
+
+function toGoogleSheetsTsv(rows: LeadRow[]) {
+  const body = rows.map((lead) => leadExportValues(lead).map((value) => String(value ?? "").replace(/\t/g, " ").replace(/\n/g, " ")).join("\t"));
+  return [leadExportHeaders.join("\t"), ...body].join("\n");
+}
+
+function buildGoogleDocsReport(rows: LeadRow[]) {
+  const generatedAt = new Date().toLocaleString();
+  const rowsHtml = rows.map((lead) => {
+    const values = leadExportValues(lead);
+    return `<tr>${values.map((value) => `<td>${htmlEscape(value)}</td>`).join("")}</tr>`;
+  }).join("\n");
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Recovery Radar Lead Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #0f172a; line-height: 1.5; padding: 32px; }
+    h1 { font-size: 28px; margin-bottom: 4px; }
+    .meta { color: #64748b; margin-bottom: 24px; }
+    .note { background: #eff6ff; border: 1px solid #bfdbfe; padding: 14px; border-radius: 14px; margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; }
+  </style>
+</head>
+<body>
+  <h1>Recovery Radar Lead Report</h1>
+  <p class="meta">Generated ${htmlEscape(generatedAt)} · ${rows.length} selected leads</p>
+  <div class="note"><strong>Manual review required:</strong> Review every source before outreach. Use only public business-level information. Do not include PHI, private group content, or unverified personal details.</div>
+  <table>
+    <thead><tr>${leadExportHeaders.map((header) => `<th>${htmlEscape(header)}</th>`).join("")}</tr></thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>
+</body>
+</html>`;
 }
 
 export function LeadMachine() {
@@ -106,6 +163,22 @@ export function LeadMachine() {
 
   function toggleLead(id: string) {
     setLeads((prev) => prev.map((lead) => lead.id === id ? { ...lead, selected: lead.selected === false } : lead));
+  }
+
+  async function copyForGoogleSheets() {
+    if (!selectedLeads.length) return;
+    try {
+      await navigator.clipboard.writeText(toGoogleSheetsTsv(selectedLeads));
+      setNotice("Copied selected leads as tab-separated rows. Open Google Sheets, click cell A1, and paste.");
+    } catch {
+      setNotice("Clipboard copy was blocked. Use the Google Sheets CSV export instead.");
+    }
+  }
+
+  function exportGoogleDocsReport() {
+    if (!selectedLeads.length) return;
+    downloadBlob("recovery-radar-google-docs-lead-report.html", buildGoogleDocsReport(selectedLeads), "text/html;charset=utf-8");
+    setNotice("Downloaded a Google Docs-ready HTML report. Upload it to Google Drive, then open with Google Docs.");
   }
 
   async function findBusinesses() {
@@ -211,7 +284,7 @@ export function LeadMachine() {
               <h2 className="mt-2 text-3xl font-black text-slate-950">Business lead list builder</h2>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="badge">CSV first</span>
+              <span className="badge">Sheets + Docs</span>
               <button
                 type="button"
                 onClick={() => setControlsCollapsed(true)}
@@ -253,8 +326,14 @@ export function LeadMachine() {
             <button type="button" onClick={enrichWebsites} disabled={enriching || !leads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
               {enriching ? "Enriching..." : "Enrich websites"}
             </button>
-            <button type="button" onClick={() => downloadCsv("recovery-radar-leads.csv", selectedLeads)} disabled={!selectedLeads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
-              Export selected CSV
+            <button type="button" onClick={() => downloadCsv("recovery-radar-google-sheets-leads.csv", selectedLeads)} disabled={!selectedLeads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+              Export Sheets CSV
+            </button>
+            <button type="button" onClick={copyForGoogleSheets} disabled={!selectedLeads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+              Copy for Sheets
+            </button>
+            <button type="button" onClick={exportGoogleDocsReport} disabled={!selectedLeads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+              Docs report
             </button>
             <button type="button" onClick={() => setLeads((prev) => prev.map((lead) => ({ ...lead, selected: true })))} disabled={!leads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
               Select all
