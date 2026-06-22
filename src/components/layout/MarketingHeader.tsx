@@ -14,6 +14,7 @@ export function MarketingHeader() {
         <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
           <Link href="/calculator">Lost Hours Calculator</Link>
           <Link href="/quiz">Operations Quiz</Link>
+          <Link href="/topics">ABA Topics</Link>
           <Link href="/provider-portal">Provider Portal</Link>
           <Link href="/current-demo/index.html">Original Demo</Link>
         </nav>
