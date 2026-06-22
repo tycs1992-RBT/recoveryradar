@@ -13,7 +13,18 @@ type SearchPreview = {
   query?: string;
   inferredCompany?: string;
   nextStep?: string;
+  leadTemperature?: "hot" | "warm" | "research";
+  whyItMatters?: string;
+  riskNote?: string;
 };
+
+const signalPresets = [
+  "ABA clinic cancellation callout scheduling pain",
+  "ABA clinic owner CentralReach problem",
+  "ABA clinic hiring scheduler operations manager",
+  "ABA therapy new clinic opening hiring",
+  "ABA clinic billing documentation authorization problem"
+];
 
 export function IntentFinderPanel() {
   const [keyword, setKeyword] = useState("new ABA clinic hiring scheduler");
@@ -68,9 +79,9 @@ export function IntentFinderPanel() {
   return (
     <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
       <section className="card">
-        <h2 className="text-2xl font-black text-slate-950">EMR buyer intent crawler</h2>
+        <h2 className="text-2xl font-black text-slate-950">Public Signal Intelligence crawler</h2>
         <p className="mt-3 text-sm leading-6 text-slate-500">
-          Use public search APIs to find public buyer-intent signals. Nothing is scraped from private groups, nothing is auto-posted, and every source is reviewed before outreach.
+          Use SerpApi or public search APIs to find indexed buyer-intent signals, clinic openings, hiring, software pain and operational complaints. Every source is reviewed before outreach.
         </p>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-2">
@@ -133,6 +144,17 @@ export function IntentFinderPanel() {
               <span className="label">Keyword / signal query</span>
               <input className="input" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
             </label>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs font-black uppercase tracking-wide text-slate-400">Pain signal presets</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {signalPresets.map((preset) => (
+                  <button key={preset} type="button" onClick={() => setKeyword(preset)} className="badge bg-slate-50 hover:bg-cyan-50">
+                    {preset}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-xs leading-5 text-slate-500">Advanced query operators are supported. Use single query mode for highly specific public-source research, then verify every result manually.</p>
+            </div>
             <label className="space-y-2 block">
               <span className="label">Location filter</span>
               <input className="input" value={location} onChange={(event) => setLocation(event.target.value)} />
@@ -149,7 +171,7 @@ export function IntentFinderPanel() {
         )}
 
         <div className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-          <strong>Manual-review rule:</strong> use this to discover leads and source URLs. Do not auto-message, scrape private forums, or post demo links without your review.
+          <strong>Manual-review rule:</strong> use this to discover leads and source URLs. Use indexed public sources only. Do not auto-message or add leads without your review.
         </div>
       </section>
 
@@ -166,10 +188,12 @@ export function IntentFinderPanel() {
                 <div className="flex flex-wrap items-center gap-2">
                   {result.keyword ? <span className="badge bg-slate-50">{result.keyword}</span> : null}
                   <span className="badge bg-cyan-50 text-cyan-800">{result.suggestedSignal}</span>
+                  {result.leadTemperature ? <span className="badge bg-amber-50 text-amber-800">{result.leadTemperature}</span> : null}
                   {result.inferredCompany ? <span className="badge bg-emerald-50 text-emerald-800">Company guess: {result.inferredCompany}</span> : null}
                 </div>
                 <p className="mt-3 font-black text-slate-950">{result.title}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{result.snippet}</p>
+                {result.whyItMatters ? <p className="mt-2 rounded-2xl bg-slate-50 p-3 text-xs font-semibold leading-5 text-slate-600">{result.whyItMatters}</p> : null}
                 {result.query ? <p className="mt-2 text-xs font-semibold text-slate-400">Query: {result.query}</p> : null}
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <a href={result.link} target="_blank" rel="noreferrer" className="text-xs font-bold text-slate-950 underline">
