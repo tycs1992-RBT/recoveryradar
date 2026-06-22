@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { inferSignal, guessCompany, leadTemperatureFromSignal, whySignalMatters, type SearchItem } from "@/lib/public-signal-intelligence";
 
 const intentFinderSchema = z.object({
   keyword: z.string().min(2),
@@ -11,16 +12,80 @@ type SearchPreview = {
   link: string;
   snippet: string;
   suggestedSignal: string;
+  inferredCompany: string;
+  leadTemperature: "hot" | "warm" | "research";
+  whyItMatters: string;
+  nextStep: string;
 };
 
-function inferSignal(text: string) {
-  const lower = text.toLowerCase();
-  if (lower.includes("opening") || lower.includes("new clinic") || lower.includes("expands")) return "new_clinic";
-  if (lower.includes("scheduler") || lower.includes("intake coordinator")) return "hiring_scheduler";
-  if (lower.includes("bcba") || lower.includes("rbt")) return "hiring_bcba";
-  if (lower.includes("centralreach") || lower.includes("rethinking") || lower.includes("software")) return "emr_shopping";
-  if (lower.includes("cancellation") || lower.includes("callout") || lower.includes("staffing")) return "operations_pain";
-  return "public_interest_signal";
+type SerpApiOrganicResult = {
+  title?: string;
+  link?: string;
+  snippet?: string;
+};
+
+type SerpApiResponse = {
+  organic_results?: SerpApiOrganicResult[];
+  error?: string;
+};
+
+function normalizeResults(items: SearchItem[], query: string): SearchPreview[] {
+  return items.map((item) => {
+    const title = item.title ?? "Untitled public result";
+    const snippet = item.snippet ?? "";
+    const signal = inferSignal(`${title} ${snippet}`);
+    return {
+      title,
+      link: item.link ?? "#",
+      snippet,
+      suggestedSignal: signal,
+      inferredCompany: guessCompany(title),
+      leadTemperature: leadTemperatureFromSignal(signal, `${title} ${snippet}`),
+      whyItMatters: whySignalMatters(signal),
+      nextStep: `Open the public source for “${query}”, verify ABA relevance and business context, then add only reviewed public business information to CRM.`
+    };
+  });
+}
+
+async function searchWithSerpApi(query: string, location: string, apiKey: string) {
+  const url = new URL("https://serpapi.com/search");
+  url.searchParams.set("engine", "google");
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("q", query);
+  url.searchParams.set("num", "5");
+  url.searchParams.set("gl", "us");
+  if (location) url.searchParams.set("location", location);
+
+  const response = await fetch(url, { next: { revalidate: 1800 } });
+  const data = (await response.json()) as SerpApiResponse;
+  if (!response.ok || data.error) {
+    throw new Error(data.error ?? `SerpApi request failed with status ${response.status}`);
+  }
+
+  const items: SearchItem[] = (data.organic_results ?? []).map((item) => ({
+    title: item.title,
+    link: item.link,
+    snippet: item.snippet
+  }));
+
+  return normalizeResults(items, query);
+}
+
+async function searchWithGoogleCustom(query: string, apiKey: string, cx: string) {
+  const url = new URL("https://www.googleapis.com/customsearch/v1");
+  url.searchParams.set("key", apiKey);
+  url.searchParams.set("cx", cx);
+  url.searchParams.set("q", query);
+  url.searchParams.set("num", "5");
+
+  const response = await fetch(url, { next: { revalidate: 1800 } });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Google Custom Search request failed: ${text.slice(0, 300)}`);
+  }
+
+  const data = await response.json() as { items?: SearchItem[] };
+  return normalizeResults(data.items ?? [], query);
 }
 
 export async function POST(request: Request) {
@@ -32,58 +97,44 @@ export async function POST(request: Request) {
   }
 
   const query = `${parsed.data.keyword} ${parsed.data.location}`.trim();
-  const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
-  const cx = process.env.GOOGLE_SEARCH_CX;
+  const serpApiKey = process.env.SERPAPI_API_KEY;
+  const googleApiKey = process.env.GOOGLE_SEARCH_API_KEY;
+  const googleCx = process.env.GOOGLE_SEARCH_CX;
 
-  if (!apiKey || !cx) {
-    const mock: SearchPreview[] = [
-      {
-        title: `Public result preview for “${query}”`,
-        link: "https://example.com/public-result",
-        snippet:
-          "Mock preview: New ABA clinic opening and hiring BCBAs, RBTs and scheduling support. Configure Google Custom Search to replace this with live public results.",
-        suggestedSignal: "new_clinic"
-      },
-      {
-        title: "Manual review queue",
-        link: "https://example.com/manual-review",
-        snippet:
-          "Use this module to review source pages, confirm ABA relevance, and record only public company-level data or public business contact methods.",
-        suggestedSignal: "manual_review_required"
-      }
-    ];
-
+  if (!serpApiKey && (!googleApiKey || !googleCx)) {
     return NextResponse.json({
       query,
-      results: mock,
-      notice:
-        "Google Custom Search keys are not configured. This is a safe mock preview; no external search was performed."
+      results: [],
+      notice: "SERPAPI_API_KEY is not configured, and Google Custom Search credentials are also missing. No sample crawler results are returned in clean-slate mode."
     });
   }
 
-  const url = new URL("https://www.googleapis.com/customsearch/v1");
-  url.searchParams.set("key", apiKey);
-  url.searchParams.set("cx", cx);
-  url.searchParams.set("q", query);
-  url.searchParams.set("num", "5");
+  try {
+    const results = serpApiKey
+      ? await searchWithSerpApi(query, parsed.data.location, serpApiKey)
+      : await searchWithGoogleCustom(query, googleApiKey as string, googleCx as string);
 
-  const response = await fetch(url, { next: { revalidate: 3600 } });
-
-  if (!response.ok) {
-    return NextResponse.json({ error: "Google Custom Search request failed" }, { status: 502 });
+    return NextResponse.json({
+      query,
+      results,
+      notice: serpApiKey
+        ? "Public indexed results returned through SerpApi. Review every source manually before adding a lead."
+        : "Public indexed results returned through Google Custom Search. Review every source manually before adding a lead."
+    });
+  } catch (error) {
+    return NextResponse.json({
+      query,
+      results: [{
+        title: `Search failed for “${query}”`,
+        link: "#",
+        snippet: error instanceof Error ? error.message : "Search request failed.",
+        suggestedSignal: "manual_review_required",
+        inferredCompany: "",
+        leadTemperature: "research",
+        whyItMatters: "The search provider rejected the request or quota is exhausted.",
+        nextStep: "Check SERPAPI_API_KEY, account quota, or API access."
+      }],
+      notice: "Search failed. No fallback sample data returned."
+    }, { status: 200 });
   }
-
-  const data = await response.json();
-  const results: SearchPreview[] = (data.items ?? []).map((item: { title?: string; link?: string; snippet?: string }) => ({
-    title: item.title ?? "Untitled public result",
-    link: item.link ?? "#",
-    snippet: item.snippet ?? "",
-    suggestedSignal: inferSignal(`${item.title ?? ""} ${item.snippet ?? ""}`)
-  }));
-
-  return NextResponse.json({
-    query,
-    results,
-    notice: "Public search results returned through Google Custom Search. Review sources manually before adding leads."
-  });
 }
