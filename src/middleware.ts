@@ -11,6 +11,7 @@ export const config = {
     "/dashboard/:path*",
     "/lead-machine/:path*",
     "/linkedin-prospector/:path*",
+    "/intelligence-bank/:path*",
     "/lead-finder/:path*",
     "/keyword-radar/:path*",
     "/seo-command-center/:path*",
