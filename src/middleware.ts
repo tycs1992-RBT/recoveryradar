@@ -10,6 +10,7 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/lead-machine/:path*",
+    "/linkedin-prospector/:path*",
     "/lead-finder/:path*",
     "/keyword-radar/:path*",
     "/seo-command-center/:path*",
