@@ -100,6 +100,7 @@ export function LeadMachine() {
   const [errors, setErrors] = useState<Array<{ query: string; status?: number; message: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [enriching, setEnriching] = useState(false);
+  const [controlsCollapsed, setControlsCollapsed] = useState(false);
 
   const selectedLeads = useMemo(() => leads.filter((lead) => lead.selected !== false), [leads]);
 
@@ -185,63 +186,92 @@ export function LeadMachine() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
-      <section className="card h-fit">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Lead Machine</p>
-            <h2 className="mt-2 text-3xl font-black text-slate-950">Business lead list builder</h2>
+    <div className={`grid gap-6 ${controlsCollapsed ? "xl:grid-cols-[92px_minmax(0,1fr)]" : "xl:grid-cols-[0.85fr_1.15fr]"}`}>
+      {controlsCollapsed ? (
+        <section className="card h-fit p-3">
+          <button
+            type="button"
+            onClick={() => setControlsCollapsed(false)}
+            className="grid h-12 w-12 place-items-center rounded-2xl border border-slate-200 bg-white text-xl font-black text-slate-950 shadow-soft transition hover:bg-slate-50"
+            aria-label="Expand lead machine controls"
+            title="Expand lead machine controls"
+          >
+            ›
+          </button>
+          <div className="mt-4 flex flex-col items-center gap-3 text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 [writing-mode:vertical-rl]">Lead Machine</p>
+            <span className="rounded-full bg-slate-100 px-2 py-2 text-[10px] font-black text-slate-600 [writing-mode:vertical-rl]">{leads.length} leads</span>
           </div>
-          <span className="badge">CSV first</span>
-        </div>
-        <p className="mt-4 text-sm leading-6 text-slate-600">
-          Built for the 50-200 lead spreadsheet workflow: search a category and location, collect public business names, phones, websites, addresses, then enrich public website emails/contact forms.
-        </p>
-
-        <div className="mt-6 space-y-4">
-          <label className="block space-y-2">
-            <span className="label">Business category / search</span>
-            <input className="input" value={businessType} onChange={(event) => setBusinessType(event.target.value)} />
-          </label>
-          <label className="block space-y-2">
-            <span className="label">Location</span>
-            <input className="input" value={location} onChange={(event) => setLocation(event.target.value)} />
-          </label>
-          <label className="block space-y-2">
-            <span className="label">Max results</span>
-            <EditableNumberInput className="input" min={1} max={200} value={maxResults} onChange={setMaxResults} />
-          </label>
-          <label className="block space-y-2">
-            <span className="label">Extra search phrases, one per line</span>
-            <textarea className="input min-h-32" value={extraQueriesText} onChange={(event) => setExtraQueriesText(event.target.value)} />
-          </label>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <button type="button" onClick={findBusinesses} disabled={loading} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:opacity-60">
-            {loading ? "Finding..." : "Find businesses"}
-          </button>
-          <button type="button" onClick={enrichWebsites} disabled={enriching || !leads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
-            {enriching ? "Enriching..." : "Enrich websites"}
-          </button>
-          <button type="button" onClick={() => downloadCsv("recovery-radar-leads.csv", selectedLeads)} disabled={!selectedLeads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
-            Export selected CSV
-          </button>
-          <button type="button" onClick={() => setLeads((prev) => prev.map((lead) => ({ ...lead, selected: true })))} disabled={!leads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
-            Select all
-          </button>
-        </div>
-
-        <div className="mt-6 rounded-3xl bg-blue-50 p-4 text-sm leading-6 text-blue-950">{notice}</div>
-        {errors.length > 0 && (
-          <div className="mt-4 rounded-3xl bg-amber-50 p-4 text-xs leading-5 text-amber-900">
-            <p className="font-black">API notes</p>
-            {errors.slice(0, 3).map((error) => <p key={`${error.query}-${error.status}`}>{error.query}: {error.status ?? "error"} {error.message}</p>)}
+        </section>
+      ) : (
+        <section className="card h-fit">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Lead Machine</p>
+              <h2 className="mt-2 text-3xl font-black text-slate-950">Business lead list builder</h2>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="badge">CSV first</span>
+              <button
+                type="button"
+                onClick={() => setControlsCollapsed(true)}
+                className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white text-lg font-black text-slate-700 shadow-soft transition hover:bg-slate-50"
+                aria-label="Minimize lead machine controls"
+                title="Minimize lead machine controls"
+              >
+                ‹
+              </button>
+            </div>
           </div>
-        )}
-      </section>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            Built for the 50-200 lead spreadsheet workflow: search a category and location, collect public business names, phones, websites, addresses, then enrich public website emails/contact forms.
+          </p>
 
-      <section className="card">
+          <div className="mt-6 space-y-4">
+            <label className="block space-y-2">
+              <span className="label">Business category / search</span>
+              <input className="input" value={businessType} onChange={(event) => setBusinessType(event.target.value)} />
+            </label>
+            <label className="block space-y-2">
+              <span className="label">Location</span>
+              <input className="input" value={location} onChange={(event) => setLocation(event.target.value)} />
+            </label>
+            <label className="block space-y-2">
+              <span className="label">Max results</span>
+              <EditableNumberInput className="input" min={1} max={200} value={maxResults} onChange={setMaxResults} />
+            </label>
+            <label className="block space-y-2">
+              <span className="label">Extra search phrases, one per line</span>
+              <textarea className="input min-h-32" value={extraQueriesText} onChange={(event) => setExtraQueriesText(event.target.value)} />
+            </label>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <button type="button" onClick={findBusinesses} disabled={loading} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:opacity-60">
+              {loading ? "Finding..." : "Find businesses"}
+            </button>
+            <button type="button" onClick={enrichWebsites} disabled={enriching || !leads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+              {enriching ? "Enriching..." : "Enrich websites"}
+            </button>
+            <button type="button" onClick={() => downloadCsv("recovery-radar-leads.csv", selectedLeads)} disabled={!selectedLeads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+              Export selected CSV
+            </button>
+            <button type="button" onClick={() => setLeads((prev) => prev.map((lead) => ({ ...lead, selected: true })))} disabled={!leads.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+              Select all
+            </button>
+          </div>
+
+          <div className="mt-6 rounded-3xl bg-blue-50 p-4 text-sm leading-6 text-blue-950">{notice}</div>
+          {errors.length > 0 && (
+            <div className="mt-4 rounded-3xl bg-amber-50 p-4 text-xs leading-5 text-amber-900">
+              <p className="font-black">API notes</p>
+              {errors.slice(0, 3).map((error) => <p key={`${error.query}-${error.status}`}>{error.query}: {error.status ?? "error"} {error.message}</p>)}
+            </div>
+          )}
+        </section>
+      )}
+
+      <section className="card min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Results</p>
