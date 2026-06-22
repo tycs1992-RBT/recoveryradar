@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { abaBuyerKeywordSeeds } from "@/lib/aba-keyword-seeds";
 import { buildPageBriefText, suggestSEOLandingPage } from "@/lib/seo-pages";
 
 const schema = z.object({
@@ -36,44 +37,19 @@ function uniq(items: string[]) {
 
 function classify(keyword: string): Pick<KeywordIdea, "intent" | "demandTier" | "commercialIntent" | "cluster"> {
   const lower = keyword.toLowerCase();
-  if (/alternative|competitor|vs|compare/.test(lower)) {
-    return {
-      intent: "comparison",
-      demandTier: "Medium",
-      commercialIntent: 90,
-      cluster: "Competitor / alternative"
-    };
+  if (/alternative|competitor|replacement|vs|compare/.test(lower)) {
+    return { intent: "comparison", demandTier: "Medium", commercialIntent: 90, cluster: "Competitors and alternatives" };
   }
-  if (/near me|florida|new hampshire|massachusetts|texas|california|clinic|center/.test(lower)) {
-    return {
-      intent: "local",
-      demandTier: "Medium",
-      commercialIntent: 75,
-      cluster: "Local demand"
-    };
+  if (/cancellation|makeup|callout|coverage|recovered hour|lost hour|revenue leakage|staff|authorization|utilization|documentation|audit|compliance/.test(lower)) {
+    return { intent: "pain", demandTier: "Medium", commercialIntent: 82, cluster: "Recovery and operational pain" };
   }
-  if (/software|system|emr|billing|scheduling|crm|management/.test(lower)) {
-    return {
-      intent: "commercial",
-      demandTier: "High",
-      commercialIntent: 85,
-      cluster: "Commercial software/service"
-    };
+  if (/near me|florida|new hampshire|massachusetts|texas|california|clinic|center|startup|new clinic|opening/.test(lower)) {
+    return { intent: "local", demandTier: "Medium", commercialIntent: 75, cluster: "Local and startup demand" };
   }
-  if (/cancellation|callout|staff|authorization|documentation|lost hours|revenue/.test(lower)) {
-    return {
-      intent: "pain",
-      demandTier: "Medium",
-      commercialIntent: 80,
-      cluster: "Pain/problem"
-    };
+  if (/software|system|emr|ehr|billing|scheduling|crm|management|portal|platform/.test(lower)) {
+    return { intent: "commercial", demandTier: "High", commercialIntent: 85, cluster: "ABA software shoppers" };
   }
-  return {
-    intent: "informational",
-    demandTier: "Low",
-    commercialIntent: 45,
-    cluster: "Informational"
-  };
+  return { intent: "informational", demandTier: "Low", commercialIntent: 45, cluster: "Education and nurture" };
 }
 
 function keywordUrl(keyword: string) {
@@ -91,44 +67,9 @@ function buildIdeas(niche: string, locations: string[]) {
     `${base} software`,
     `${base} system`,
     `${base} platform`,
-    `${base} near me`,
     `best ${base}`,
     `${base} pricing`,
     `${base} reviews`
-  ];
-  const abaSeeds = [
-    "ABA clinic software",
-    "ABA therapy software",
-    "ABA EMR software",
-    "ABA practice management software",
-    "CentralReach alternative",
-    "Rethink alternative",
-    "Motivity alternative",
-    "ABA scheduling software",
-    "ABA cancellation management",
-    "ABA cancellation software",
-    "ABA missed session recovery",
-    "ABA recovered hours",
-    "RBT callout coverage ABA",
-    "ABA staff coverage software",
-    "ABA authorization tracking",
-    "ABA documentation readiness",
-    "ABA software pricing",
-    "active learner pricing",
-    "how to open an ABA clinic",
-    "ABA clinic startup software"
-  ];
-  const cabinetSeeds = [
-    "bulk phone sales",
-    "used phone buyers",
-    "sell bulk phones",
-    "wholesale phones",
-    "kitchen cabinet company",
-    "custom cabinet maker",
-    "cabinet installer",
-    "cabinet refacing",
-    "RTA cabinets",
-    "wholesale cabinets"
   ];
   const pain = [
     `how much money do ${base}s lose`,
@@ -145,7 +86,7 @@ function buildIdeas(niche: string, locations: string[]) {
     `${base} companies ${location}`
   ]);
 
-  return uniq([...core, ...abaSeeds, ...cabinetSeeds, ...pain, ...local]).slice(0, 120);
+  return uniq([...core, ...abaBuyerKeywordSeeds, ...pain, ...local]).slice(0, 180);
 }
 
 async function enrichWithCustomSearch(ideas: KeywordIdea[]) {
@@ -218,14 +159,14 @@ export async function POST(request: Request) {
   if (checkCompetition) {
     const enriched = await enrichWithCustomSearch(ideas);
     return NextResponse.json({
-      notice: "Keyword ideas generated and mapped to publishable SEO pages. Competition count is a rough SERP proxy, not true search volume.",
+      notice: "ABA keyword bank loaded. Keyword ideas were mapped to publishable SEO pages. Competition count is a rough SERP proxy, not true search volume.",
       ideas: enriched.ideas,
       errors: enriched.errors
     });
   }
 
   return NextResponse.json({
-    notice: "Keyword ideas generated and mapped to published SEO landing pages. Open the page URL, copy the brief, then submit the sitemap in Google Search Console.",
+    notice: "ABA keyword bank loaded. Keywords are mapped to published SEO landing pages. Open the page URL, copy the brief, then submit the sitemap in Google Search Console.",
     ideas,
     errors: []
   });
