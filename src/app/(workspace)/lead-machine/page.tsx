@@ -1,4 +1,4 @@
-import { LeadMachine } from "@/components/leads/LeadMachine";
+import { LeadMachinePro } from "@/components/leads/LeadMachinePro";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function LeadMachinePage() {
@@ -7,9 +7,9 @@ export default function LeadMachinePage() {
       <PageHeader
         eyebrow="Lead Machine"
         title="Build the 50-200 lead spreadsheet faster"
-        description="Use Google Places to collect public business names, phone numbers, websites, addresses, ratings, then enrich public websites for business emails/contact forms. Review every source before outreach."
+        description="Use Google Places to collect public business names, phone numbers, websites, addresses, ratings, then enrich public websites. Results are alphabetized, duplicate-checked, and can be saved into the Intelligence Bank."
       />
-      <LeadMachine />
+      <LeadMachinePro />
     </>
   );
 }
