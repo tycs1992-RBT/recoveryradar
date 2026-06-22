@@ -54,9 +54,7 @@ const leadExportHeaders = [
   "Google Maps URL",
   "Rating",
   "Review Count",
-  "Lead Score",
-  "Source Query",
-  "Notes"
+  "Lead Score"
 ];
 
 function csvEscape(value: unknown) {
@@ -86,9 +84,7 @@ function leadExportValues(lead: LeadRow) {
     lead.googleMapsUrl,
     lead.rating,
     lead.reviewCount,
-    lead.leadScore,
-    lead.sourceQuery,
-    `${lead.notes ?? ""} ${lead.enrichmentNotes ?? ""}`.trim()
+    lead.leadScore
   ];
 }
 
@@ -169,7 +165,7 @@ export function LeadMachine() {
     if (!selectedLeads.length) return;
     try {
       await navigator.clipboard.writeText(toGoogleSheetsTsv(selectedLeads));
-      setNotice("Copied selected leads as tab-separated rows. Open Google Sheets, click cell A1, and paste.");
+      setNotice("Copied selected leads as tab-separated rows ending at Lead Score. Open Google Sheets, click cell A1, and paste.");
     } catch {
       setNotice("Clipboard copy was blocked. Use the Google Sheets CSV export instead.");
     }
@@ -178,7 +174,7 @@ export function LeadMachine() {
   function exportGoogleDocsReport() {
     if (!selectedLeads.length) return;
     downloadBlob("recovery-radar-google-docs-lead-report.html", buildGoogleDocsReport(selectedLeads), "text/html;charset=utf-8");
-    setNotice("Downloaded a Google Docs-ready HTML report. Upload it to Google Drive, then open with Google Docs.");
+    setNotice("Downloaded a Google Docs-ready HTML report ending at Lead Score. Upload it to Google Drive, then open with Google Docs.");
   }
 
   async function findBusinesses() {
