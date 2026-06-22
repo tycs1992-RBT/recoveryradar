@@ -52,6 +52,7 @@ export const coreModules = [
 export const navItems = [
   { href: "/dashboard", label: "Dashboard", eyebrow: "Command center" },
   { href: "/lead-machine", label: "Lead Machine", eyebrow: "CSV leads" },
+  { href: "/linkedin-prospector", label: "LinkedIn Prospector", eyebrow: "Execs" },
   { href: "/lead-finder", label: "Intent Crawler", eyebrow: "Signals" },
   { href: "/keyword-radar", label: "Keyword Radar", eyebrow: "SEO + ads" },
   { href: "/seo-command-center", label: "SEO Command Center", eyebrow: "Keywords" },
