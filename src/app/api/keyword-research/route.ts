@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { buildPageBriefText, suggestSEOLandingPage } from "@/lib/seo-pages";
 
 const schema = z.object({
   niche: z.string().trim().min(2).default("ABA clinic software"),
@@ -20,21 +21,27 @@ type KeywordIdea = {
   googleTrendsUrl: string;
   competitionResults?: string;
   topResultTitles?: string[];
+  pageTitle: string;
+  pageH1: string;
+  metaDescription: string;
+  pageStatus: "published" | "planned";
+  pageBrief: string;
+  internalLinks: string[];
+  faqQuestions: string[];
 };
 
 function uniq(items: string[]) {
   return Array.from(new Set(items.map((item) => item.trim()).filter(Boolean)));
 }
 
-function classify(keyword: string): Pick<KeywordIdea, "intent" | "demandTier" | "commercialIntent" | "suggestedPage" | "contentAngle"> {
+function classify(keyword: string): Pick<KeywordIdea, "intent" | "demandTier" | "commercialIntent" | "cluster"> {
   const lower = keyword.toLowerCase();
   if (/alternative|competitor|vs|compare/.test(lower)) {
     return {
       intent: "comparison",
       demandTier: "Medium",
       commercialIntent: 90,
-      suggestedPage: "/aba-emr-alternative",
-      contentAngle: "Compare migration risk against a no-migration recovery layer."
+      cluster: "Competitor / alternative"
     };
   }
   if (/near me|florida|new hampshire|massachusetts|texas|california|clinic|center/.test(lower)) {
@@ -42,8 +49,7 @@ function classify(keyword: string): Pick<KeywordIdea, "intent" | "demandTier" | 
       intent: "local",
       demandTier: "Medium",
       commercialIntent: 75,
-      suggestedPage: "/lead-machine",
-      contentAngle: "Local buyer-intent lead list and regional landing page opportunity."
+      cluster: "Local demand"
     };
   }
   if (/software|system|emr|billing|scheduling|crm|management/.test(lower)) {
@@ -51,8 +57,7 @@ function classify(keyword: string): Pick<KeywordIdea, "intent" | "demandTier" | 
       intent: "commercial",
       demandTier: "High",
       commercialIntent: 85,
-      suggestedPage: "/aba-emr-alternative",
-      contentAngle: "Capture software shoppers before they commit to a full migration."
+      cluster: "Commercial software/service"
     };
   }
   if (/cancellation|callout|staff|authorization|documentation|lost hours|revenue/.test(lower)) {
@@ -60,16 +65,14 @@ function classify(keyword: string): Pick<KeywordIdea, "intent" | "demandTier" | 
       intent: "pain",
       demandTier: "Medium",
       commercialIntent: 80,
-      suggestedPage: "/aba-cancellation-recovery",
-      contentAngle: "Turn operational pain into a calculator, checklist, or workflow demo."
+      cluster: "Pain/problem"
     };
   }
   return {
     intent: "informational",
     demandTier: "Low",
     commercialIntent: 45,
-    suggestedPage: "/content-generator",
-    contentAngle: "Educational content that can support nurture and internal linking."
+    cluster: "Informational"
   };
 }
 
@@ -94,6 +97,8 @@ function buildIdeas(niche: string, locations: string[]) {
     `${base} reviews`
   ];
   const abaSeeds = [
+    "ABA clinic software",
+    "ABA therapy software",
     "ABA EMR software",
     "ABA practice management software",
     "CentralReach alternative",
@@ -101,10 +106,15 @@ function buildIdeas(niche: string, locations: string[]) {
     "Motivity alternative",
     "ABA scheduling software",
     "ABA cancellation management",
+    "ABA cancellation software",
+    "ABA missed session recovery",
+    "ABA recovered hours",
     "RBT callout coverage ABA",
+    "ABA staff coverage software",
     "ABA authorization tracking",
     "ABA documentation readiness",
-    "ABA recovered hours",
+    "ABA software pricing",
+    "active learner pricing",
     "how to open an ABA clinic",
     "ABA clinic startup software"
   ];
@@ -187,26 +197,35 @@ export async function POST(request: Request) {
   const keywords = buildIdeas(niche, locations);
   const ideas = keywords.map((keyword) => {
     const meta = classify(keyword);
+    const page = suggestSEOLandingPage(keyword);
     return {
       keyword,
-      cluster: meta.intent === "comparison" ? "Competitor / alternative" : meta.intent === "local" ? "Local demand" : meta.intent === "pain" ? "Pain/problem" : meta.intent === "commercial" ? "Commercial software/service" : "Informational",
       ...meta,
+      suggestedPage: page.path,
+      contentAngle: page.contentAngle,
       googleSearchUrl: keywordUrl(keyword),
-      googleTrendsUrl: trendsUrl(keyword)
+      googleTrendsUrl: trendsUrl(keyword),
+      pageTitle: page.title,
+      pageH1: page.h1,
+      metaDescription: page.metaDescription,
+      pageStatus: "published",
+      pageBrief: buildPageBriefText(page, [keyword]),
+      internalLinks: page.internalLinks,
+      faqQuestions: page.faqQuestions
     } satisfies KeywordIdea;
   });
 
   if (checkCompetition) {
     const enriched = await enrichWithCustomSearch(ideas);
     return NextResponse.json({
-      notice: "Keyword ideas generated. Competition count is a rough SERP proxy, not true search volume. For true search volume, connect Google Ads Keyword Planner or a third-party keyword data API later.",
+      notice: "Keyword ideas generated and mapped to publishable SEO pages. Competition count is a rough SERP proxy, not true search volume.",
       ideas: enriched.ideas,
       errors: enriched.errors
     });
   }
 
   return NextResponse.json({
-    notice: "Keyword ideas generated. Use Google Trends links for demand direction. Actual monthly search volume requires Google Ads Keyword Planner or a third-party keyword API.",
+    notice: "Keyword ideas generated and mapped to published SEO landing pages. Open the page URL, copy the brief, then submit the sitemap in Google Search Console.",
     ideas,
     errors: []
   });
