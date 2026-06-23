@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { mockLeads, type MockLead } from "@/lib/mock-data";
 import { ScorePill } from "@/components/ui/ScorePill";
+import { ScoreReasonsPanel } from "@/components/leads/ScoreReasonsPanel";
+import { scoreReasonsForDisplay } from "@/lib/score-reasons-ui";
 
 const columns = [
   { key: "new", label: "New leads" },
@@ -54,11 +56,23 @@ function tierTextClass(score: number) {
   return "text-xs font-black text-slate-500";
 }
 
+function crmScoreReasons(lead: MockLead) {
+  return scoreReasonsForDisplay({
+    companyName: lead.companyName,
+    contactRole: lead.contactRole,
+    clinicSize: lead.clinicSize,
+    serviceModel: lead.serviceModel,
+    status: lead.status,
+    painPoint: lead.painPoint,
+    snippet: lead.nextStep
+  });
+}
+
 export function CRMBoard() {
   const [leads, setLeads] = useState<MockLead[]>(mockLeads);
   const [dueDates, setDueDates] = useState<Record<string, string>>(() => Object.fromEntries(mockLeads.map((lead) => [lead.id, defaultDueDate(3)])));
   const [selectedTaskTypes, setSelectedTaskTypes] = useState<Record<string, string>>(() => Object.fromEntries(mockLeads.map((lead) => [lead.id, "CONNECTION_NOTE"])));
-  const [notification, setNotification] = useState("CRM ready. Create tasks with due dates, then open the full task inbox for follow-up management.");
+  const [notification, setNotification] = useState("CRM ready. Lead cards now show deterministic score reasons before outreach.");
 
   const grouped = useMemo(() => columns.map((column) => ({ ...column, leads: leads.filter((lead) => lead.status === column.key) })), [leads]);
 
@@ -123,13 +137,17 @@ export function CRMBoard() {
           <section key={column.key} className="rounded-3xl border border-slate-200 bg-slate-100/60 p-4">
             <div className="mb-4 flex items-center justify-between"><h2 className="text-sm font-black text-slate-950">{column.label}</h2><span className="rounded-full bg-white px-2 py-1 text-xs font-black text-slate-500">{column.leads.length}</span></div>
             <div className="space-y-3">
-              {column.leads.length ? column.leads.map((lead) => (
-                <article key={lead.id} className={cardClass(lead.leadScore)}>
-                  <div className="flex items-start justify-between gap-3"><div><p className="font-black text-slate-950">{lead.companyName}</p><p className="mt-1 text-xs text-slate-500">{lead.contactRole ?? "Research role"} · {lead.state}</p></div><div className="flex flex-col items-end gap-1"><ScorePill score={lead.leadScore} /><span className={tierTextClass(lead.leadScore)}>{tierLabel(lead.leadScore)}</span></div></div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{lead.nextStep ?? lead.painPoint}</p>
-                  <div className="mt-4 space-y-3"><select className="input py-2 text-xs" value={lead.status} onChange={(event) => updateStatus(lead.id, event.target.value)}>{columns.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select><label className="block space-y-1"><span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Task type</span><select className="input py-2 text-xs" value={selectedTaskTypes[lead.id] ?? "CONNECTION_NOTE"} onChange={(event) => setSelectedTaskTypes((prev) => ({ ...prev, [lead.id]: event.target.value }))}>{taskTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><label className="block space-y-1"><span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Due date</span><input type="date" className="input py-2 text-xs" value={dueDates[lead.id] ?? defaultDueDate(3)} onChange={(event) => setDueDates((prev) => ({ ...prev, [lead.id]: event.target.value }))} /></label><div className="grid gap-2"><button type="button" className="rounded-full bg-slate-950 px-4 py-2 text-xs font-black text-white" onClick={() => assignTask(lead)}>Create task</button><button type="button" className="rounded-full border border-slate-200 px-4 py-2 text-xs font-black text-slate-700" onClick={() => openOutreach(lead.id)}>Draft outreach</button></div></div>
-                </article>
-              )) : <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500">No leads yet</div>}
+              {column.leads.length ? column.leads.map((lead) => {
+                const score = crmScoreReasons(lead);
+                return (
+                  <article key={lead.id} className={cardClass(lead.leadScore)}>
+                    <div className="flex items-start justify-between gap-3"><div><p className="font-black text-slate-950">{lead.companyName}</p><p className="mt-1 text-xs text-slate-500">{lead.contactRole ?? "Research role"} · {lead.state}</p></div><div className="flex flex-col items-end gap-1"><ScorePill score={lead.leadScore} /><span className={tierTextClass(lead.leadScore)}>{tierLabel(lead.leadScore)}</span></div></div>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{lead.nextStep ?? lead.painPoint}</p>
+                    <ScoreReasonsPanel result={{ ...score, score: lead.leadScore, tier: getTier(lead.leadScore) }} />
+                    <div className="mt-4 space-y-3"><select className="input py-2 text-xs" value={lead.status} onChange={(event) => updateStatus(lead.id, event.target.value)}>{columns.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</select><label className="block space-y-1"><span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Task type</span><select className="input py-2 text-xs" value={selectedTaskTypes[lead.id] ?? "CONNECTION_NOTE"} onChange={(event) => setSelectedTaskTypes((prev) => ({ ...prev, [lead.id]: event.target.value }))}>{taskTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><label className="block space-y-1"><span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Due date</span><input type="date" className="input py-2 text-xs" value={dueDates[lead.id] ?? defaultDueDate(3)} onChange={(event) => setDueDates((prev) => ({ ...prev, [lead.id]: event.target.value }))} /></label><div className="grid gap-2"><button type="button" className="rounded-full bg-slate-950 px-4 py-2 text-xs font-black text-white" onClick={() => assignTask(lead)}>Create task</button><button type="button" className="rounded-full border border-slate-200 px-4 py-2 text-xs font-black text-slate-700" onClick={() => openOutreach(lead.id)}>Draft outreach</button></div></div>
+                  </article>
+                );
+              }) : <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500">No leads yet</div>}
             </div>
           </section>
         ))}
