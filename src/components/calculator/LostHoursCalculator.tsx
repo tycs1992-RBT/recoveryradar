@@ -28,11 +28,84 @@ const initialInput: CalculatorInput = {
   consentToContact: false
 };
 
+function htmlEscape(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function downloadBlob(filename: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildReportHtml(input: CalculatorInput, result: CalculatorResult) {
+  const generatedAt = new Date().toLocaleString();
+  const rows = [
+    ["ABA clients served", input.clients],
+    ["Sessions per client/week", input.sessionsPerClientPerWeek],
+    ["Average session length", `${input.sessionLengthHours} hours`],
+    ["Cancellation rate", `${input.cancellationRate}%`],
+    ["RBT callout rate", `${input.calloutRate}%`],
+    ["Reimbursement per hour", currency(input.reimbursementPerHour)],
+    ["Current recovery rate", `${input.currentRecoveryRate}%`],
+    ["Admin minutes per cancellation", input.adminMinutesPerCancellation],
+    ["Documentation cleanup", input.documentationCleanupFrequency],
+    ["Recovery workflow maturity", input.recoveryWorkflowMaturity],
+    ["Current EMR", input.currentEmr || "Not provided"]
+  ];
+  const metrics = [
+    ["Weekly hours at risk", number(result.hoursAtRiskPerWeek)],
+    ["Monthly hours at risk", number(result.monthlyHoursAtRisk)],
+    ["Monthly revenue leakage", currency(result.monthlyRevenueLeakage)],
+    ["Admin hours spent", number(result.adminHoursSpent)],
+    ["10% workflow lift", `${number(result.potentialRecoveredHours10)} hrs/wk`],
+    ["20% workflow lift", `${number(result.potentialRecoveredHours20)} hrs/wk`],
+    ["30% workflow lift", `${number(result.potentialRecoveredHours30)} hrs/wk`]
+  ];
+
+  return `<!doctype html><html><head><meta charset="utf-8" /><title>Infinite Suite OS Lost Hours Report</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:32px;line-height:1.55}h1{font-size:30px;margin-bottom:6px}.eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#0891b2;font-size:12px}.box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin:18px 0}.dark{background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}th{background:#f8fafc}.cta{background:#ecfeff;border:1px solid #a5f3fc;border-radius:18px;padding:18px;margin-top:18px}</style></head><body><p class="eyebrow">Infinite Suite OS™ · Lost Hours Calculator</p><h1>Before you switch EMRs, calculate your lost-hours baseline.</h1><p>Generated ${htmlEscape(generatedAt)}. This report uses clinic-level estimates only and should not include PHI.</p><div class="box dark"><h2>${number(result.hoursAtRiskPerWeek)} weekly hours at risk</h2><p>${htmlEscape(result.summary)}</p></div><div class="grid"><div class="box"><h2>Clinic-level assumptions</h2><table>${rows.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div><div class="box"><h2>Estimated results</h2><table>${metrics.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div></div><div class="box"><h2>Recommended recovery path</h2><p><strong>Suggested bottleneck:</strong> ${htmlEscape(result.suggestedBottleneck)}</p><p><strong>Recommended modules:</strong> ${htmlEscape(result.recommendedModules.join(", "))}</p></div><div class="cta"><h2>Your EMR may track the session. Infinite Suite OS™ is built to help recover the session before it disappears.</h2><p>Next step: tour the Provider Portal at https://www.infinitepieces.ai/provider-portal</p><p>No-PHI disclaimer: do not submit patient names, dates of birth, insurance IDs, treatment notes or clinical details. This is an operational estimate, not a payer, billing, legal or compliance guarantee.</p></div></body></html>`;
+}
+
+function buildEmailReport(input: CalculatorInput, result: CalculatorResult) {
+  return [
+    "Subject: Lost-hours baseline report for your ABA clinic",
+    "",
+    "Before you switch EMRs, calculate your lost-hours baseline.",
+    "",
+    `Clinic: ${input.clinicName || "Not provided"}`,
+    `Current EMR: ${input.currentEmr || "Not provided"}`,
+    `Weekly hours at risk: ${number(result.hoursAtRiskPerWeek)}`,
+    `Monthly hours at risk: ${number(result.monthlyHoursAtRisk)}`,
+    `Monthly revenue leakage: ${currency(result.monthlyRevenueLeakage)}`,
+    `Admin hours spent: ${number(result.adminHoursSpent)}`,
+    `Current recovery rate: ${input.currentRecoveryRate}%`,
+    "",
+    `Suggested bottleneck: ${result.suggestedBottleneck}`,
+    `Recommended module path: ${result.recommendedModules.join(", ")}`,
+    "",
+    "Your EMR may track the session. Infinite Suite OS™ is built to help recover the session before it disappears.",
+    "",
+    "Tour Provider Portal: https://www.infinitepieces.ai/provider-portal",
+    "",
+    "No-PHI disclaimer: this report uses clinic-level estimates only and is not a billing, payer, legal or compliance guarantee."
+  ].join("\n");
+}
+
 export function LostHoursCalculator() {
   const [input, setInput] = useState<CalculatorInput>(initialInput);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [botTrap, setBotTrap] = useState("");
 
   const result = useMemo(() => calculateLostHours(input), [input]);
 
@@ -60,7 +133,7 @@ export function LostHoursCalculator() {
       const response = await fetch("/api/calculator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
+        body: JSON.stringify({ ...input, companyWebsiteHidden: botTrap })
       });
       if (!response.ok) throw new Error("Report request failed");
       setSaved(true);
@@ -69,6 +142,15 @@ export function LostHoursCalculator() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function downloadReport() {
+    downloadBlob("infinite-suite-lost-hours-report.html", buildReportHtml(input, result), "text/html;charset=utf-8");
+  }
+
+  async function copyEmailReport() {
+    await navigator.clipboard.writeText(buildEmailReport(input, result));
+    setSaved(true);
   }
 
   return (
@@ -120,6 +202,8 @@ export function LostHoursCalculator() {
           </label>
         </div>
 
+        <input className="hidden" tabIndex={-1} autoComplete="off" value={botTrap} onChange={(event) => setBotTrap(event.target.value)} aria-hidden="true" />
+
         <div className="mt-8 rounded-3xl bg-slate-50 p-5">
           <p className="text-sm font-black text-slate-950">Request detailed report</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -143,15 +227,23 @@ export function LostHoursCalculator() {
               I agree that Infinite Pieces AI may contact me about Infinite Suite OS™. I understand this calculator provides estimates, not guarantees, and I will not submit patient information.
             </span>
           </label>
-          <button
-            type="button"
-            onClick={requestReport}
-            className="mt-5 rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Send detailed report"}
-          </button>
-          {saved ? <p className="mt-3 text-sm font-semibold text-emerald-700">Report request saved. A follow-up task was created if the database is connected.</p> : null}
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <button
+              type="button"
+              onClick={requestReport}
+              className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Send detailed report"}
+            </button>
+            <button type="button" onClick={downloadReport} className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">
+              Download report
+            </button>
+            <button type="button" onClick={copyEmailReport} className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">
+              Copy email report
+            </button>
+          </div>
+          {saved ? <p className="mt-3 text-sm font-semibold text-emerald-700">Report action complete. Review before sending. A follow-up task was created if the database is connected.</p> : null}
           {error ? <p className="mt-3 text-sm font-semibold text-rose-700">{error}</p> : null}
         </div>
       </section>
