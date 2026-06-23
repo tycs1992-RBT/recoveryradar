@@ -74,6 +74,7 @@ export function LinkedInProspectorPro() {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [banking, setBanking] = useState(false);
+  const [controlsCollapsed, setControlsCollapsed] = useState(false);
 
   const visibleProspects = useMemo(() => alphabetizeAndDedupe(prospects), [prospects]);
   const selectedProspects = useMemo(() => alphabetizeAndDedupe(prospects.filter((prospect) => prospect.selected !== false)), [prospects]);
@@ -154,30 +155,62 @@ export function LinkedInProspectorPro() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-      <section className="card h-fit">
-        <div className="flex items-start justify-between gap-4">
-          <div><p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Executive finder</p><h2 className="mt-2 text-3xl font-black text-slate-950">LinkedIn decision-maker prospector</h2></div>
-          <span className="badge">A-Z + dedupe</span>
-        </div>
-        <p className="mt-4 text-sm leading-6 text-slate-600">Search indexed public LinkedIn profile snippets for executives. Results are alphabetized and can be saved to the Intelligence Bank.</p>
-        <div className="mt-6 space-y-4">
-          <label className="block space-y-2"><span className="label">Company / niche keywords, one per line</span><textarea className="input min-h-28" value={keywordsText} onChange={(event) => setKeywordsText(event.target.value)} /></label>
-          <label className="block space-y-2"><span className="label">Location / market</span><input className="input" value={location} onChange={(event) => setLocation(event.target.value)} /></label>
-          <label className="block space-y-2"><span className="label">Target titles, one per line</span><textarea className="input min-h-36" value={titlesText} onChange={(event) => setTitlesText(event.target.value)} /></label>
-          <label className="block space-y-2"><span className="label">Max results per keyword</span><EditableNumberInput className="input" min={1} max={10} value={maxResults} onChange={setMaxResults} /></label>
-        </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <button type="button" onClick={runSearch} disabled={loading} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-60">{loading ? "Searching..." : "Find executives"}</button>
-          <button type="button" onClick={() => setProspects((prev) => alphabetizeAndDedupe(prev.map((prospect) => ({ ...prospect, selected: true }))))} disabled={!visibleProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Select all</button>
-          <button type="button" onClick={copyNames} disabled={!selectedProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Copy names</button>
-          <button type="button" onClick={copyForSheets} disabled={!selectedProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Copy for Sheets</button>
-          <button type="button" onClick={() => downloadCsv(selectedProspects)} disabled={!selectedProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Export CSV</button>
-          <button type="button" onClick={saveToBank} disabled={banking || !selectedProspects.length} className="rounded-full border border-cyan-200 bg-cyan-50 px-5 py-3 text-sm font-black text-cyan-950 disabled:opacity-60">{banking ? "Saving..." : "Save to Bank"}</button>
-        </div>
-        <div className="mt-6 rounded-3xl bg-blue-50 p-4 text-sm leading-6 text-blue-950">{notice}</div>
-        {errors.length > 0 && <div className="mt-4 rounded-3xl bg-amber-50 p-4 text-xs leading-5 text-amber-900"><p className="font-black">Search notes</p>{errors.slice(0, 5).map((error) => <p key={error}>{error}</p>)}</div>}
-      </section>
+    <div className={`grid gap-6 ${controlsCollapsed ? "xl:grid-cols-[88px_minmax(0,1fr)]" : "xl:grid-cols-[0.78fr_1.22fr]"}`}>
+      {controlsCollapsed ? (
+        <section className="card h-fit p-3">
+          <button
+            type="button"
+            onClick={() => setControlsCollapsed(false)}
+            className="grid h-12 w-12 place-items-center rounded-2xl border border-slate-200 bg-white text-xl font-black text-slate-950 shadow-soft transition hover:bg-slate-50"
+            aria-label="Expand executive search controls"
+            title="Expand executive search controls"
+          >
+            ›
+          </button>
+          <div className="mt-4 flex flex-col items-center gap-3 text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 [writing-mode:vertical-rl]">Executive Finder</p>
+            <span className="rounded-full bg-slate-100 px-2 py-2 text-[10px] font-black text-slate-600 [writing-mode:vertical-rl]">{visibleProspects.length} results</span>
+          </div>
+        </section>
+      ) : (
+        <section className="card h-fit">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Executive finder</p>
+              <h2 className="mt-2 text-3xl font-black text-slate-950">LinkedIn decision-maker prospector</h2>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="badge">A-Z + dedupe</span>
+              <button
+                type="button"
+                onClick={() => setControlsCollapsed(true)}
+                className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white text-lg font-black text-slate-700 shadow-soft transition hover:bg-slate-50"
+                aria-label="Minimize executive search controls"
+                title="Minimize executive search controls"
+              >
+                ‹
+              </button>
+            </div>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">Search indexed public LinkedIn profile snippets for executives. Results are alphabetized and can be saved to the Intelligence Bank.</p>
+          <div className="mt-6 space-y-4">
+            <label className="block space-y-2"><span className="label">Company / niche keywords, one per line</span><textarea className="input min-h-28" value={keywordsText} onChange={(event) => setKeywordsText(event.target.value)} /></label>
+            <label className="block space-y-2"><span className="label">Location / market</span><input className="input" value={location} onChange={(event) => setLocation(event.target.value)} /></label>
+            <label className="block space-y-2"><span className="label">Target titles, one per line</span><textarea className="input min-h-36" value={titlesText} onChange={(event) => setTitlesText(event.target.value)} /></label>
+            <label className="block space-y-2"><span className="label">Max results per keyword</span><EditableNumberInput className="input" min={1} max={10} value={maxResults} onChange={setMaxResults} /></label>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <button type="button" onClick={runSearch} disabled={loading} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-60">{loading ? "Searching..." : "Find executives"}</button>
+            <button type="button" onClick={() => setProspects((prev) => alphabetizeAndDedupe(prev.map((prospect) => ({ ...prospect, selected: true }))))} disabled={!visibleProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Select all</button>
+            <button type="button" onClick={copyNames} disabled={!selectedProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Copy names</button>
+            <button type="button" onClick={copyForSheets} disabled={!selectedProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Copy for Sheets</button>
+            <button type="button" onClick={() => downloadCsv(selectedProspects)} disabled={!selectedProspects.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-60">Export CSV</button>
+            <button type="button" onClick={saveToBank} disabled={banking || !selectedProspects.length} className="rounded-full border border-cyan-200 bg-cyan-50 px-5 py-3 text-sm font-black text-cyan-950 disabled:opacity-60">{banking ? "Saving..." : "Save to Bank"}</button>
+          </div>
+          <div className="mt-6 rounded-3xl bg-blue-50 p-4 text-sm leading-6 text-blue-950">{notice}</div>
+          {errors.length > 0 && <div className="mt-4 rounded-3xl bg-amber-50 p-4 text-xs leading-5 text-amber-900"><p className="font-black">Search notes</p>{errors.slice(0, 5).map((error) => <p key={error}>{error}</p>)}</div>}
+        </section>
+      )}
 
       <section className="card min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Results</p><h2 className="mt-2 text-3xl font-black text-slate-950">{visibleProspects.length} executive prospects</h2></div><span className="badge">{selectedProspects.length} selected · A-Z</span></div>
