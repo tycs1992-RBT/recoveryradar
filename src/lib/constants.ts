@@ -52,21 +52,23 @@ export const coreModules = [
 export const navItems = [
   { href: "/dashboard", label: "Dashboard", eyebrow: "Command center" },
   { href: "/lead-machine", label: "Lead Machine", eyebrow: "CSV leads" },
-  { href: "/linkedin-prospector", label: "LinkedIn Prospector", eyebrow: "Execs" },
+  { href: "/executive-prospector", label: "Executive Prospector", eyebrow: "Execs" },
   { href: "/intelligence-bank", label: "Intelligence Bank", eyebrow: "Deduped" },
-  { href: "/lead-finder", label: "Intent Crawler", eyebrow: "Signals" },
+  { href: "/lead-finder", label: "Social Source Finder", eyebrow: "Signals" },
   { href: "/keyword-radar", label: "Keyword Radar", eyebrow: "SEO + ads" },
   { href: "/seo-command-center", label: "SEO Command Center", eyebrow: "Keywords" },
   { href: "/calculator", label: "Calculator", eyebrow: "Public tool" },
   { href: "/quiz", label: "Quiz", eyebrow: "Public tool" },
   { href: "/bot-builder", label: "Bot Builder", eyebrow: "Recovery Advisor" },
   { href: "/crm", label: "CRM Leads", eyebrow: "Pipeline" },
+  { href: "/crm-import", label: "CRM Import", eyebrow: "Mapping" },
   { href: "/tasks", label: "Task Inbox", eyebrow: "Follow-up" },
   { href: "/outreach", label: "Outreach", eyebrow: "Templates" },
+  { href: "/outreach-approval", label: "Outreach Approval", eyebrow: "Human review" },
   { href: "/content-generator", label: "Content Generator", eyebrow: "AI drafts" },
   { href: "/campaign-planner", label: "Campaign Planner", eyebrow: "Google Ads" },
   { href: "/analytics", label: "Analytics", eyebrow: "Conversion" },
-  { href: "/audit-suggestions", label: "Audit Suggestions", eyebrow: "Merged build" },
+  { href: "/audit-suggestions", label: "Audit Suggestions", eyebrow: "Action board" },
   { href: "/settings", label: "Settings", eyebrow: "Compliance" }
 ];
 
