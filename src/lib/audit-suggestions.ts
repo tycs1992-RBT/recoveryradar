@@ -19,7 +19,7 @@ export const auditSuggestions: AuditSuggestion[] = [
     title: 'Use deterministic lead scoring with visible reasons',
     status: 'implemented',
     rationale: 'Operators need to understand why a lead is hot, research, nurture, or do-not-contact before outreach occurs.',
-    nextStep: 'Expose score modifiers on the lead detail page and re-score whenever new intent signals are attached.'
+    nextStep: 'Score reasons are now exposed in social source cards, CRM cards and Intelligence Bank rows. Next: attach live intent-signal records to every saved source.'
   },
   {
     priority: 'High',
@@ -31,16 +31,16 @@ export const auditSuggestions: AuditSuggestion[] = [
   {
     priority: 'High',
     title: 'Add production-grade public form protection',
-    status: 'recommended',
-    rationale: 'Calculator, quiz, and chatbot endpoints will be public conversion surfaces and need abuse controls before launch.',
-    nextStep: 'Add rate limits, bot protection, validation error monitoring, and consent text versioning to public API routes.'
+    status: 'implemented',
+    rationale: 'Calculator, quiz, and chatbot endpoints are public conversion surfaces and need abuse controls before launch.',
+    nextStep: 'Rate limits, bot-trap checks, validation telemetry, request metadata and consent text versioning are now attached to public endpoints. Next: add external bot protection and alerting.'
   },
   {
     priority: 'High',
     title: 'Preserve human approval for outreach',
-    status: 'scaffolded',
+    status: 'implemented',
     rationale: 'Recovery Radar should draft and organize outreach, not auto-message contacts or bypass platform rules.',
-    nextStep: 'Create a manual approval queue for email/LinkedIn drafts and globally suppress do-not-contact leads.'
+    nextStep: 'Manual outreach approval queue is now available at /outreach-approval with Copy approved message instead of auto-send. Next: connect suppression list checks to every workflow.'
   },
   {
     priority: 'Medium',
@@ -52,22 +52,22 @@ export const auditSuggestions: AuditSuggestion[] = [
   {
     priority: 'Medium',
     title: 'Add PDF/email report generation for calculator leads',
-    status: 'recommended',
+    status: 'implemented',
     rationale: 'The instant calculator creates interest; a polished report gives visitors a reason to opt in and schedule a walkthrough.',
-    nextStep: 'Create a report renderer that includes assumptions, results, recommended modules, no-PHI disclaimer, and CTA.'
+    nextStep: 'Calculator now has downloadable printable report and copyable email report. Next: add true PDF rendering and automated email delivery after deliverability review.'
   },
   {
     priority: 'Medium',
     title: 'Add CRM import/export mappings',
-    status: 'scaffolded',
+    status: 'implemented',
     rationale: 'The growth workflow should eventually sync with HubSpot, Airtable, or another operating CRM without duplicate data entry.',
-    nextStep: 'Extend CSV export and add import validation, dedupe, and field mapping screens.'
+    nextStep: 'CRM import mapper is now available at /crm-import with CSV upload, field mapping, duplicate preview, suppression detection and score preview. Next: add saved mapping templates.'
   },
   {
     priority: 'Low',
     title: 'Use AI for content drafts and signal suggestions, not final decisions',
-    status: 'scaffolded',
+    status: 'implemented',
     rationale: 'AI can accelerate research and content, but compliance-sensitive decisions and outbound messages need human review.',
-    nextStep: 'Add approval metadata to AI-generated content and score/signal recommendations.'
+    nextStep: 'AI-generated content now returns approval metadata and the content generator captures human review status. Next: persist approvals to the database.'
   }
 ];
