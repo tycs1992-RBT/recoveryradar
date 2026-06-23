@@ -54,7 +54,7 @@ function basicAuthHeader(clientId: string, clientSecret: string) {
 }
 
 function userAgent() {
-  return process.env.REDDIT_USER_AGENT || "InfinitePiecesAI-RecoveryRadar/1.0 by tycs1992";
+  return process.env.REDDIT_USER_AGENT || "InfinitePiecesAI-RecoveryRadar/1.0";
 }
 
 async function getRedditToken() {
@@ -82,9 +82,10 @@ function normalizeSubreddit(value: string) {
   return clean || "all";
 }
 
-function buildSearchUrl(subreddit: string, query: string, limit: number, sort: string, time: string) {
+function buildSearchUrl(subreddit: string, query: string, limit: number, sort: string, time: string, oauth: boolean) {
   const normalized = normalizeSubreddit(subreddit);
-  const base = normalized.toLowerCase() === "all" ? "https://oauth.reddit.com/search" : `https://oauth.reddit.com/r/${normalized}/search`;
+  const host = oauth ? "https://oauth.reddit.com" : "https://www.reddit.com";
+  const base = normalized.toLowerCase() === "all" ? `${host}/search.json` : `${host}/r/${normalized}/search.json`;
   const url = new URL(base);
   url.searchParams.set("q", query);
   url.searchParams.set("sort", sort);
@@ -109,13 +110,14 @@ function signalFromText(title: string, body: string) {
   return "emr_software_signal";
 }
 
-async function searchReddit(token: string, subreddit: string, query: string, limit: number, sort: string, time: string) {
-  const url = buildSearchUrl(subreddit, query, limit, sort, time);
+async function searchReddit(token: string | null, subreddit: string, query: string, limit: number, sort: string, time: string) {
+  const oauth = Boolean(token);
+  const url = buildSearchUrl(subreddit, query, limit, sort, time, oauth);
+  const headers: Record<string, string> = { "User-Agent": userAgent() };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "User-Agent": userAgent()
-    },
+    headers,
     next: { revalidate: 900 }
   });
 
@@ -133,16 +135,20 @@ export async function POST(request: Request) {
   const parsed = redditSignalSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid Reddit signal request", issues: parsed.error.flatten() }, { status: 400 });
 
-  if (!process.env.REDDIT_CLIENT_ID || !process.env.REDDIT_CLIENT_SECRET) {
-    return NextResponse.json({
-      posts: [],
-      notice: "Reddit API is not connected yet. Add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET in Vercel Environment Variables.",
-      configurationNeeded: ["REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET", "REDDIT_USER_AGENT"]
-    });
+  const { query, subreddits, limit, sort, time } = parsed.data;
+  let token: string | null = null;
+  const setupNotes: string[] = [];
+
+  if (process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET) {
+    try {
+      token = await getRedditToken();
+    } catch (error) {
+      setupNotes.push(`Reddit OAuth failed, using public Reddit JSON fallback: ${error instanceof Error ? error.message : "unknown token error"}`);
+    }
+  } else {
+    setupNotes.push("No Reddit app credentials found. Using public Reddit JSON fallback so you can keep working without the broken Reddit app setup.");
   }
 
-  const { query, subreddits, limit, sort, time } = parsed.data;
-  const token = await getRedditToken();
   const errors: string[] = [];
   const posts = new Map<string, Record<string, unknown>>();
 
@@ -178,6 +184,10 @@ export async function POST(request: Request) {
   return NextResponse.json({
     posts: Array.from(posts.values()),
     errors,
-    notice: "Public Reddit posts returned through the official Reddit API. These are real public user posts, not website result pages. Manual review required."
+    setupNotes,
+    source: token ? "reddit_oauth" : "reddit_public_json",
+    notice: token
+      ? "Public Reddit posts returned through Reddit OAuth. Manual review required."
+      : "Public Reddit posts returned through the public Reddit JSON fallback. You can use this now without Reddit app credentials. Manual review required."
   });
 }
