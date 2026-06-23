@@ -3,6 +3,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { auditEvent } from "@/lib/audit";
+import { CONSENT_TEXT_VERSION, checkRateLimit, hasBotTrap, logPublicEndpointEvent, publicRequestMetadata, requestFingerprint } from "@/lib/public-endpoint-protection";
 
 const leadCaptureSchema = z.object({
   event: z.string(),
@@ -78,10 +79,23 @@ async function answerQuestion(question: string) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  const body = await request.json().catch(() => ({}));
+  const rate = checkRateLimit({ key: requestFingerprint(request, "chat"), limit: 30, windowMs: 10 * 60 * 1000 });
+
+  if (!rate.allowed) {
+    await logPublicEndpointEvent("chat_rate_limited", request, { path: "/api/chat" });
+    return NextResponse.json({ error: "Too many chat requests. Please try again shortly." }, { status: 429 });
+  }
+
+  if (hasBotTrap(body)) {
+    await logPublicEndpointEvent("chat_bot_trap_blocked", request, { path: "/api/chat" });
+    return NextResponse.json({ error: "Request rejected." }, { status: 400 });
+  }
+
   const parsed = leadCaptureSchema.safeParse(body);
 
   if (!parsed.success) {
+    await logPublicEndpointEvent("chat_validation_failed", request, { issues: parsed.error.flatten() });
     return NextResponse.json({ error: "Invalid chat event" }, { status: 400 });
   }
 
@@ -91,7 +105,7 @@ export async function POST(request: Request) {
       try {
         await prisma.chatbotConversation.create({
           data: {
-            transcript: { ...parsed.data, answer } as never
+            transcript: { ...parsed.data, answer, requestMetadata: publicRequestMetadata(request) } as never
           }
         });
       } catch {
@@ -121,14 +135,14 @@ export async function POST(request: Request) {
           leadScore: 35,
           status: "NEW",
           nextStep: "Review bot transcript and schedule walkthrough",
-          notes: "Captured by Recovery Advisor chatbot. No PHI requested."
+          notes: `Captured by Recovery Advisor chatbot. No PHI requested.\n\nConsent text version: ${CONSENT_TEXT_VERSION}`
         }
       });
       leadId = storedLead.id;
       await prisma.consentOptIn.create({
         data: {
           leadId,
-          consentType: "email_marketing",
+          consentType: `email_marketing:${CONSENT_TEXT_VERSION}`,
           consented: true
         }
       });
@@ -137,15 +151,16 @@ export async function POST(request: Request) {
     const conversation = await prisma.chatbotConversation.create({
       data: {
         leadId,
-        transcript: parsed.data as never
+        transcript: { ...parsed.data, consentTextVersion: CONSENT_TEXT_VERSION, requestMetadata: publicRequestMetadata(request) } as never
       }
     });
 
-    await auditEvent({ action: "chatbot_event_logged", entityType: "ChatbotConversation", entityId: conversation.id, after: parsed.data });
+    await auditEvent({ action: "chatbot_event_logged", entityType: "ChatbotConversation", entityId: conversation.id, after: { ...parsed.data, requestMetadata: publicRequestMetadata(request) } });
 
-    return NextResponse.json({ ok: true, persisted: true, leadId, conversationId: conversation.id });
+    return NextResponse.json({ ok: true, persisted: true, leadId, conversationId: conversation.id, consentTextVersion: CONSENT_TEXT_VERSION });
   } catch (error) {
     console.error(error);
+    await logPublicEndpointEvent("chat_persistence_failed", request, { message: error instanceof Error ? error.message : "unknown" });
     return NextResponse.json({ ok: true, persisted: false, error: "Chat event accepted, but database persistence failed." });
   }
 }
