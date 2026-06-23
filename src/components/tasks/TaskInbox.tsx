@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { mockLeads, mockTasks } from "@/lib/mock-data";
+import { ScoreReasonsPanel } from "@/components/leads/ScoreReasonsPanel";
+import { scoreReasonsForDisplay } from "@/lib/score-reasons-ui";
 
 type OutreachStatus = "PENDING" | "APPROVED" | "SENT" | "COMPLETED" | "CANCELLED";
 type OutreachTaskType = "CONNECTION_NOTE" | "INMAIL" | "EMAIL_FOLLOWUP" | "CALL";
@@ -13,6 +15,9 @@ type LeadSummary = {
   contactRole?: string | null;
   leadScore?: number | null;
   nextStep?: string | null;
+  painPoint?: string | null;
+  currentEmr?: string | null;
+  status?: string | null;
 };
 
 type TaskLike = {
@@ -71,16 +76,31 @@ function getLeadForTask(task: TaskLike): LeadSummary {
           contactName: matchedLead.contactName,
           contactRole: matchedLead.contactRole,
           leadScore: matchedLead.leadScore,
-          nextStep: matchedLead.nextStep
+          nextStep: matchedLead.nextStep,
+          painPoint: matchedLead.painPoint,
+          currentEmr: matchedLead.currentEmr,
+          status: matchedLead.status
         }
       : { id: task.leadId, companyName: "Unmatched lead" })
   );
 }
 
+function taskScoreReasons(lead: LeadSummary, task: TaskLike) {
+  const result = scoreReasonsForDisplay({
+    companyName: lead.companyName,
+    contactRole: lead.contactRole,
+    status: lead.status,
+    sourceSignal: task.taskType,
+    painPoint: lead.painPoint,
+    snippet: [lead.nextStep, task.generatedMessage, lead.currentEmr].filter(Boolean).join(" ")
+  });
+  return typeof lead.leadScore === "number" ? { ...result, score: lead.leadScore } : result;
+}
+
 export function TaskInbox() {
   const [tasks, setTasks] = useState<TaskLike[]>(mockTasks);
   const [filter, setFilter] = useState<FilterOption>("all");
-  const [notification, setNotification] = useState("Task inbox loaded. Public outreach still requires manual review before sending.");
+  const [notification, setNotification] = useState("Task inbox loaded. Public outreach still requires manual review before sending. Score reasons are visible for review.");
 
   useEffect(() => {
     let mounted = true;
@@ -186,6 +206,7 @@ export function TaskInbox() {
                     <div className="flex flex-wrap items-center gap-2"><span className="badge bg-slate-50">{formatTaskType(task.taskType ?? task.type)}</span><span className={`badge ${isOverdue ? "border-red-200 bg-red-100 text-red-700" : "bg-white"}`}>{dueState}</span><span className="badge bg-white">{task.status}</span></div>
                     <h3 className="mt-3 text-xl font-black text-slate-950">{task.title ?? `${formatTaskType(task.taskType)} for ${lead.companyName}`}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{lead.companyName} · {lead.contactRole ?? "Research role"} · Assigned to {task.assignedTo ?? "Unassigned"}</p>
+                    <ScoreReasonsPanel result={taskScoreReasons(lead, task)} />
                     {task.generatedMessage ? <p className="mt-3 rounded-2xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">{task.generatedMessage}</p> : null}
                   </div>
 
