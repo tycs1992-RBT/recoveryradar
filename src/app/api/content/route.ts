@@ -1,13 +1,28 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+const PROMPT_VERSION = "content-draft-v2026-06-23";
+
 const contentSchema = z.object({
   topic: z.string().min(3),
   format: z.string().min(3)
 });
 
+function approvalMetadata(provider: "openai" | "fallback", model?: string) {
+  return {
+    generatedBy: provider,
+    model: model ?? "strategy_fallback",
+    promptVersion: PROMPT_VERSION,
+    createdAt: new Date().toISOString(),
+    reviewedBy: null,
+    reviewedAt: null,
+    approvalStatus: "NEEDS_REVIEW",
+    finalHumanEditedText: null
+  };
+}
+
 function fallbackDraft(topic: string, format: string) {
-  return `# ${topic}\n\nFormat: ${format}\n\nPositioning: Keep your current EMR. Add Infinite Suite OS™ beside it as an operational recovery layer.\n\nDraft outline:\n\n1. Open with the lost-hours problem: cancellations, RBT callouts, caregiver communication gaps and documentation cleanup.\n2. Explain why EMR replacement may not solve the operational recovery gap.\n3. Show the recovery workflow: Cancellation → Scheduler AI™ → Auth War Room → SubPool™ → FieldPocket™ → Care Pocket™ → Compliance Sentinel™ → API Hub export.\n4. Recommend the Lost Hours Calculator and ABA Operations Stack Quiz.\n5. CTA: Go to demo.infinitepieces.ai, review the homepage, then click Provider Portal.\n\nCompliance notes:\n- Do not claim blanket HIPAA compliance.\n- Do not ask for PHI.\n- Use human review before publishing or sending.\n`;
+  return `# ${topic}\n\nFormat: ${format}\n\nPositioning: Keep your current EMR. Add Infinite Suite OS™ beside it as an operational recovery layer.\n\nDraft outline:\n\n1. Open with the lost-hours problem: cancellations, RBT callouts, caregiver communication gaps and documentation cleanup.\n2. Explain why EMR replacement may not solve the operational recovery gap.\n3. Show the recovery workflow: Cancellation → Scheduler AI™ → Auth War Room → SubPool™ → FieldPocket™ → Care Pocket™ → Compliance Sentinel™ → API Hub export.\n4. Recommend the Lost Hours Calculator and ABA Operations Stack Quiz.\n5. CTA: Go to demo.infinitepieces.ai, review the homepage, then click Provider Portal.\n\nCompliance notes:\n- Do not claim blanket HIPAA compliance.\n- Do not ask for PHI.\n- Use human review before publishing or sending.\n\nApproval status: NEEDS_REVIEW. A human must approve before publishing or sending.\n`;
 }
 
 export async function POST(request: Request) {
@@ -22,7 +37,7 @@ export async function POST(request: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json({ content: fallbackDraft(topic, format), provider: "fallback" });
+    return NextResponse.json({ content: fallbackDraft(topic, format), provider: "fallback", approval: approvalMetadata("fallback") });
   }
 
   try {
@@ -45,9 +60,9 @@ export async function POST(request: Request) {
       temperature: 0.5
     });
 
-    return NextResponse.json({ content: completion.choices[0]?.message.content ?? fallbackDraft(topic, format), provider: "openai" });
+    return NextResponse.json({ content: completion.choices[0]?.message.content ?? fallbackDraft(topic, format), provider: "openai", approval: approvalMetadata("openai", model) });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ content: fallbackDraft(topic, format), provider: "fallback", error: "OpenAI request failed, fallback returned." });
+    return NextResponse.json({ content: fallbackDraft(topic, format), provider: "fallback", approval: approvalMetadata("fallback"), error: "OpenAI request failed, fallback returned." });
   }
 }
