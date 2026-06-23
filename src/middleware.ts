@@ -19,6 +19,7 @@ export const config = {
     "/bot-builder/:path*",
     "/recovery-advisor-chatbot/:path*",
     "/crm/:path*",
+    "/crm-import/:path*",
     "/tasks/:path*",
     "/outreach/:path*",
     "/outreach-approval/:path*",
