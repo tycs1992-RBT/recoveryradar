@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ScoreReasonsPanel } from "@/components/leads/ScoreReasonsPanel";
+import { scoreReasonsForDisplay } from "@/lib/score-reasons-ui";
 
 type BankRecord = {
   type?: string;
@@ -46,6 +48,18 @@ function rowName(row: BankRecord) {
   return String(row.name || row.companyName || "").toLowerCase();
 }
 
+function rowScore(row: BankRecord) {
+  const calculated = scoreReasonsForDisplay({
+    companyName: row.companyName || row.name,
+    contactRole: row.role,
+    status: row.type,
+    sourceSignal: row.source,
+    title: row.name,
+    snippet: [row.website, row.linkedinUrl, row.sourceUrl, row.cityState].filter(Boolean).join(" ")
+  });
+  return typeof row.leadScore === "number" ? { ...calculated, score: row.leadScore } : calculated;
+}
+
 export function IntelligenceBank() {
   const [records, setRecords] = useState<BankRecord[]>([]);
   const [notice, setNotice] = useState("Loading Intelligence Bank...");
@@ -66,7 +80,7 @@ export function IntelligenceBank() {
       const data = (await response.json()) as BankResponse;
       if (!response.ok) throw new Error(data.error ?? "Failed to load Intelligence Bank");
       setRecords(data.records ?? []);
-      setNotice(`Loaded ${data.count ?? data.records?.length ?? 0} deduped records. Results are alphabetized.`);
+      setNotice(`Loaded ${data.count ?? data.records?.length ?? 0} deduped records. Results are alphabetized and score reasons are visible.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Failed to load Intelligence Bank");
     } finally {
@@ -86,7 +100,7 @@ export function IntelligenceBank() {
             <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">No-duplicate master bank</p>
             <h2 className="mt-2 text-3xl font-black text-slate-950">Intelligence Bank</h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-              This stores companies, contacts, executives, public emails, websites and source links gathered from Lead Machine, LinkedIn Prospector and CRM imports. Records are alphabetized and duplicate-checked by company name, website, public email and LinkedIn URL.
+              This stores companies, contacts, executives, public emails, websites and source links gathered from Lead Machine, Executive Prospector, social sources and CRM imports. Records are alphabetized, duplicate-checked, and scored with visible reasons.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -103,7 +117,7 @@ export function IntelligenceBank() {
 
       <section className="card min-w-0">
         <div className="overflow-x-auto rounded-3xl border border-slate-200">
-          <table className="min-w-[1150px] w-full divide-y divide-slate-200 bg-white text-sm">
+          <table className="min-w-[1250px] w-full divide-y divide-slate-200 bg-white text-sm">
             <thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-4 py-3">Type</th>
@@ -113,32 +127,35 @@ export function IntelligenceBank() {
                 <th className="px-4 py-3">Links</th>
                 <th className="px-4 py-3">Email / Phone</th>
                 <th className="px-4 py-3">Market</th>
-                <th className="px-4 py-3">Score</th>
+                <th className="px-4 py-3">Score reasons</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map((row, index) => (
-                <tr key={`${row.type}-${row.name}-${row.companyName}-${index}`}>
-                  <td className="px-4 py-4 align-top"><span className="badge bg-slate-50">{row.type || "—"}</span></td>
-                  <td className="px-4 py-4 align-top font-black text-slate-950">{row.name || "—"}</td>
-                  <td className="px-4 py-4 align-top text-slate-700">{row.role || "—"}</td>
-                  <td className="px-4 py-4 align-top text-slate-700">{row.companyName || "—"}</td>
-                  <td className="px-4 py-4 align-top space-x-3">
-                    {row.website ? <a href={row.website} target="_blank" rel="noreferrer" className="font-bold underline">Website</a> : null}
-                    {row.linkedinUrl ? <a href={row.linkedinUrl} target="_blank" rel="noreferrer" className="font-bold underline">LinkedIn</a> : null}
-                    {row.sourceUrl ? <a href={row.sourceUrl} target="_blank" rel="noreferrer" className="font-bold underline">Source</a> : null}
-                    {!row.website && !row.linkedinUrl && !row.sourceUrl ? "—" : null}
-                  </td>
-                  <td className="px-4 py-4 align-top text-slate-700">
-                    <p>{row.publicEmail || "—"}</p>
-                    <p className="text-xs text-slate-500">{row.phone || ""}</p>
-                  </td>
-                  <td className="px-4 py-4 align-top text-slate-700">{row.cityState || "—"}</td>
-                  <td className="px-4 py-4 align-top">{typeof row.leadScore === "number" ? <span className="badge bg-emerald-50 text-emerald-700">{row.leadScore}</span> : "—"}</td>
-                </tr>
-              ))}
+              {filtered.map((row, index) => {
+                const score = rowScore(row);
+                return (
+                  <tr key={`${row.type}-${row.name}-${row.companyName}-${index}`}>
+                    <td className="px-4 py-4 align-top"><span className="badge bg-slate-50">{row.type || "—"}</span></td>
+                    <td className="px-4 py-4 align-top font-black text-slate-950">{row.name || "—"}</td>
+                    <td className="px-4 py-4 align-top text-slate-700">{row.role || "—"}</td>
+                    <td className="px-4 py-4 align-top text-slate-700">{row.companyName || "—"}</td>
+                    <td className="px-4 py-4 align-top space-x-3">
+                      {row.website ? <a href={row.website} target="_blank" rel="noreferrer" className="font-bold underline">Website</a> : null}
+                      {row.linkedinUrl ? <a href={row.linkedinUrl} target="_blank" rel="noreferrer" className="font-bold underline">LinkedIn</a> : null}
+                      {row.sourceUrl ? <a href={row.sourceUrl} target="_blank" rel="noreferrer" className="font-bold underline">Source</a> : null}
+                      {!row.website && !row.linkedinUrl && !row.sourceUrl ? "—" : null}
+                    </td>
+                    <td className="px-4 py-4 align-top text-slate-700">
+                      <p>{row.publicEmail || "—"}</p>
+                      <p className="text-xs text-slate-500">{row.phone || ""}</p>
+                    </td>
+                    <td className="px-4 py-4 align-top text-slate-700">{row.cityState || "—"}</td>
+                    <td className="px-4 py-4 align-top min-w-[300px]"><ScoreReasonsPanel result={score} /></td>
+                  </tr>
+                );
+              })}
               {!filtered.length ? (
-                <tr><td colSpan={8} className="px-4 py-16 text-center text-slate-500">No intelligence records yet. Save selected Lead Machine or LinkedIn Prospector results into the bank.</td></tr>
+                <tr><td colSpan={8} className="px-4 py-16 text-center text-slate-500">No intelligence records yet. Save selected Lead Machine or Executive Prospector results into the bank.</td></tr>
               ) : null}
             </tbody>
           </table>
