@@ -21,6 +21,7 @@ export const config = {
     "/crm/:path*",
     "/tasks/:path*",
     "/outreach/:path*",
+    "/outreach-approval/:path*",
     "/outreach-templates/:path*",
     "/content-generator/:path*",
     "/campaign-planner/:path*",
