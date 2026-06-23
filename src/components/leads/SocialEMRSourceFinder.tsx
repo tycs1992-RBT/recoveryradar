@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { ScoreReasonsPanel } from "@/components/leads/ScoreReasonsPanel";
+import { scoreReasonsForDisplay } from "@/lib/score-reasons-ui";
 
 type SearchPreview = {
   title: string;
@@ -44,12 +46,26 @@ function keepResult(result: SearchPreview) {
   return softwareWords.some((word) => text.includes(word)) && buyerWords.some((word) => text.includes(word));
 }
 
+function replyAngle(result: SearchPreview) {
+  return [
+    "Possible human reply angle:",
+    "",
+    "I saw your post about ABA software/EMR alternatives. I’m building Infinite Suite OS™ around the recovery gap many clinics hit before they migrate: cancellations, RBT callouts, caregiver communication and documentation cleanup turning into lost hours.",
+    "",
+    "No PHI needed — the first step is just calculating a clinic-level lost-hours baseline:",
+    "https://www.infinitepieces.ai/calculator",
+    "",
+    `Source: ${result.link}`
+  ].join("\n");
+}
+
 export function SocialEMRSourceFinder() {
   const [query, setQuery] = useState(defaultQuery);
   const [location, setLocation] = useState("United States");
   const [results, setResults] = useState<SearchPreview[]>([]);
   const [notice, setNotice] = useState("Search is restricted to public social platforms only: Facebook, Reddit, LinkedIn, Threads/X. Generic vendor pages are removed.");
   const [loading, setLoading] = useState(false);
+  const [savingLink, setSavingLink] = useState<string | null>(null);
 
   async function runSearch() {
     setLoading(true);
@@ -69,6 +85,40 @@ export function SocialEMRSourceFinder() {
       setNotice(error instanceof Error ? error.message : "Search failed.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function copyReply(result: SearchPreview) {
+    await navigator.clipboard.writeText(replyAngle(result));
+    setNotice("Copied human-reviewed reply angle. Open the social post manually before contacting anyone.");
+  }
+
+  async function saveSource(result: SearchPreview) {
+    setSavingLink(result.link);
+    try {
+      const score = scoreReasonsForDisplay({ title: result.title, snippet: result.snippet, sourceSignal: result.suggestedSignal });
+      const response = await fetch("/api/intelligence-bank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          records: [{
+            recordType: "COMPANY",
+            name: result.title,
+            companyName: result.title,
+            sourceUrl: result.link,
+            leadScore: score.score,
+            sourceQuery: query,
+            sourceTool: "Social Source Finder",
+            notes: `${result.snippet}\n\n${replyAngle(result)}`
+          }]
+        })
+      });
+      const data = await response.json();
+      setNotice(response.ok ? data.notice ?? "Saved social source to Intelligence Bank." : data.error ?? "Save failed.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Save failed.");
+    } finally {
+      setSavingLink(null);
     }
   }
 
@@ -114,17 +164,26 @@ export function SocialEMRSourceFinder() {
         </div>
         <p className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm leading-6 text-blue-950">{notice}</p>
         <div className="mt-5 space-y-4">
-          {results.length ? results.map((result) => (
-            <article key={result.link} className="rounded-2xl border border-slate-200 p-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="badge bg-cyan-50 text-cyan-800">{host(result.link)}</span>
-                {result.leadTemperature ? <span className="badge bg-amber-50 text-amber-800">{result.leadTemperature}</span> : null}
-              </div>
-              <p className="mt-3 font-black text-slate-950">{result.title}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{result.snippet}</p>
-              <a href={result.link} target="_blank" rel="noreferrer" className="mt-3 inline-flex text-xs font-black text-slate-950 underline">Open public social source</a>
-            </article>
-          )) : (
+          {results.length ? results.map((result) => {
+            const score = scoreReasonsForDisplay({ title: result.title, snippet: result.snippet, sourceSignal: result.suggestedSignal });
+            return (
+              <article key={result.link} className="rounded-2xl border border-slate-200 p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="badge bg-cyan-50 text-cyan-800">{host(result.link)}</span>
+                  {result.leadTemperature ? <span className="badge bg-amber-50 text-amber-800">{result.leadTemperature}</span> : null}
+                  <span className="badge bg-emerald-50 text-emerald-800">Score {score.score}</span>
+                </div>
+                <p className="mt-3 font-black text-slate-950">{result.title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{result.snippet}</p>
+                <ScoreReasonsPanel result={score} />
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <a href={result.link} target="_blank" rel="noreferrer" className="inline-flex text-xs font-black text-slate-950 underline">Open public social source</a>
+                  <button type="button" onClick={() => copyReply(result)} className="text-xs font-black text-slate-950 underline">Copy human reply angle</button>
+                  <button type="button" onClick={() => saveSource(result)} disabled={savingLink === result.link} className="text-xs font-black text-slate-950 underline disabled:opacity-50">{savingLink === result.link ? "Saving..." : "Save source"}</button>
+                </div>
+              </article>
+            );
+          }) : (
             <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">Run a search to find public social EMR-shopping sources.</div>
           )}
         </div>
