@@ -10,11 +10,27 @@ export default function CalculatorPage() {
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <PageHeader
           eyebrow="Lost Hours Calculator"
-          title="Estimate ABA hours and revenue at risk from cancellations and callouts"
-          description="Enter clinic-level operating estimates only. The calculator displays summary results immediately and can optionally capture consent for a detailed follow-up report."
+          title="Before you switch EMRs, calculate your lost-hours baseline."
+          description="Shopping for ABA software? Before you migrate your clinic into another platform, estimate how many hours are being lost through cancellations, RBT callouts, poor recovery routing, caregiver communication gaps, and documentation cleanup."
         >
           <Link href="/quiz" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">Take quiz</Link>
+          <Link href="/provider-portal" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white">Tour Provider Portal</Link>
         </PageHeader>
+
+        <section className="mb-8 rounded-3xl border border-cyan-100 bg-cyan-50 p-6">
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">Why calculate first?</p>
+          <div className="mt-3 grid gap-4 lg:grid-cols-[1fr_0.8fr]">
+            <div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-950">Your EMR may track the session. Infinite Suite OS™ is built to help recover the session before it disappears.</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-700">Use clinic-level numbers only. No patient names, diagnoses, insurance IDs, treatment notes or PHI. The report is an operational estimate and should be reviewed by your team.</p>
+            </div>
+            <div className="rounded-2xl bg-white p-4 text-sm font-semibold leading-6 text-slate-700">
+              <p className="font-black text-slate-950">The wedge:</p>
+              <p className="mt-2">One canceled session becomes one recovered, supported, documented, review-ready hour.</p>
+            </div>
+          </div>
+        </section>
+
         <LostHoursCalculator />
       </main>
     </div>
