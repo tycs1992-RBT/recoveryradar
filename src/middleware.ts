@@ -11,6 +11,7 @@ export const config = {
     "/dashboard/:path*",
     "/workflow-center/:path*",
     "/lead-machine/:path*",
+    "/emr-shopping-radar/:path*",
     "/linkedin-prospector/:path*",
     "/executive-prospector/:path*",
     "/intelligence-bank/:path*",
