@@ -10,7 +10,8 @@ const campaignImagePromptSchema = z.object({
   focusLabel: z.string().trim().min(2).default("Lost Hours"),
   focusTheme: z.string().trim().min(2).default("Recover the hour before it disappears"),
   landingPage: z.string().trim().min(1).default("/calculator"),
-  keywords: z.array(z.string().trim()).default([])
+  keywords: z.array(z.string().trim()).default([]),
+  variationsPerDay: z.coerce.number().int().min(1).max(20).default(20)
 });
 
 export async function POST(request: Request) {
@@ -24,6 +25,8 @@ export async function POST(request: Request) {
   const prompts = buildCampaignImagePrompts(parsed.data);
   return NextResponse.json({
     prompts,
-    notice: "Generated 30 image prompts, captions and CTAs. Use Copy Prompt or Export CSV to feed an image API/bot."
+    variationsPerDay: parsed.data.variationsPerDay,
+    totalAssets: prompts.length,
+    notice: `Generated ${prompts.length} image prompts: ${parsed.data.variationsPerDay} variations per day for 30 days. Export CSV to feed an image API/bot queue.`
   });
 }
