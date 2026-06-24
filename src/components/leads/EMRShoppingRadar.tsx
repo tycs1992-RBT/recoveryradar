@@ -52,29 +52,32 @@ function replyAngle(result: RadarResult) {
 
 export function EMRShoppingRadar() {
   const [location, setLocation] = useState("United States");
-  const [keywordText, setKeywordText] = useState(emrShoppingKeywords.slice(0, 8).join("\n"));
-  const [selectedPlatforms, setSelectedPlatforms] = useState<RadarPlatform[]>(["facebook", "linkedin", "reddit", "google", "news", "blogs"]);
+  const [keywordText, setKeywordText] = useState(emrShoppingKeywords.slice(0, 6).join("\n"));
+  const [selectedPlatforms, setSelectedPlatforms] = useState<RadarPlatform[]>(["facebook", "linkedin", "reddit"]);
   const [recency, setRecency] = useState<"day" | "week" | "month">("week");
   const [saveToBank, setSaveToBank] = useState(false);
   const [results, setResults] = useState<RadarResult[]>([]);
-  const [notice, setNotice] = useState("Ready. This uses public indexed sources only. Facebook mode searches public indexed Facebook pages/posts, not private groups.");
+  const [notice, setNotice] = useState("Ready. Start with Facebook + LinkedIn + Reddit and 3-6 keywords so the live scan returns fast. Facebook mode searches public indexed Facebook pages/posts, not private groups.");
   const [loading, setLoading] = useState(false);
   const [savingLink, setSavingLink] = useState<string | null>(null);
 
-  const keywords = useMemo(() => keywordText.split(/\n|,/).map((item) => item.trim()).filter(Boolean).slice(0, 25), [keywordText]);
+  const keywords = useMemo(() => keywordText.split(/\n|,/).map((item) => item.trim()).filter(Boolean).slice(0, 8), [keywordText]);
 
   function togglePlatform(platform: RadarPlatform) {
-    setSelectedPlatforms((current) => current.includes(platform) ? current.filter((item) => item !== platform) : [...current, platform]);
+    setSelectedPlatforms((current) => current.includes(platform) ? current.filter((item) => item !== platform) : [...current, platform].slice(0, 3));
   }
 
   async function runRadar() {
     setLoading(true);
-    setNotice("Running EMR Shopping Radar across public indexed sources...");
+    setNotice("Running EMR Shopping Radar. Searches are capped so this should finish instead of hanging...");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 42000);
     try {
       const response = await fetch("/api/emr-shopping-radar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keywords, location, platforms: selectedPlatforms, maxPerQuery: 5, recency, saveToBank })
+        signal: controller.signal,
+        body: JSON.stringify({ keywords, location, platforms: selectedPlatforms, maxPerQuery: 3, recency, saveToBank })
       });
       const data = await response.json();
       if (!response.ok) {
@@ -82,10 +85,16 @@ export function EMRShoppingRadar() {
         return;
       }
       setResults(data.results ?? []);
-      setNotice(data.notice ?? `${data.count ?? 0} signals found.`);
+      const errorNotice = data.errors?.length ? ` Errors: ${data.errors.slice(0, 3).join(" | ")}` : "";
+      setNotice(`${data.notice ?? `${data.count ?? 0} signals found.`}${errorNotice}`);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Radar search failed.");
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setNotice("The scan timed out before the search provider answered. Try fewer keywords, Facebook only, or check the Vercel search API key/quota.");
+      } else {
+        setNotice(error instanceof Error ? error.message : "Radar search failed.");
+      }
     } finally {
+      window.clearTimeout(timeout);
       setLoading(false);
     }
   }
@@ -153,7 +162,7 @@ export function EMRShoppingRadar() {
             <label className="block space-y-2"><span className="label">Location / market</span><input className="input" value={location} onChange={(event) => setLocation(event.target.value)} /></label>
             <label className="block space-y-2"><span className="label">Recency</span><select className="input" value={recency} onChange={(event) => setRecency(event.target.value as typeof recency)}><option value="day">Last day</option><option value="week">Last week</option><option value="month">Last month</option></select></label>
             <div className="rounded-3xl border border-slate-200 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Sources</p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Sources · max 3 per scan</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {platforms.map((platform) => <button key={platform} type="button" onClick={() => togglePlatform(platform)} className={`badge ${selectedPlatforms.includes(platform) ? "bg-slate-950 text-white" : "bg-slate-50"}`}>{platform}</button>)}
               </div>
@@ -166,6 +175,7 @@ export function EMRShoppingRadar() {
           <button type="button" onClick={runRadar} disabled={loading || !keywords.length || !selectedPlatforms.length} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-50">{loading ? "Scanning..." : "Run EMR Shopping Radar"}</button>
           <button type="button" onClick={() => downloadCsv(results)} disabled={!results.length} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-50">Export CSV</button>
           <button type="button" onClick={() => setKeywordText(emrShoppingKeywords.join("\n"))} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700">Load full keyword bank</button>
+          <button type="button" onClick={() => { setSelectedPlatforms(["facebook"]); setKeywordText("CentralReach alternative\nMotivity alternative\nABA software recommendation"); setNotice("Fast Facebook-only mode loaded. Click Run EMR Shopping Radar."); }} className="rounded-full border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-black text-blue-950">Fast Facebook scan</button>
         </div>
         <div className="mt-5 rounded-3xl bg-blue-50 p-4 text-sm font-semibold leading-6 text-blue-950">{notice}</div>
       </section>
