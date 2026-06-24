@@ -5,9 +5,9 @@ import { WebsiteAnalyticsTracker } from "@/components/analytics/WebsiteAnalytics
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Recovery Radar™ | Infinite Pieces AI",
+  title: "ABA Operational Recovery Software | Infinite Suite OS™",
   description:
-    "Capture and qualify ABA clinic demand by reframing EMR shopping around operational recovery."
+    "Capture and qualify ABA clinic demand with no-migration operational recovery software that helps recover lost hours from cancellations, callouts and EMR workflow gaps."
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
