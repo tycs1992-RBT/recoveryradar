@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { CampaignImagePromptStudio } from "@/components/campaigns/CampaignImagePromptStudio";
 
 const focusOptions = [
   {
@@ -193,6 +194,15 @@ export function CampaignPlannerPro() {
         <Link href="/intelligence-bank" className="card p-5 hover:bg-slate-50"><p className="font-black text-slate-950">Intelligence Bank</p><p className="mt-2 text-sm text-slate-600">Store deduped records.</p></Link>
         <Link href="/analytics" className="card p-5 hover:bg-slate-50"><p className="font-black text-slate-950">Analytics</p><p className="mt-2 text-sm text-slate-600">See traffic and page interest.</p></Link>
       </section>
+
+      <CampaignImagePromptStudio
+        market={market}
+        audience={audience}
+        focusLabel={focus.label}
+        focusTheme={focus.theme}
+        landingPage={focus.page}
+        keywords={[...focus.keywords]}
+      />
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="card">
