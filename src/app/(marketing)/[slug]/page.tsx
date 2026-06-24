@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarketingHeader } from "@/components/layout/MarketingHeader";
+import { WalkthroughRequestForm } from "@/components/marketing/WalkthroughRequestForm";
 import { allLandingPages, type MarketingLandingPageSlug } from "@/lib/seo-pages";
 
 export async function generateStaticParams() {
@@ -56,26 +57,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
           <article className="card">
             <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">Lead capture</p>
             <h2 className="mt-3 text-3xl font-black text-slate-950">{page.formTitle}</h2>
-            <div className="mt-5 grid gap-3">
-              <input className="input" placeholder="Name" />
-              <input className="input" placeholder="Role" />
-              <input className="input" placeholder="Clinic" />
-              <input className="input" placeholder="Email" />
-              <input className="input" placeholder="Current EMR" />
-              <select className="input" defaultValue="">
-                <option value="" disabled>Biggest operational pain</option>
-                <option>Cancellations</option>
-                <option>RBT callouts</option>
-                <option>Caregiver communication</option>
-                <option>Documentation cleanup</option>
-                <option>Authorization tracking</option>
-              </select>
-              <label className="flex gap-3 text-sm leading-6 text-slate-600">
-                <input type="checkbox" className="mt-1 h-4 w-4" />
-                <span>I agree Infinite Pieces AI may contact me about Infinite Suite OS™. I will not submit patient information.</span>
-              </label>
-              <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white" type="button">Request walkthrough</button>
-            </div>
+            <WalkthroughRequestForm pageSlug={slug} formTitle={page.formTitle} />
           </article>
         </section>
 
