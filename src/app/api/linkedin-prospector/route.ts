@@ -10,7 +10,7 @@ const schema = z.object({
   maxResults: z.number().min(1).max(10).default(5)
 });
 
-type SerpApiResult = {
+type SearchResult = {
   title?: string;
   link?: string;
   snippet?: string;
@@ -18,7 +18,20 @@ type SerpApiResult = {
 };
 
 type SerpApiResponse = {
-  organic_results?: SerpApiResult[];
+  organic_results?: SearchResult[];
+  error?: string;
+};
+
+type BraveSearchResponse = {
+  web?: {
+    results?: Array<{
+      title?: string;
+      url?: string;
+      description?: string;
+      profile?: { url?: string };
+    }>;
+  };
+  message?: string;
   error?: string;
 };
 
@@ -50,7 +63,7 @@ function inferRole(text: string, titles: string[]) {
   return found ?? "Executive / decision maker";
 }
 
-function parseProfile(result: SerpApiResult, keyword: string, location: string, sourceQuery: string, titles: string[]): ExecutiveProspect | null {
+function parseProfile(result: SearchResult, keyword: string, location: string, sourceQuery: string, titles: string[]): ExecutiveProspect | null {
   const link = result.link ?? "";
   if (!/linkedin\.com\/in\//i.test(link)) return null;
 
@@ -85,9 +98,9 @@ function parseProfile(result: SerpApiResult, keyword: string, location: string, 
 }
 
 function buildQuery(keyword: string, location: string, titles: string[]) {
-  const roleQuery = titles.slice(0, 10).map((title) => `\"${title}\"`).join(" OR ");
-  const locationPart = location ? ` \"${location}\"` : "";
-  return `site:linkedin.com/in (${roleQuery}) \"${keyword}\"${locationPart}`;
+  const roleQuery = titles.slice(0, 10).map((title) => `"${title}"`).join(" OR ");
+  const locationPart = location ? ` "${location}"` : "";
+  return `site:linkedin.com/in (${roleQuery}) "${keyword}"${locationPart}`;
 }
 
 async function searchSerpApi(query: string, apiKey: string, maxResults: number) {
@@ -102,6 +115,57 @@ async function searchSerpApi(query: string, apiKey: string, maxResults: number) 
   const data = (await response.json()) as SerpApiResponse;
   if (!response.ok || data.error) throw new Error(data.error ?? `SerpApi failed with status ${response.status}`);
   return data.organic_results ?? [];
+}
+
+async function searchBrave(query: string, apiKey: string, maxResults: number) {
+  const url = new URL("https://api.search.brave.com/res/v1/web/search");
+  url.searchParams.set("q", query);
+  url.searchParams.set("count", String(Math.min(20, Math.max(1, maxResults))));
+  url.searchParams.set("country", "us");
+  url.searchParams.set("search_lang", "en");
+  url.searchParams.set("safesearch", "moderate");
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+      "Accept-Encoding": "gzip",
+      "X-Subscription-Token": apiKey
+    },
+    next: { revalidate: 1800 }
+  });
+  const data = (await response.json()) as BraveSearchResponse;
+  if (!response.ok || data.error) throw new Error(data.error || data.message || `Brave Search failed with status ${response.status}`);
+
+  return (data.web?.results ?? []).map((item) => ({
+    title: item.title,
+    link: item.url ?? item.profile?.url,
+    snippet: item.description,
+    displayed_link: item.url
+  })) satisfies SearchResult[];
+}
+
+async function searchWithAvailableProvider(query: string, maxResults: number) {
+  const providerErrors: string[] = [];
+  const braveKey = process.env.BRAVE_SEARCH_API_KEY;
+  const serpKey = process.env.SERPAPI_API_KEY;
+
+  if (braveKey) {
+    try {
+      return { provider: "brave", results: await searchBrave(query, braveKey, maxResults), providerErrors };
+    } catch (error) {
+      providerErrors.push(`Brave: ${error instanceof Error ? error.message : "failed"}`);
+    }
+  }
+
+  if (serpKey) {
+    try {
+      return { provider: "serpapi", results: await searchSerpApi(query, serpKey, maxResults), providerErrors };
+    } catch (error) {
+      providerErrors.push(`SerpApi: ${error instanceof Error ? error.message : "failed"}`);
+    }
+  }
+
+  return { provider: "none", results: [] as SearchResult[], providerErrors };
 }
 
 export async function POST(request: Request) {
@@ -120,34 +184,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid LinkedIn prospector request", issues: parsed.error.flatten() }, { status: 400 });
   }
 
-  const apiKey = process.env.SERPAPI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({
-      prospects: [],
-      notice: "SERPAPI_API_KEY is not configured. Add it in Vercel to search Google-indexed public LinkedIn profile results."
-    });
-  }
-
   const { keywords, location, titles, maxResults } = parsed.data;
   const prospects = new Map<string, ExecutiveProspect>();
   const errors: string[] = [];
+  const providers = new Set<string>();
+
+  if (!process.env.BRAVE_SEARCH_API_KEY && !process.env.SERPAPI_API_KEY) {
+    return NextResponse.json({
+      prospects: [],
+      provider: "none",
+      errors: [],
+      notice: "No search provider is configured. Add BRAVE_SEARCH_API_KEY in Vercel for the low-cost/free monthly credit search fallback, or add SERPAPI_API_KEY."
+    });
+  }
 
   for (const keyword of keywords.slice(0, 10)) {
     const query = buildQuery(keyword, location, titles);
-    try {
-      const results = await searchSerpApi(query, apiKey, maxResults);
-      for (const result of results) {
-        const parsedProfile = parseProfile(result, keyword, location, query, titles);
-        if (parsedProfile) prospects.set(parsedProfile.id, parsedProfile);
-      }
-    } catch (error) {
-      errors.push(`${keyword}: ${error instanceof Error ? error.message : "Search failed"}`);
+    const search = await searchWithAvailableProvider(query, maxResults);
+    providers.add(search.provider);
+    errors.push(...search.providerErrors.map((message) => `${keyword}: ${message}`));
+
+    for (const result of search.results) {
+      const parsedProfile = parseProfile(result, keyword, location, query, titles);
+      if (parsedProfile) prospects.set(parsedProfile.id, parsedProfile);
     }
   }
 
+  const providerLabel = Array.from(providers).filter((provider) => provider !== "none").join(", ") || "none";
   return NextResponse.json({
     prospects: Array.from(prospects.values()).sort((a, b) => b.confidence - a.confidence),
     errors,
-    notice: "Executive prospects returned from Google-indexed public LinkedIn profile results. Manual review required. Do not automate LinkedIn login, scraping, or messaging."
+    provider: providerLabel,
+    notice: `Executive prospects returned from Google/Brave-indexed public LinkedIn profile results using ${providerLabel}. Manual review required. Do not automate LinkedIn login, scraping, or messaging.`
   });
 }
