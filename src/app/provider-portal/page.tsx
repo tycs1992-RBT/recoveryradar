@@ -15,13 +15,6 @@ export default function ProviderPortalPage() {
         title="Infinite Suite OS™ — Provider Portal tour (sample data, no PHI)"
         className="absolute inset-0 h-full w-full border-0"
       />
-
-      {/* Floating no-PHI chip — small, click-through, sits over the app's top bar */}
-      <div className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 px-3">
-        <div className="rounded-full border border-amber-300/40 bg-slate-950/75 px-3 py-1 text-[10px] font-bold text-amber-100 shadow-lg backdrop-blur-sm">
-          Tour Mock OS — sample data only, no PHI
-        </div>
-      </div>
     </main>
   );
 }
