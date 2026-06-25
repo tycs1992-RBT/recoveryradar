@@ -33,7 +33,10 @@ export function auditEvent(eventName: string, payload: Record<string, unknown> =
   };
 }
 
-export function demoJson({ moduleId = "", action = "", prompt = "" } = {}) {
+export function demoJson(input: Record<string, unknown> = {}) {
+  const moduleId = String(input.moduleId ?? "");
+  const action = String(input.action ?? "");
+  const prompt = String(input.prompt ?? "");
   const s = `${moduleId} ${action} ${prompt}`.toLowerCase();
   if (s.includes("social") || s.includes("story")) {
     return { title: "Demo Social Story", pages: [
@@ -65,7 +68,11 @@ export function demoJson({ moduleId = "", action = "", prompt = "" } = {}) {
   return { title: "Infinite Suite OS Draft", text: "Backend demo draft generated. Human review required before clinical use, caregiver send, EMR copy, or operational action.", reviewRequired: true };
 }
 
-export function demoCore9Generate({ moduleId = "motherboard-os", action = "generate", featureId = "core9", context = {} as Record<string, unknown> } = {}) {
+export function demoCore9Generate(input: Record<string, unknown> = {}) {
+  const moduleId = String(input.moduleId ?? "motherboard-os");
+  const action = String(input.action ?? "generate");
+  const featureId = String(input.featureId ?? "core9");
+  const context = (input.context && typeof input.context === "object" ? input.context : {}) as Record<string, unknown>;
   const labels: Record<string, string> = {
     "scheduler-ai": "Scheduler AI™ Recovery Waterfall",
     "caregiver-pocket": "Care Pocket™ caregiver recovery communication",
