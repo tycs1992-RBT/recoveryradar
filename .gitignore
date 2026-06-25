@@ -25,3 +25,6 @@ prisma/dev.db
 /hero_every_hour_recovered*.png
 /recovery_trust_support_export*.png
 /founder_every_piece_matters*.png
+
+.vercel
+.env*
