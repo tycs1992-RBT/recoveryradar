@@ -1,0 +1,4 @@
+company_name,contact_name,contact_role,state,website,current_emr,pain_point,clinic_size,service_model,status
+Bright Beginnings ABA,Dr. Jane Smith,Founder/CEO,FL,https://brightbeginningsaba.example,CentralReach,"Opening new center; hiring BCBAs and schedulers",45,hybrid,new
+Pathways Therapy Group,,Operations Manager,TX,https://pathwaystherapygroup.example,Rethink,"High cancellations and admin time",50,center,researched
+ABA Kids Care,Emily Johnson,Scheduler,CA,https://abakidscare.example,Motivity,"Cancellations and callouts",85,in-home,connection_requested

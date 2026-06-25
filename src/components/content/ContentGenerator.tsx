@@ -1,0 +1,127 @@
+"use client";
+
+import { useState } from "react";
+
+const topics = [
+  "ABA EMR vs operational recovery layer",
+  "CentralReach alternative? Consider recovery before migration",
+  "How ABA clinics lose revenue from cancellations",
+  "ABA scheduling software is not enough without a recovery workflow",
+  "How to recover ABA makeup sessions",
+  "ABA staff callout coverage workflow",
+  "Software stack for opening a new ABA clinic",
+  "ABA caregiver communication workflow",
+  "ABA documentation readiness checklist",
+  "How to protect authorized hours before they disappear"
+];
+
+type ApprovalMetadata = {
+  generatedBy?: string;
+  model?: string;
+  promptVersion?: string;
+  createdAt?: string;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  approvalStatus?: string;
+  finalHumanEditedText?: string | null;
+};
+
+export function ContentGenerator() {
+  const [topic, setTopic] = useState(topics[0]);
+  const [format, setFormat] = useState("SEO article brief");
+  const [draft, setDraft] = useState("");
+  const [approval, setApproval] = useState<ApprovalMetadata | null>(null);
+  const [reviewer, setReviewer] = useState("Tyler | human review");
+  const [loading, setLoading] = useState(false);
+
+  async function generate() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, format })
+      });
+      const payload = await response.json();
+      setDraft(payload.content ?? "No content returned.");
+      setApproval(payload.approval ?? null);
+    } catch (error) {
+      setDraft(error instanceof Error ? error.message : "Content generation failed.");
+      setApproval(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function approveDraft() {
+    setApproval((prev) => ({
+      ...(prev ?? {}),
+      reviewedBy: reviewer,
+      reviewedAt: new Date().toISOString(),
+      approvalStatus: "APPROVED",
+      finalHumanEditedText: draft
+    }));
+  }
+
+  async function copyWithMetadata() {
+    await navigator.clipboard.writeText([draft, "", "---", "Approval metadata:", JSON.stringify(approval, null, 2)].join("\n"));
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+      <section className="card">
+        <h2 className="text-2xl font-black text-slate-950">Generate approved-first drafts</h2>
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          Drafts should be reviewed before publication. Every generated draft now carries approval metadata: model, prompt version, reviewer, review timestamp and final human-edited text.
+        </p>
+        <div className="mt-6 space-y-4">
+          <label className="space-y-2 block">
+            <span className="label">Topic</span>
+            <select className="input" value={topic} onChange={(event) => setTopic(event.target.value)}>
+              {topics.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </label>
+          <label className="space-y-2 block">
+            <span className="label">Format</span>
+            <select className="input" value={format} onChange={(event) => setFormat(event.target.value)}>
+              <option>SEO article brief</option>
+              <option>LinkedIn post</option>
+              <option>Google Ads copy</option>
+              <option>Email nurture draft</option>
+            </select>
+          </label>
+          <label className="space-y-2 block">
+            <span className="label">Human reviewer</span>
+            <input className="input" value={reviewer} onChange={(event) => setReviewer(event.target.value)} />
+          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button type="button" onClick={generate} disabled={loading} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-50">
+              {loading ? "Generating..." : "Generate draft"}
+            </button>
+            <button type="button" onClick={approveDraft} disabled={!draft} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-50">
+              Approve human edit
+            </button>
+            <button type="button" onClick={copyWithMetadata} disabled={!draft} className="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 disabled:opacity-50 sm:col-span-2">
+              Copy draft + metadata
+            </button>
+          </div>
+        </div>
+      </section>
+      <section className="card">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-2xl font-black text-slate-950">Draft</h2>
+          <span className="badge">{approval?.approvalStatus ?? "Review before publish"}</span>
+        </div>
+        {approval ? (
+          <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-600">
+            <p><strong>Generated by:</strong> {approval.generatedBy} · <strong>Model:</strong> {approval.model}</p>
+            <p><strong>Prompt version:</strong> {approval.promptVersion}</p>
+            <p><strong>Created:</strong> {approval.createdAt}</p>
+            <p><strong>Reviewed by:</strong> {approval.reviewedBy ?? "Pending"} · <strong>Reviewed at:</strong> {approval.reviewedAt ?? "Pending"}</p>
+          </div>
+        ) : null}
+        <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Generated content appears here..." className="mt-6 h-[520px] w-full resize-none rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800" />
+      </section>
+    </div>
+  );
+}
