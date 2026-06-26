@@ -14,15 +14,16 @@ export const metadata = {
 
 // Each app gets a cheerful "subject folder" color.
 const coreApps = [
-  { name: "Analyst Pocket™", role: "For the BCBA", blurb: "Run programs across the whole caseload, review data, and supervise a small team from one place.", color: "#0ea5e9", tint: "#e0f2fe" },
+  { name: "DataFlow Pro™", role: "Data → decisions", blurb: "Turn the data your team collects into clean graphs and IEP-ready progress — so collection actually drives decisions, not just storage.", color: "#14b8a6", tint: "#ccfbf1" },
   { name: "Program Tree™", role: "Programs & targets", blurb: "Build and branch each learner's goals and targets — the clinical backbone the classroom collects against.", color: "#10b981", tint: "#d1fae5" },
+  { name: "Material Maker™", role: "Materials & visuals", blurb: "Build visual schedules, supports, and reinforcer materials in minutes — instead of losing hours making them by hand.", color: "#f59e0b", tint: "#fef3c7" },
   { name: "Field Pocket™", role: "For RBTs / paras", blurb: "Fast, in-the-moment data collection on a phone or tablet, built for the pace of a classroom.", color: "#f97316", tint: "#ffedd5" },
+  { name: "Analyst Pocket™", role: "For the BCBA", blurb: "Run programs across the whole caseload, review data, and supervise a small team from one place.", color: "#0ea5e9", tint: "#e0f2fe" },
   { name: "Care Pocket™", role: "Family loop", blurb: "Keep caregivers in the loop with updates and home carryover, without anyone leaving the classroom.", color: "#ec4899", tint: "#fce7f3" },
-  { name: "ZoneMate™", role: "Visual schedules & zones", blurb: "Visual schedules, transitions, and classroom zones that keep the day predictable for every learner.", color: "#8b5cf6", tint: "#ede9fe" },
-  { name: "Gestalt AAC™", role: "Communication", blurb: "Gestalt language processing–aware AAC, so communication support is part of the room, not a separate device.", color: "#f59e0b", tint: "#fef3c7" }
+  { name: "ZoneMate™", role: "Visual schedules & zones", blurb: "Visual schedules, transitions, and classroom zones that keep the day predictable for every learner.", color: "#8b5cf6", tint: "#ede9fe" }
 ];
 
-const crayons = ["#0ea5e9", "#10b981", "#f97316", "#ec4899", "#8b5cf6", "#f59e0b"];
+const crayons = ["#14b8a6", "#10b981", "#f59e0b", "#f97316", "#0ea5e9", "#ec4899", "#8b5cf6"];
 
 export default function SchoolPortalPage() {
   return (
@@ -134,7 +135,7 @@ export default function SchoolPortalPage() {
         {/* core apps */}
         <div className="mt-14">
           <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">Core apps</p>
-          <h2 className="mt-1 text-3xl font-black text-slate-900">Six tools, one classroom</h2>
+          <h2 className="mt-1 text-3xl font-black text-slate-900">Seven tools, one classroom</h2>
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {coreApps.map((a) => (
               <div key={a.name} className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -159,7 +160,7 @@ export default function SchoolPortalPage() {
             <ul className="mt-3 space-y-2 text-sm font-bold text-slate-700">
               <li className="flex gap-2"><span className="text-emerald-500">✓</span> Classroom-paced data collection on any device</li>
               <li className="flex gap-2"><span className="text-emerald-500">✓</span> Visual schedules, transitions, and zones</li>
-              <li className="flex gap-2"><span className="text-emerald-500">✓</span> AAC built into the room</li>
+              <li className="flex gap-2"><span className="text-emerald-500">✓</span> Progress graphs and reports ready for IEP reviews</li>
               <li className="flex gap-2"><span className="text-emerald-500">✓</span> One BCBA view across ~20 learners</li>
               <li className="flex gap-2"><span className="text-emerald-500">✓</span> Lowest-cost tier — priced for school budgets</li>
             </ul>
