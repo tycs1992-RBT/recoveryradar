@@ -60,27 +60,51 @@ export default function HomePage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Founding offer</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Priced around active learners and recovered operational value.</h2>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Start with the pilot. Pricing follows the proof.</h2>
             <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
-              Infinite Suite OS™ is not priced to punish staff growth, RBT turnover, substitutes, supervisors, caregivers, or floaters. It is priced around active learners and the operational value recovered beside the clinic’s current EMR.
+              Infinite Suite OS™ is not priced to punish staff growth, RBT turnover, substitutes, supervisors, caregivers, or floaters. Founding clinics start on a performance-based pilot — you see what it recovers before you pay a flat fee.
             </p>
           </div>
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            {offer.plans.map((plan) => (
-              <article key={plan.name} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">{plan.name}</p>
-                <p className="mt-4 text-3xl font-black text-slate-950">{plan.price}</p>
-                {plan.subprice ? <p className="mt-2 text-sm font-black text-cyan-800">{plan.subprice}</p> : null}
-                <ul className="mt-5 space-y-3 text-sm font-semibold leading-6 text-slate-600">
-                  {plan.details.map((detail) => <li key={detail}>• {detail}</li>)}
-                </ul>
-              </article>
-            ))}
+
+          {/* HERO: Founding Pilot — the one thing we want clinics to start with */}
+          <div className="mt-8 overflow-hidden rounded-[2rem] border-2 border-cyan-300 bg-gradient-to-br from-cyan-50 to-white shadow-soft">
+            <div className="grid gap-6 p-8 lg:grid-cols-[1.1fr_1fr] lg:p-10">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-white">Start here</span>
+                <p className="mt-5 text-xs font-black uppercase tracking-[0.25em] text-cyan-700">{offer.plans[0].name}</p>
+                <p className="mt-2 text-4xl font-black tracking-tight text-slate-950">{offer.plans[0].price}</p>
+                <p className="mt-2 text-sm font-black text-cyan-800">{offer.plans[0].subprice}</p>
+                <p className="mt-3 text-base font-bold leading-7 text-slate-600">{offer.plans[0].bestFor}</p>
+              </div>
+              <ul className="space-y-3 text-sm font-semibold leading-6 text-slate-700 lg:border-l lg:border-cyan-200 lg:pl-8">
+                {offer.plans[0].details.map((detail) => <li key={detail}>• {detail}</li>)}
+              </ul>
+            </div>
           </div>
-          <div className="mt-6 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-6 text-cyan-950">
+
+          {/* DEMOTED: standard tiers — directional, set after the pilot proves out */}
+          <div className="mt-10">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">{offer.tiersHeading}</p>
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-slate-500">{offer.tiersFraming}</p>
+            <div className="mt-5 grid gap-4 lg:grid-cols-3">
+              {offer.plans.slice(1).map((plan) => (
+                <article key={plan.name} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">{plan.name}</p>
+                  <p className="mt-3 text-2xl font-black text-slate-700">{plan.price}</p>
+                  {plan.subprice ? <p className="mt-1 text-xs font-bold text-slate-500">{plan.subprice}</p> : null}
+                  {plan.bestFor ? <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">{plan.bestFor}</p> : null}
+                </article>
+              ))}
+            </div>
+            <p className="mt-4 text-xs font-semibold leading-6 text-slate-400">
+              {offer.breakEvenDisclaimer}
+            </p>
+          </div>
+
+          <div className="mt-8 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-6 text-cyan-950">
             <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">Sales math</p>
-            <p className="mt-3 text-lg font-black">One recovered session ≈ 2 billable hours ≈ ~$155 collected. Recover ~7 sessions a month and a $1,000 plan has already paid for itself.</p>
-            <p className="mt-2 text-sm font-semibold leading-6">A clinic losing 20+ sessions a month — well within the industry 24–38% cancellation range — recovers Recovery Core several times over, and watches it on the scoreboard. (Illustrative; validated in your pilot.)</p>
+            <p className="mt-3 text-lg font-black">{offer.roiLine}</p>
+            <p className="mt-2 text-sm font-semibold leading-6">One recovered session ≈ 2 billable hours ≈ ~$155 collected. A clinic losing 20+ sessions a month — well within the industry 24–38% cancellation range — recovers a Recovery Core plan several times over, and watches it on the scoreboard. (Illustrative; validated in your pilot.)</p>
           </div>
         </section>
 

@@ -7,21 +7,22 @@ export const offer = {
   // site count and avoid monthly "what counts as recovered" disputes.
   plans: [
     {
-      name: "Founding Pilot — prove it on our dime",
+      name: "Founding Pilot",
       price: "Performance-based",
-      subprice: "90-day proof window",
+      subprice: "90-day proof window · 1–2 clinics per cohort",
+      bestFor: "Best for proving the lift before you pay a flat fee",
       details: [
         "we measure your current recovery rate first",
         "you pay a small share only of what we recover above that line",
         "no flat fee during the proof window",
-        "see the recovered-hour number before you commit",
-        "1–2 founding clinics per cohort"
+        "see the recovered-hour number before you commit"
       ]
     },
     {
       name: "Recovery Core",
       price: "~$1,000 / site / month",
       subprice: "break-even ≈ 7 recovered sessions/mo",
+      bestFor: "Best for cancellations, callouts, recovery routing, scorecard",
       details: [
         "the full recovery cascade + scoreboard",
         "note-gating compliance (clean claims)",
@@ -33,17 +34,18 @@ export const offer = {
       name: "Core + Compliance",
       price: "~$1,500 / site / month",
       subprice: "break-even ≈ 10 recovered sessions/mo",
+      bestFor: "Best for recovery plus documentation readiness and proof packets",
       details: [
         "everything in Recovery Core",
         "Compliance Sentinel proof packets",
-        "documentation-defect tracking before export",
-        "best for clinics that live on clean claims"
+        "documentation-defect tracking before export"
       ]
     },
     {
       name: "Full Stack",
       price: "~$2,000–2,500 / site / month",
       subprice: "+ API Integration Hub",
+      bestFor: "Best for API Hub, exports, larger operational workflow",
       details: [
         "everything in Core + Compliance",
         "export bridges beside your current EMR",
@@ -60,6 +62,10 @@ export const offer = {
     ratePerHour: 77,
     monthlyRecoveredValue: 1078
   },
+  roiLine: "If Infinite Suite OS™ recovers just a few missed sessions per month, it can begin paying for itself.",
+  breakEvenDisclaimer: "Break-even estimates assume an average recovered session value of about $150. Actual value depends on session length, reimbursement rate, payer mix, and recovery workflow.",
+  tiersHeading: "Where pricing lands after your pilot",
+  tiersFraming: "Founding clinics lock in founding rates. We set your standard plan together once the 90-day pilot shows what Infinite Suite OS™ actually recovers for you — so you choose a tier against a proven number, not a guess. Figures below are directional.",
   objections: [
     ["We already have an EMR.", "Keep it. Infinite sits beside it — no migration."],
     ["Per-user pricing gets expensive.", "Flat per-site. Unlimited staff and caregiver seats."],
