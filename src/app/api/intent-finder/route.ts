@@ -114,16 +114,30 @@ export async function POST(request: Request) {
   }
 
   try {
-    const results = serpApiKey
-      ? await searchWithSerpApi(query, parsed.data.location, serpApiKey)
-      : await searchWithGoogleCustom(query, googleApiKey as string, googleCx as string);
+    // Prefer Google Custom Search (100/day free, ~30x SerpApi's free tier). Fall back to
+    // SerpApi only if Google isn't configured or its request fails (e.g. daily cap hit).
+    const googleReady = Boolean(googleApiKey && googleCx);
+    let results: SearchPreview[];
+    let providerUsed: string;
+
+    if (googleReady) {
+      try {
+        results = await searchWithGoogleCustom(query, googleApiKey as string, googleCx as string);
+        providerUsed = "Google Custom Search";
+      } catch (googleError) {
+        if (!serpApiKey) throw googleError;
+        results = await searchWithSerpApi(query, parsed.data.location, serpApiKey);
+        providerUsed = "SerpApi (fallback — Google Custom Search failed or hit its daily cap)";
+      }
+    } else {
+      results = await searchWithSerpApi(query, parsed.data.location, serpApiKey as string);
+      providerUsed = "SerpApi";
+    }
 
     return NextResponse.json({
       query,
       results,
-      notice: serpApiKey
-        ? "Public indexed results returned through SerpApi. Review every source manually before adding a lead."
-        : "Public indexed results returned through Google Custom Search. Review every source manually before adding a lead."
+      notice: `Public indexed results returned through ${providerUsed}. Review every source manually before adding a lead.`
     });
   } catch (error) {
     return NextResponse.json({

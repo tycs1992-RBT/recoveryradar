@@ -122,8 +122,8 @@ export async function POST(request: Request) {
   const googleApiKey = process.env.GOOGLE_SEARCH_API_KEY;
   const googleCx = process.env.GOOGLE_SEARCH_CX;
 
-  if (serpApiKey) return searchWithSerpApi(keyword, num, serpApiKey);
   if (googleApiKey && googleCx) return searchWithGoogleCustom(keyword, num, googleApiKey, googleCx);
+  if (serpApiKey) return searchWithSerpApi(keyword, num, serpApiKey);
 
   return NextResponse.json({
     keyword,

@@ -104,6 +104,39 @@ async function searchSerpApi(query: string, apiKey: string, maxResults: number) 
   return data.organic_results ?? [];
 }
 
+async function searchGoogleCustom(query: string, apiKey: string, cx: string, maxResults: number): Promise<SerpApiResult[]> {
+  const url = new URL("https://www.googleapis.com/customsearch/v1");
+  url.searchParams.set("key", apiKey);
+  url.searchParams.set("cx", cx);
+  url.searchParams.set("q", query);
+  url.searchParams.set("num", String(Math.min(maxResults, 10)));
+
+  const response = await fetch(url, { next: { revalidate: 1800 } });
+  if (!response.ok) throw new Error(`Google Custom Search failed: ${(await response.text()).slice(0, 200)}`);
+  const data = (await response.json()) as { items?: Array<{ title?: string; link?: string; snippet?: string }> };
+  // Map Google's item shape onto the same fields parseProfile reads from SerpApi results.
+  return (data.items ?? []).map((item) => ({ title: item.title, link: item.link, snippet: item.snippet }));
+}
+
+// Prefer Google Custom Search (100/day free); fall back to SerpApi on failure or if Google
+// isn't configured. Returns both the results and which provider produced them.
+async function runProspectSearch(
+  query: string,
+  maxResults: number,
+  keys: { serpApiKey?: string; googleApiKey?: string; googleCx?: string }
+): Promise<{ results: SerpApiResult[]; provider: string }> {
+  const googleReady = Boolean(keys.googleApiKey && keys.googleCx);
+  if (googleReady) {
+    try {
+      return { results: await searchGoogleCustom(query, keys.googleApiKey as string, keys.googleCx as string, maxResults), provider: "Google Custom Search" };
+    } catch (googleError) {
+      if (!keys.serpApiKey) throw googleError;
+      return { results: await searchSerpApi(query, keys.serpApiKey, maxResults), provider: "SerpApi (fallback)" };
+    }
+  }
+  return { results: await searchSerpApi(query, keys.serpApiKey as string, maxResults), provider: "SerpApi" };
+}
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -120,22 +153,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid LinkedIn prospector request", issues: parsed.error.flatten() }, { status: 400 });
   }
 
-  const apiKey = process.env.SERPAPI_API_KEY;
-  if (!apiKey) {
+  const serpApiKey = process.env.SERPAPI_API_KEY;
+  const googleApiKey = process.env.GOOGLE_SEARCH_API_KEY;
+  const googleCx = process.env.GOOGLE_SEARCH_CX;
+  const googleReady = Boolean(googleApiKey && googleCx);
+  if (!serpApiKey && !googleReady) {
     return NextResponse.json({
       prospects: [],
-      notice: "SERPAPI_API_KEY is not configured. Add it in Vercel to search Google-indexed public LinkedIn profile results."
+      notice: "No search key configured. Add GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX (100/day free) or SERPAPI_API_KEY in Vercel to search Google-indexed public LinkedIn profile results."
     });
   }
 
   const { keywords, location, titles, maxResults } = parsed.data;
   const prospects = new Map<string, ExecutiveProspect>();
   const errors: string[] = [];
+  let providerUsed = googleReady ? "Google Custom Search" : "SerpApi";
 
   for (const keyword of keywords.slice(0, 10)) {
     const query = buildQuery(keyword, location, titles);
     try {
-      const results = await searchSerpApi(query, apiKey, maxResults);
+      const { results, provider } = await runProspectSearch(query, maxResults, { serpApiKey, googleApiKey, googleCx });
+      providerUsed = provider;
       for (const result of results) {
         const parsedProfile = parseProfile(result, keyword, location, query, titles);
         if (parsedProfile) prospects.set(parsedProfile.id, parsedProfile);
@@ -148,6 +186,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     prospects: Array.from(prospects.values()).sort((a, b) => b.confidence - a.confidence),
     errors,
-    notice: "Executive prospects returned from Google-indexed public LinkedIn profile results. Manual review required. Do not automate LinkedIn login, scraping, or messaging."
+    provider: providerUsed,
+    notice: `Executive prospects returned via ${providerUsed} (Google-indexed public LinkedIn profile results). Manual review required. Do not automate LinkedIn login, scraping, or messaging.`
   });
 }

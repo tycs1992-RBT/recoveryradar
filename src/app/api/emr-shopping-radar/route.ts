@@ -148,9 +148,20 @@ async function saveResultsToBank(results: ReturnType<typeof dedupeRadarResults>)
 }
 
 async function runJob(job: RadarJob, parsed: z.infer<typeof radarSchema>, keys: { serpApiKey?: string; googleApiKey?: string; googleCx?: string }) {
-  const items = keys.serpApiKey
-    ? await searchWithSerpApi(job.query, parsed.location, keys.serpApiKey, parsed.maxPerQuery, parsed.recency)
-    : await searchWithGoogleCustom(job.query, keys.googleApiKey as string, keys.googleCx as string, parsed.maxPerQuery, parsed.recency);
+  // Prefer Google Custom Search (bigger free quota). Fall back to SerpApi only if Google
+  // isn't configured or its request fails (e.g. daily cap reached mid-run).
+  const googleReady = Boolean(keys.googleApiKey && keys.googleCx);
+  let items;
+  if (googleReady) {
+    try {
+      items = await searchWithGoogleCustom(job.query, keys.googleApiKey as string, keys.googleCx as string, parsed.maxPerQuery, parsed.recency);
+    } catch (googleError) {
+      if (!keys.serpApiKey) throw googleError;
+      items = await searchWithSerpApi(job.query, parsed.location, keys.serpApiKey, parsed.maxPerQuery, parsed.recency);
+    }
+  } else {
+    items = await searchWithSerpApi(job.query, parsed.location, keys.serpApiKey as string, parsed.maxPerQuery, parsed.recency);
+  }
   return items.map((item) => normalizeRadarResult(item, { keyword: job.keyword, query: job.query, platform: job.platform }));
 }
 
