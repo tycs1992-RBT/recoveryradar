@@ -19,6 +19,28 @@ const publicSteps = [
 ];
 
 export default function HomePage() {
+  const foundingApplyHref =
+    "mailto:founders@infinitepieces.ai" +
+    "?subject=" +
+    encodeURIComponent("Founding Clinic Application — Infinite Suite OS") +
+    "&body=" +
+    encodeURIComponent(
+      [
+        "Hi Infinite Pieces team,",
+        "",
+        "We'd like to apply as a founding clinic for the Infinite Suite OS recovery pilot.",
+        "",
+        "Clinic name:",
+        "Your name and role:",
+        "Number of sites:",
+        "Approx. active learners:",
+        "Current EMR:",
+        "Biggest operational pain (cancellations, callouts, late notes, etc.):",
+        "",
+        "Thanks!"
+      ].join("\n")
+    );
+
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />
@@ -75,6 +97,13 @@ export default function HomePage() {
                 <p className="mt-2 text-4xl font-black tracking-tight text-slate-950">{offer.plans[0].price}</p>
                 <p className="mt-2 text-sm font-black text-cyan-800">{offer.plans[0].subprice}</p>
                 <p className="mt-3 text-base font-bold leading-7 text-slate-600">{offer.plans[0].bestFor}</p>
+                <a
+                  href={foundingApplyHref}
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft transition hover:bg-slate-800"
+                >
+                  Apply as a founding clinic →
+                </a>
+                <p className="mt-2 text-xs font-semibold text-slate-400">Opens an email to our founding team — no commitment.</p>
               </div>
               <ul className="space-y-3 text-sm font-semibold leading-6 text-slate-700 lg:border-l lg:border-cyan-200 lg:pl-8">
                 {offer.plans[0].details.map((detail) => <li key={detail}>• {detail}</li>)}

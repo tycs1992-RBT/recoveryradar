@@ -151,3 +151,53 @@ export function publicPainQueries(location: string) {
   const locationPart = location ? ` ${location}` : "";
   return painTerms.map((term) => `ABA clinic ${term}${locationPart}`);
 }
+
+// Curated high-intent Reddit searches — each targets a distinct buying/pain signal.
+// Returned as plain query strings; the route runs them, dedups, and scores the posts.
+export function redditIntentQueries(): { query: string; intent: string }[] {
+  return [
+    { query: "CentralReach alternative", intent: "emr_replacement_shopping" },
+    { query: "CentralReach problems OR frustrated OR hate", intent: "emr_complaint" },
+    { query: "Rethink OR Motivity OR Catalyst alternative ABA", intent: "emr_replacement_shopping" },
+    { query: "ABA practice management software recommend", intent: "emr_recommendation_shopping" },
+    { query: "ABA EMR switching OR migrate", intent: "emr_replacement_shopping" },
+    { query: "ABA billing software problem OR denial", intent: "operations_pain" },
+    { query: "ABA scheduling cancellation OR callout software", intent: "operations_pain" },
+    { query: "best EMR for ABA clinic", intent: "emr_recommendation_shopping" },
+    { query: "opening an ABA clinic software stack", intent: "new_or_expanding_clinic" }
+  ];
+}
+
+// Score a single Reddit post the SAME way the open-web scanner scores results,
+// so Reddit signals carry consistent temperature + why + risk language.
+export function scoreRedditPost(input: {
+  title: string;
+  body: string;
+  score?: number;
+  comments?: number;
+  createdUtc?: number | null;
+}) {
+  const text = `${input.title} ${input.body}`;
+  const signal = inferSignal(text);
+  let leadTemperature = leadTemperatureFromSignal(signal, text);
+
+  // Engagement + recency nudges (transparent, capped): a busy, recent thread is a
+  // stronger live signal than an old one-comment post. Never downgrades below research.
+  const engagement = (input.score ?? 0) + (input.comments ?? 0) * 2;
+  const ageDays = input.createdUtc ? (Date.now() / 1000 - input.createdUtc) / 86400 : 9999;
+  const reasons: string[] = [whySignalMatters(signal)];
+  if (engagement >= 25) reasons.push("High thread engagement (active discussion).");
+  if (ageDays <= 45) reasons.push("Recent post — likely a live, current need.");
+  if (leadTemperature === "warm" && engagement >= 40 && ageDays <= 30) {
+    leadTemperature = "hot";
+    reasons.push("Upgraded to hot: strong, recent engagement on a pain/shopping topic.");
+  }
+
+  return {
+    suggestedSignal: signal,
+    leadTemperature,
+    whyItMatters: reasons.join(" "),
+    riskNote:
+      "Public Reddit discovery only. Use as market intelligence — do not auto-message users, log into private subs, or store personal/private details."
+  };
+}

@@ -155,7 +155,7 @@ async function runJob(job: RadarJob, parsed: z.infer<typeof radarSchema>, keys: 
 }
 
 async function runJobsInBatches(jobs: RadarJob[], parsed: z.infer<typeof radarSchema>, keys: { serpApiKey?: string; googleApiKey?: string; googleCx?: string }) {
-  const results = [];
+  const results: ReturnType<typeof normalizeRadarResult>[] = [];
   const errors: string[] = [];
   const batchSize = 4;
 
