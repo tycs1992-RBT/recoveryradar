@@ -20,6 +20,8 @@ const initialInput: CalculatorInput = {
   adminMinutesPerCancellation: 12,
   documentationCleanupFrequency: "sometimes",
   recoveryWorkflowMaturity: "manual",
+  rbtCount: 25,
+  lateNoteRate: 0,
   contactName: "",
   role: "",
   clinicName: "",
@@ -69,7 +71,10 @@ function buildReportHtml(input: CalculatorInput, result: CalculatorResult) {
     ["Admin hours spent", number(result.adminHoursSpent)],
     ["10% workflow lift", `${number(result.potentialRecoveredHours10)} hrs/wk`],
     ["20% workflow lift", `${number(result.potentialRecoveredHours20)} hrs/wk`],
-    ["30% workflow lift", `${number(result.potentialRecoveredHours30)} hrs/wk`]
+    ["30% workflow lift", `${number(result.potentialRecoveredHours30)} hrs/wk`],
+    ["At-risk billing / month (late notes)", currency(result.atRiskClaimDollarsMonthly)],
+    ["Clean claims protected by note-gating / month", currency(result.cleanClaimsProtectedMonthly)],
+    ["Annual RBT turnover cost (context, not a saving)", currency(result.annualTurnoverCostContext)]
   ];
 
   return `<!doctype html><html><head><meta charset="utf-8" /><title>Infinite Suite OS Lost Hours Report</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:32px;line-height:1.55}h1{font-size:30px;margin-bottom:6px}.eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#0891b2;font-size:12px}.box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin:18px 0}.dark{background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}th{background:#f8fafc}.cta{background:#ecfeff;border:1px solid #a5f3fc;border-radius:18px;padding:18px;margin-top:18px}</style></head><body><p class="eyebrow">Infinite Suite OS™ · Lost Hours Calculator</p><h1>Before you switch EMRs, calculate your lost-hours baseline.</h1><p>Generated ${htmlEscape(generatedAt)}. This report uses clinic-level estimates only and should not include PHI.</p><div class="box dark"><h2>${number(result.hoursAtRiskPerWeek)} weekly hours at risk</h2><p>${htmlEscape(result.summary)}</p></div><div class="grid"><div class="box"><h2>Clinic-level assumptions</h2><table>${rows.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div><div class="box"><h2>Estimated results</h2><table>${metrics.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div></div><div class="box"><h2>Recommended recovery path</h2><p><strong>Suggested bottleneck:</strong> ${htmlEscape(result.suggestedBottleneck)}</p><p><strong>Recommended modules:</strong> ${htmlEscape(result.recommendedModules.join(", "))}</p></div><div class="cta"><h2>Your EMR may track the session. Infinite Suite OS™ is built to help recover the session before it disappears.</h2><p>Next step: tour the Provider Portal at https://www.infinitepieces.ai/provider-portal</p><p>No-PHI disclaimer: do not submit patient names, dates of birth, insurance IDs, treatment notes or clinical details. This is an operational estimate, not a payer, billing, legal or compliance guarantee.</p></div></body></html>`;
@@ -173,6 +178,8 @@ export function LostHoursCalculator() {
           <NumberField label="Reimbursement per hour" prefix="$" value={input.reimbursementPerHour} min={0} onChange={(v) => update("reimbursementPerHour", v)} />
           <NumberField label="Current makeup/recovery rate" suffix="%" value={input.currentRecoveryRate} min={0} max={100} onChange={(v) => update("currentRecoveryRate", v)} />
           <NumberField label="Admin minutes per cancellation" value={input.adminMinutesPerCancellation} min={0} onChange={(v) => update("adminMinutesPerCancellation", v)} />
+          <NumberField label="RBTs on staff" value={input.rbtCount ?? 0} min={0} onChange={(v) => update("rbtCount", v)} />
+          <NumberField label="Late/missing note rate" suffix="%" value={input.lateNoteRate ?? 0} min={0} max={100} onChange={(v) => update("lateNoteRate", v)} />
 
           <label className="space-y-2">
             <span className="label">Documentation cleanup frequency</span>
@@ -378,6 +385,30 @@ function CalculatorResults({ result }: { result: CalculatorResult }) {
           <RecoveryBar label="20% workflow lift" value={result.potentialRecoveredHours20} max={result.potentialRecoveredHours30} />
           <RecoveryBar label="30% workflow lift" value={result.potentialRecoveredHours30} max={result.potentialRecoveredHours30} />
         </div>
+      </div>
+
+      <div className="card">
+        <h3 className="text-lg font-black text-slate-950">Clean-claims protection</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-500">Late and missing notes put billable dollars at denial/recoupment risk. Note-gating closes most of the documentation-caused share.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">At-risk billing / month</p>
+            <p className="mt-2 text-2xl font-black text-slate-950">{currency(result.atRiskClaimDollarsMonthly)}</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Protected by note-gating</p>
+            <p className="mt-2 text-2xl font-black text-emerald-800">{currency(result.cleanClaimsProtectedMonthly)}</p>
+          </div>
+        </div>
+        <p className="mt-3 text-xs font-semibold text-slate-400">Illustrative; measured in your pilot. Note-gating addresses documentation-caused denials, not payer-side determinations.</p>
+      </div>
+
+      <div className="card border-amber-200 bg-amber-50">
+        <h3 className="text-lg font-black text-amber-950">Staff retention — the size of the problem</h3>
+        <p className="mt-2 text-2xl font-black text-amber-900">{currency(result.annualTurnoverCostContext)}<span className="text-sm font-bold text-amber-700"> / year in RBT turnover cost</span></p>
+        <p className="mt-3 text-sm leading-6 text-amber-800">
+          This is context, not a promise. When StaffPulse flags an RBT as burned out in a post-session report, you can step in <em>before</em> they quit — and a clinic that isn&rsquo;t bleeding hours and drowning in late notes is one people stay at. We don&rsquo;t claim a dollar of this as savings, because retention can&rsquo;t be cleanly attributed. We show recovery and clean claims as the proof; retention is the problem this helps you chip away at.
+        </p>
       </div>
 
       <div className="card">

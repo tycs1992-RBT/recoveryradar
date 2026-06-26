@@ -14,6 +14,9 @@ export const calculatorInputSchema = z.object({
   adminMinutesPerCancellation: z.coerce.number().min(0).max(480),
   documentationCleanupFrequency: z.enum(documentationCleanupOptions),
   recoveryWorkflowMaturity: z.enum(recoveryWorkflowOptions),
+  // Retention/compliance context inputs (optional — drive the StaffPulse + clean-claims framing)
+  rbtCount: z.coerce.number().min(0).max(5000).optional().default(0),
+  lateNoteRate: z.coerce.number().min(0).max(100).optional().default(0),
   contactName: z.string().trim().optional().default(""),
   role: z.string().trim().optional().default(""),
   clinicName: z.string().trim().optional().default(""),
@@ -40,6 +43,11 @@ export type CalculatorResult = {
   potentialRecoveredHours10: number;
   potentialRecoveredHours20: number;
   potentialRecoveredHours30: number;
+  // Clean-claims (PROVABLE): billable $ at risk from late/missing notes that note-gating protects
+  atRiskClaimDollarsMonthly: number;
+  cleanClaimsProtectedMonthly: number;
+  // Retention CONTEXT (story, not a guaranteed saving): size of the turnover problem StaffPulse helps address
+  annualTurnoverCostContext: number;
   suggestedBottleneck: string;
   recommendedModules: string[];
   summary: string;
@@ -90,6 +98,27 @@ export function calculateLostHours(input: CalculatorInput): CalculatorResult {
     recoveryWorkflowMaturity: input.recoveryWorkflowMaturity
   });
 
+  // CLEAN CLAIMS (provable): a share of billable hours is at denial/recoupment risk when notes
+  // are late or missing. Note-gating protects most of it. Illustrative; validate with payer mix.
+  const monthlyScheduledHours = scheduledHoursPerWeek * 4;
+  const lateNoteShare = (input.lateNoteRate ?? 0) / 100;
+  // If the user didn't give a late-note rate, infer a small one from cleanup frequency.
+  const inferredLateShare =
+    lateNoteShare > 0
+      ? lateNoteShare
+      : input.documentationCleanupFrequency === "often"
+        ? 0.06
+        : input.documentationCleanupFrequency === "sometimes"
+          ? 0.03
+          : 0.015;
+  const atRiskClaimDollarsMonthly = monthlyScheduledHours * inferredLateShare * input.reimbursementPerHour;
+  // Note-gating doesn't fix payer-side denials, but it closes the documentation-caused share. ~80%.
+  const cleanClaimsProtectedMonthly = atRiskClaimDollarsMonthly * 0.8;
+
+  // RETENTION CONTEXT (story, NOT a guaranteed saving): size of the annual turnover problem.
+  // RBT turnover ~90%/yr midpoint; ~$4,000 to replace one (recruit+train+ramp+rapport). Illustrative.
+  const annualTurnoverCostContext = (input.rbtCount ?? 0) * 0.9 * 4000;
+
   return {
     scheduledSessionsPerWeek,
     scheduledHoursPerWeek,
@@ -106,6 +135,9 @@ export function calculateLostHours(input: CalculatorInput): CalculatorResult {
     potentialRecoveredHours10: hoursAtRiskPerWeek * 0.1,
     potentialRecoveredHours20: hoursAtRiskPerWeek * 0.2,
     potentialRecoveredHours30: hoursAtRiskPerWeek * 0.3,
+    atRiskClaimDollarsMonthly,
+    cleanClaimsProtectedMonthly,
+    annualTurnoverCostContext,
     suggestedBottleneck,
     recommendedModules,
     summary: buildSummary(hoursAtRiskPerWeek, weeklyRevenueAtRisk, suggestedBottleneck)

@@ -12,6 +12,8 @@ const input: CalculatorInput = {
   adminMinutesPerCancellation: 12,
   documentationCleanupFrequency: "sometimes",
   recoveryWorkflowMaturity: "manual",
+  rbtCount: 25,
+  lateNoteRate: 0,
   contactName: "",
   role: "",
   clinicName: "",

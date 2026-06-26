@@ -49,9 +49,9 @@ export default function HomePage() {
             <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-[0_24px_90px_rgba(6,17,37,.18)]">
               <img src={visualAssets.hero} alt="Infinite Pieces AI recovery workflow visual" className="w-full rounded-[1.5rem] object-cover" />
               <div className="mt-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
-                <p className="font-black text-slate-950">Founding Clinic Trial</p>
-                <p className="mt-2 text-2xl font-black text-slate-950">$15 per active learner/month</p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">$500/month minimum · unlimited staff seats · unlimited caregiver seats · no implementation fee · 3-month pilot · recovered-hour scorecard included.</p>
+                <p className="font-black text-slate-950">Founding Pilot — prove it on our dime</p>
+                <p className="mt-2 text-2xl font-black text-slate-950">Performance-based · 90 days</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">We measure your current recovery rate first, then you pay a small share only of what we recover above it. See the recovered-hour number before you ever commit to a plan. Unlimited staff + caregiver seats.</p>
               </div>
             </div>
           </div>
@@ -79,8 +79,60 @@ export default function HomePage() {
           </div>
           <div className="mt-6 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-6 text-cyan-950">
             <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">Sales math</p>
-            <p className="mt-3 text-lg font-black">If Infinite recovers only 3 sessions/month × 3 hours/session × $80/hour, that is $720/month in recovered value.</p>
-            <p className="mt-2 text-sm font-semibold leading-6">A $500–$750/month product can justify itself by recovering only a few missed sessions.</p>
+            <p className="mt-3 text-lg font-black">One recovered session ≈ 2 billable hours ≈ ~$155 collected. Recover ~7 sessions a month and a $1,000 plan has already paid for itself.</p>
+            <p className="mt-2 text-sm font-semibold leading-6">A clinic losing 20+ sessions a month — well within the industry 24–38% cancellation range — recovers Recovery Core several times over, and watches it on the scoreboard. (Illustrative; validated in your pilot.)</p>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">How it works · the recovery cascade</p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">When a session is at risk, every save is offered before it&rsquo;s lost.</h2>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
+              A parent can always cancel. But the easy, one-tap alternatives come first &mdash; so canceling into a void becomes the last resort, not the first click. Every option is offered, never forced.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-4 lg:grid-cols-5">
+            {[
+              ["1", "Reschedule this week", "Same RBT, same continuity. Surfaced first."],
+              ["2", "Telehealth this slot", "If clinically appropriate and the family is open to it."],
+              ["3", "Caregiver coaching", "Keep the hour productive even when direct therapy isn't possible."],
+              ["4", "Makeup on the board", "Post to your internal SubPool for coverage."],
+              ["5", "Only then: cancel", "Logged, pattern-tracked, and routed for follow-up."]
+            ].map(([n, title, body]) => (
+              <article key={n} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-100 text-sm font-black text-cyan-800">{n}</div>
+                <p className="mt-3 font-black text-slate-950">{title}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{body}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-6 text-cyan-950">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">Ethical by design</p>
+            <p className="mt-3 text-base font-semibold leading-7">This isn&rsquo;t about trapping families &mdash; it&rsquo;s about making the good option the easy option. Every recovery step is human-reviewed. Recovery Radar recommends; your team decides. It never auto-bills and is never the system of record.</p>
+          </div>
+        </section>
+
+        <section className="bg-slate-50 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Compliance · notes that can&rsquo;t slip</p>
+              <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">The note gets done. Every time. Before it costs you a claim.</h2>
+            </div>
+            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+                <p className="font-black text-slate-950">Can&rsquo;t end a session without the note</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">The timer won&rsquo;t close until objective data is entered and signed. The note is done while the session is fresh &mdash; not at 10 p.m.</p>
+              </article>
+              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+                <p className="font-black text-slate-950">Can&rsquo;t start the next session if notes are &gt;24h overdue</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">Fall behind, and the system holds the next punch-in until you&rsquo;re caught up. Documentation stays defensible; claims stay clean.</p>
+              </article>
+            </div>
+            <div className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6">
+              <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">Why it matters</p>
+              <p className="mt-3 text-base font-semibold leading-7 text-slate-700">Unsigned and late notes are a top driver of denials and recoupments. This isn&rsquo;t bureaucracy &mdash; it&rsquo;s protecting revenue you&rsquo;ve already earned, and it&rsquo;s a number you can watch fall: documentation-defect rate, on-time note rate, notes outstanding.</p>
+            </div>
           </div>
         </section>
 
@@ -92,7 +144,7 @@ export default function HomePage() {
               <div className="mt-6 space-y-5">
                 {offer.objections.map(([question, answer]) => (
                   <div key={question} className="rounded-2xl bg-slate-50 p-4">
-                    <p className="font-black text-slate-950">“{question}”</p>
+                    <p className="font-black text-slate-950">&ldquo;{question}&rdquo;</p>
                     <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{answer}</p>
                   </div>
                 ))}

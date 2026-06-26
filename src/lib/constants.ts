@@ -32,8 +32,8 @@ export const coreModules = [
   {
     name: "Compliance Sentinel™",
     shortName: "Compliance Sentinel",
-    description: "Flags documentation gaps and stages proof packets for review-ready operations.",
-    bestFor: ["documentation cleanup", "audit readiness", "export readiness"]
+    description: "Gates session notes (can't end without a signed note; can't start the next session if notes are >24h overdue), flags documentation gaps, and stages proof packets for review-ready operations.",
+    bestFor: ["note-gating", "documentation cleanup", "audit readiness", "export readiness"]
   },
   {
     name: "Auth Utilization War Room™",
