@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export type AppRole = "admin" | "growth" | "viewer";
+export type AppRole = "admin" | "growth" | "viewer" | "owner";
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "recovery-radar-local-dev-secret-change-before-deploy",
@@ -19,19 +19,33 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        const expectedEmail = process.env.DEMO_ADMIN_EMAIL ?? "founders@infinitepieces.ai";
-        const expectedPassword = process.env.DEMO_ADMIN_PASSWORD ?? "infinitemark2026";
+        const email = credentials?.email?.toLowerCase() ?? "";
+        const password = credentials?.password ?? "";
 
-        if (
-          credentials?.email?.toLowerCase() === expectedEmail.toLowerCase() &&
-          credentials?.password === expectedPassword
-        ) {
+        // Founder workspace login (internal growth/intel suite).
+        const founderEmail = (process.env.DEMO_ADMIN_EMAIL ?? "founders@infinitepieces.ai").toLowerCase();
+        const founderPassword = process.env.DEMO_ADMIN_PASSWORD ?? "infinitemark2026";
+        if (email === founderEmail && password === founderPassword) {
           return {
             id: "demo-admin",
             name: process.env.DEMO_ADMIN_NAME ?? "Founders",
-            email: expectedEmail,
+            email: founderEmail,
             role: "admin" as AppRole
           };
+        }
+
+        // Owner workspace login — clinic CEO's Recovery Radar dashboard (demo tenant).
+        const ownerEmail = (process.env.DEMO_OWNER_EMAIL ?? "demo@infinitepieces.ai").toLowerCase();
+        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? "infinitedemo";
+        if (email === ownerEmail && password === ownerPassword) {
+          return {
+            id: "demo-owner",
+            name: "North Star ABA (demo)",
+            email: ownerEmail,
+            role: "owner" as AppRole,
+            tenantId: "demo-clinic",
+            clinicName: "North Star ABA"
+          } as { id: string; name: string; email: string; role: AppRole; tenantId: string; clinicName: string };
         }
 
         return null;
@@ -41,14 +55,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as typeof user & { role?: AppRole }).role ?? "admin";
+        const u = user as typeof user & { role?: AppRole; tenantId?: string; clinicName?: string };
+        token.role = u.role ?? "admin";
+        if (u.tenantId) token.tenantId = u.tenantId;
+        if (u.clinicName) token.clinicName = u.clinicName;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as typeof session.user & { role?: AppRole }).role =
-          (token.role as AppRole) ?? "viewer";
+        const su = session.user as typeof session.user & { role?: AppRole; tenantId?: string; clinicName?: string };
+        su.role = (token.role as AppRole) ?? "viewer";
+        su.tenantId = token.tenantId as string | undefined;
+        su.clinicName = token.clinicName as string | undefined;
       }
       return session;
     }

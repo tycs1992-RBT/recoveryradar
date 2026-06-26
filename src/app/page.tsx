@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { MarketingHeader } from "@/components/layout/MarketingHeader";
+import { MarketingFooter } from "@/components/layout/MarketingFooter";
 import { coreMessage, coreModules } from "@/lib/constants";
 import { offer } from "@/lib/pricing";
 
@@ -62,7 +63,7 @@ export default function HomePage() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">Calculate lost hours</Link>
                 <Link href="/quiz" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">Take operations quiz</Link>
-                <Link href="/provider-portal" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">Provider Portal</Link>
+                <Link href="/provider-portal" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">See the Provider Portal tour</Link>
               </div>
               <p className="mt-4 text-xs font-bold leading-6 text-slate-500">
                 Public forms use clinic-level estimates only. Do not submit client names, PHI, or sensitive clinical details.
@@ -221,7 +222,7 @@ export default function HomePage() {
             <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Public visitor path</p>
             <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Let clinics explore the recovery idea without exposing the private workspace.</h2>
             <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
-              The public can use the calculator, quiz, Recovery Advisor chatbot and Provider Portal. The internal lead finder, CRM, tasks and outreach workspace remain behind sign-in for you, Mark and Daniel.
+              The public can use the calculator, quiz, Recovery Advisor chatbot and Provider Portal tour. The internal market-intelligence, CRM, tasks and outreach workspace stays behind sign-in for the founding team.
             </p>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -238,13 +239,12 @@ export default function HomePage() {
         <section className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Private team workspace</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Recovery Radar™ is the growth machine that sells Infinite Suite OS™.</h2>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">The founder workspace that finds and reaches the right clinics.</h2>
             <p className="mt-5 text-base font-semibold leading-8 text-slate-600">
-              The private workspace contains the Lead Machine, Intent Crawler, Keyword Radar, SEO Command Center, CRM, task inbox, outreach drafts and campaign tools. It gives Mark a real workflow while Daniel hardens backend, auth, RBAC, tenant scoping, audit logs and integrations.
+              This private workspace holds the market-intelligence, lead, SEO, CRM, task-inbox, outreach and campaign tools the founding team uses to grow Infinite Suite OS™. It stays behind sign-in while Daniel hardens the backend, auth, RBAC, tenant scoping, audit logs and integrations.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/login?callbackUrl=/dashboard" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white">Team login</Link>
-              <Link href="/provider-portal" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">Tour Provider Portal</Link>
             </div>
           </div>
           <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-soft">
@@ -280,6 +280,7 @@ export default function HomePage() {
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         <ChatbotWidget compact />
       </div>
+      <MarketingFooter />
     </div>
   );
 }

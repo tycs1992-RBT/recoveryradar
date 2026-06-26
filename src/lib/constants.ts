@@ -58,6 +58,7 @@ export const navItems = [
   { href: "/lead-finder", label: "Social Source Finder", eyebrow: "Signals" },
   { href: "/keyword-radar", label: "Keyword Radar", eyebrow: "SEO + ads" },
   { href: "/seo-command-center", label: "SEO Command Center", eyebrow: "Keywords" },
+  { href: "/seo-page-factory", label: "SEO Page Factory", eyebrow: "Publish pages" },
   { href: "/calculator", label: "Calculator", eyebrow: "Public tool" },
   { href: "/quiz", label: "Quiz", eyebrow: "Public tool" },
   { href: "/bot-builder", label: "Bot Builder", eyebrow: "Recovery Advisor" },

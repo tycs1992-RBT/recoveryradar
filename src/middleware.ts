@@ -9,6 +9,8 @@ export default withAuth({
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/recovery-radar/:path*",
+    "/seo-page-factory/:path*",
     "/workflow-center/:path*",
     "/lead-machine/:path*",
     "/emr-shopping-radar/:path*",

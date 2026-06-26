@@ -2,10 +2,19 @@
 
 This repository is the original Recovery Radar project with the lean Infinite Suite OS offer incorporated directly into the main app. It is not a separate ZIP/build anymore.
 
-## Product structure
+## Product structure (naming model — locked, see docs/NAMING.md)
 
-- **Infinite Suite OS™** = the ABA operational recovery product.
-- **Recovery Radar™** = the private growth, lead, SEO, CRM and outreach machine that sells it.
+- **Infinite Pieces AI** = the company.
+- **Infinite Suite OS™** = the ABA operational recovery product clinics license (where field staff work).
+- **Recovery Radar™** = the **clinic owner's dashboard** — a CEO logs in and watches how well the Recovery Waterfall is recovering hours for their clinic.
+- **Recovery Waterfall™** = the method/system that turns a cancellation into a recovered hour (cancel → Scheduler AI™ → auth check → SubPool™ → telehealth → makeup → admin).
+- **Internal growth/lead suite** = the founder's private workspace (lead, SEO, CRM, outreach, intel). Secret, internal-only — *not* branded publicly. (This was previously, loosely, called "Recovery Radar"; that name now belongs to the owner dashboard.)
+
+Three audiences, three logins, one public site:
+
+- **Founder** (you) → the private growth/lead workspace (`/dashboard`).
+- **Field staff** (RBTs, BCBAs) → Infinite Suite OS (mounted at `/provider-portal`).
+- **Clinic owners / CEOs** → Recovery Radar (`/recovery-radar`).
 
 Primary market line:
 
@@ -22,10 +31,10 @@ The public site is designed for `https://www.infinitepieces.ai`:
 - `/` — public homepage with no-migration positioning and Founding Clinic pricing.
 - `/calculator` — Lost Hours Calculator using clinic-level estimates only.
 - `/quiz` — ABA Operations Stack Quiz.
-- `/provider-portal` — Provider Portal mock OS walkthrough.
+- `/provider-portal` — Provider Portal tour: the Infinite Suite OS™ mock OS (sample data, no PHI).
 - Public Recovery Advisor chatbot on the homepage.
 
-Public visitors do **not** see the private Recovery Radar workspace unless they sign in.
+Public visitors do **not** see any of the three private workspaces unless they sign in.
 
 ## What the private team sees after login
 

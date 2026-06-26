@@ -31,6 +31,7 @@ function LoginShell({ children, loadingMessage }: { children?: React.ReactNode; 
 function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const isOwner = callbackUrl.includes("recovery-radar");
   const error = searchParams.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,9 +57,14 @@ function LoginForm() {
 
   return (
     <LoginShell>
-      <h1 className="mt-4 text-4xl font-black tracking-tight">Team login</h1>
+      <h1 className="mt-4 text-4xl font-black tracking-tight">{isOwner ? "Owner login" : "Team login"}</h1>
       <p className="mt-3 text-sm leading-6 text-slate-300">
-        Private Recovery Radar workspace for lead review, CRM tasks, outreach drafts, and buyer-intent monitoring.
+        {isOwner
+          ? "Your clinic's Recovery Radar™ dashboard — see how Infinite Suite OS™ is recovering hours across your sites."
+          : "Sign in to your private workspace."}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-slate-500">
+        {isOwner ? "Demo owner login: demo@infinitepieces.ai / infinitedemo" : null}
       </p>
 
       {errorMessage ? (

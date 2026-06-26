@@ -83,16 +83,17 @@ export const outreachTemplates = [
 
 export function mergeTemplate(
   body: string,
-  lead: OutreachLead,
+  lead: OutreachLead | undefined,
   senderName = "Infinite Pieces AI Team",
   physicalAddress = "[physical address]"
 ) {
+  const safeLead = lead ?? ({} as Partial<OutreachLead>);
   const values: Record<string, string> = {
-    contactName: lead.contactName || "there",
-    contactRole: lead.contactRole || "operator",
-    companyName: lead.companyName || "your clinic",
-    currentEmr: lead.currentEmr || "your current EMR",
-    painPoint: lead.painPoint || "lost hours",
+    contactName: safeLead.contactName || "there",
+    contactRole: safeLead.contactRole || "operator",
+    companyName: safeLead.companyName || "your clinic",
+    currentEmr: safeLead.currentEmr || "your current EMR",
+    painPoint: safeLead.painPoint || "lost hours",
     senderName,
     physicalAddress
   };

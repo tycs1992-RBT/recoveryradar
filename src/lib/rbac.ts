@@ -3,7 +3,8 @@ import type { AppRole } from "./auth";
 const permissions: Record<AppRole, string[]> = {
   admin: ["read", "write", "score", "approve_outreach", "settings"],
   growth: ["read", "write", "score", "draft_outreach"],
-  viewer: ["read"]
+  viewer: ["read"],
+  owner: ["read", "view_own_clinic"]
 };
 
 export function can(role: AppRole | undefined, action: string) {
