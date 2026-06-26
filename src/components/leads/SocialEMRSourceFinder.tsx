@@ -12,19 +12,19 @@ type SearchPreview = {
   leadTemperature?: "hot" | "warm" | "research";
 };
 
-const defaultQuery = 'site:facebook.com ("ABA clinic" OR "ABA therapy" OR BCBA) (CentralReach OR Rethink OR Motivity OR Catalyst OR ATrack OR EMR) (alternative OR replacement OR recommend OR "looking for" OR problem OR issue OR frustrated) -jobs -salary -hiring';
+const defaultQuery = 'ABA EMR CentralReach alternative OR problem OR recommend';
 
 const presets = [
-  'site:facebook.com ("ABA clinic" OR "ABA therapy" OR BCBA) (CentralReach OR Rethink OR Motivity OR Catalyst OR ATrack OR EMR) (alternative OR replacement OR recommend OR "looking for" OR problem OR issue OR frustrated) -jobs -salary -hiring',
-  'site:reddit.com (ABA OR BCBA OR RBT) (CentralReach OR Rethink OR Motivity OR Catalyst OR ATrack OR EMR) (alternative OR replacement OR recommend OR "looking for" OR problem OR issue OR frustrated) -jobs -salary',
-  'site:linkedin.com ("ABA clinic" OR "ABA therapy" OR BCBA) (EMR OR CentralReach OR Rethink OR Motivity OR Catalyst) (alternative OR replacement OR recommend OR switching OR compare) -jobs -salary -hiring',
-  '(site:facebook.com OR site:reddit.com) ("CentralReach alternative" OR "RethinkBH alternative" OR "Motivity alternative" OR "Catalyst ABA alternative") -jobs -salary -hiring'
+  'ABA EMR CentralReach alternative OR replacement OR recommend',
+  'site:reddit.com ABA CentralReach OR Rethink OR Motivity alternative OR problem',
+  'ABA clinic software switching OR "looking for" OR frustrated',
+  '"CentralReach alternative" OR "RethinkBH alternative" OR "Motivity alternative"'
 ];
 
 const allowedHosts = ["facebook.com", "reddit.com", "linkedin.com", "threads.net", "x.com", "twitter.com"];
-const unwantedWords = ["job", "jobs", "salary", "hiring", "indeed", "ziprecruiter", "glassdoor", "career"];
-const buyerWords = ["alternative", "replacement", "recommend", "looking for", "problem", "issue", "frustrated", "switching", "compare", " vs ", "best"];
-const softwareWords = ["emr", "ehr", "centralreach", "rethink", "motivity", "catalyst", "atrack", "software", "practice management"];
+const unwantedWords = ["job opening", "now hiring", "salary range", "indeed.com", "ziprecruiter", "glassdoor"];
+const buyerWords = ["alternative", "replacement", "recommend", "looking for", "problem", "issue", "frustrated", "switching", "switch", "compare", " vs ", "best", "hate", "struggling", "anyone use"];
+const softwareWords = ["emr", "ehr", "centralreach", "rethink", "motivity", "catalyst", "atrack", "software", "practice management", "aba"];
 
 function host(link: string) {
   try {
@@ -39,11 +39,13 @@ function isAllowedSocial(link: string) {
   return allowedHosts.some((item) => current === item || current.endsWith(`.${item}`));
 }
 
+// Relaxed gate: keep a result if it looks relevant at all — a software mention OR a
+// buyer signal is enough (not both). Social-host preference is applied as a SORT, not a
+// hard drop, so a strong on-topic result isn't discarded just for living off-platform.
 function keepResult(result: SearchPreview) {
   const text = `${result.title} ${result.snippet}`.toLowerCase();
-  if (!isAllowedSocial(result.link)) return false;
   if (unwantedWords.some((word) => text.includes(word))) return false;
-  return softwareWords.some((word) => text.includes(word)) && buyerWords.some((word) => text.includes(word));
+  return softwareWords.some((word) => text.includes(word)) || buyerWords.some((word) => text.includes(word));
 }
 
 function replyAngle(result: SearchPreview) {
@@ -79,8 +81,15 @@ export function SocialEMRSourceFinder() {
       const payload = await response.json();
       const filtered = (payload.results ?? []).filter(keepResult);
       const deduped = Array.from(new Map(filtered.map((item: SearchPreview) => [item.link, item])).values()) as SearchPreview[];
-      setResults(deduped);
-      setNotice(`${deduped.length} public social source${deduped.length === 1 ? "" : "s"} matched. Non-social pages were removed.`);
+      // Prefer social-platform sources (sort them first) instead of discarding the rest.
+      const sorted = deduped.sort((a, b) => Number(isAllowedSocial(b.link)) - Number(isAllowedSocial(a.link)));
+      setResults(sorted);
+      const socialCount = sorted.filter((r) => isAllowedSocial(r.link)).length;
+      setNotice(
+        sorted.length
+          ? `${sorted.length} public source${sorted.length === 1 ? "" : "s"} matched (${socialCount} on social platforms, shown first). Open each and review context manually before outreach.`
+          : "0 results. Try a simpler query (e.g. \"CentralReach alternative\") — heavy site: operators and long OR-chains often return nothing. Confirm SERPAPI_API_KEY is set."
+      );
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Search failed.");
     } finally {

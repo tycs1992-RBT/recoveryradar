@@ -96,7 +96,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid query" }, { status: 400 });
   }
 
-  const query = `${parsed.data.keyword} ${parsed.data.location}`.trim();
+  // Don't jam the location onto operator-heavy queries (site:, OR, quotes) — it usually
+  // zeroes out the results. Only append a bare location to a plain keyword query.
+  const kw = parsed.data.keyword.trim();
+  const hasOperators = /site:|\bOR\b|"|-\w/.test(kw);
+  const query = hasOperators || !parsed.data.location ? kw : `${kw} ${parsed.data.location}`.trim();
   const serpApiKey = process.env.SERPAPI_API_KEY;
   const googleApiKey = process.env.GOOGLE_SEARCH_API_KEY;
   const googleCx = process.env.GOOGLE_SEARCH_CX;
