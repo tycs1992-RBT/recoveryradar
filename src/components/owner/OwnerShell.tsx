@@ -6,7 +6,8 @@ const ownerNav = [
   { href: "/recovery-radar/learners", label: "By Site & Setting" },
   { href: "/recovery-radar/waterfall", label: "Recovery Waterfall" },
   { href: "/recovery-radar/pulse", label: "Staff Pulse" },
-  { href: "/recovery-radar/alerts", label: "Alerts" }
+  { href: "/recovery-radar/alerts", label: "Alerts" },
+  { href: "/recovery-radar/simulator", label: "ROI Simulator" }
 ];
 
 export function OwnerShell({ children, clinicName }: { children: ReactNode; clinicName: string }) {

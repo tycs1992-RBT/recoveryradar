@@ -13,6 +13,7 @@ export function MarketingHeader() {
         </Link>
         <nav className="hidden items-center gap-5 text-sm font-semibold text-slate-600 md:flex">
           <Link href="/calculator">Lost Hours Calculator</Link>
+          <Link href="/roi-simulator">ROI Simulator</Link>
           <Link href="/quiz">Operations Quiz</Link>
           <Link href="/topics">ABA Topics</Link>
           <Link href="/aba-keyword-bank">Keyword Bank</Link>

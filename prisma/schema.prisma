@@ -211,9 +211,9 @@ model CalculatorResult {
   monthlyHoursAtRisk          Float
   monthlyRevenueLeakage       Float
   adminHoursSpent             Float
-  potentialRecoveredHours10   Float
-  potentialRecoveredHours20   Float
-  potentialRecoveredHours30   Float
+  potentialRecoveredHours10   Float?
+  potentialRecoveredHours20   Float?
+  potentialRecoveredHours30   Float?
   recommendedModules          String[]
   createdAt                   DateTime @default(now())
 

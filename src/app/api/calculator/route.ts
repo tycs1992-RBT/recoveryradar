@@ -68,11 +68,11 @@ export async function POST(request: Request) {
           contactRole: input.role || null,
           publicEmail: input.email,
           currentEmr: input.currentEmr || null,
-          painPoint: result.suggestedBottleneck,
+          painPoint: result.summary,
           clinicSize: input.clients,
           leadScore: scoring.score,
           status: scoring.tier === "hot" ? "NEW" : "RESEARCHED",
-          nextStep: "Send lost-hours report and invite to recovery workflow demo",
+          nextStep: "Send lost-hours report and invite to the ROI Simulator",
           notes: [
             result.summary,
             "Consent text version: " + CONSENT_TEXT_VERSION,
@@ -93,16 +93,12 @@ export async function POST(request: Request) {
 
     const stored = await prisma.calculatorResult.create({
       data: {
-        leadId,
+        leadId: leadId ?? null,
         inputs: { ...input, consentTextVersion: CONSENT_TEXT_VERSION, requestMetadata: publicRequestMetadata(request) },
         weeklyHoursAtRisk: result.hoursAtRiskPerWeek,
         monthlyHoursAtRisk: result.monthlyHoursAtRisk,
         monthlyRevenueLeakage: result.monthlyRevenueLeakage,
-        adminHoursSpent: result.adminHoursSpent,
-        potentialRecoveredHours10: result.potentialRecoveredHours10,
-        potentialRecoveredHours20: result.potentialRecoveredHours20,
-        potentialRecoveredHours30: result.potentialRecoveredHours30,
-        recommendedModules: result.recommendedModules
+        adminHoursSpent: result.adminHoursSpent
       }
     });
 

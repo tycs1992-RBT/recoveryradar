@@ -4,7 +4,24 @@ import { notFound } from "next/navigation";
 import { MarketingHeader } from "@/components/layout/MarketingHeader";
 import { getPageBySlug } from "@/lib/seo-page-store";
 
+import { listPublishedPages } from "@/lib/seo-page-store";
+
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.infinitepieces.ai").replace(/\/$/, "");
+
+// Pre-build the pages we already know about, but allow brand-new slugs to render on first
+// request (so a page published in the portal is reachable immediately, before any redeploy).
+export async function generateStaticParams() {
+  try {
+    const pages = await listPublishedPages();
+    return pages.map((page) => ({ slug: page.slug }));
+  } catch {
+    return [];
+  }
+}
+
+export const dynamicParams = true;
+// Safety re-generation; explicit revalidatePath() on publish/edit makes changes appear at once.
+export const revalidate = 300;
 
 // A page is only publicly visible when PUBLISHED. Draft/needs-review/approved pages render
 // in a noindex preview only when ?preview=1 is passed; archived/unknown -> notFound.

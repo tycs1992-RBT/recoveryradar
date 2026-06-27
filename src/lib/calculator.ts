@@ -1,8 +1,11 @@
 import { z } from "zod";
 
 export const documentationCleanupOptions = ["rarely", "sometimes", "often"] as const;
-export const recoveryWorkflowOptions = ["none", "manual", "partial", "automated"] as const;
 
+// The Lost Hours Calculator quantifies ONLY what a clinic is losing right now, from numbers the
+// clinic already knows to be true (its own cancellation/callout rates, hours, and collected rate).
+// It deliberately makes NO recovery or retention claim — nothing here depends on attributing an
+// outcome to software. "What you'd recover with Infinite Pieces" is the ROI Simulator's job.
 export const calculatorInputSchema = z.object({
   clients: z.coerce.number().int().min(1).max(10000),
   sessionsPerClientPerWeek: z.coerce.number().min(0).max(50),
@@ -10,13 +13,10 @@ export const calculatorInputSchema = z.object({
   cancellationRate: z.coerce.number().min(0).max(100),
   calloutRate: z.coerce.number().min(0).max(100),
   reimbursementPerHour: z.coerce.number().min(0).max(1000),
-  currentRecoveryRate: z.coerce.number().min(0).max(100),
   adminMinutesPerCancellation: z.coerce.number().min(0).max(480),
   documentationCleanupFrequency: z.enum(documentationCleanupOptions),
-  recoveryWorkflowMaturity: z.enum(recoveryWorkflowOptions),
-  // Retention/compliance context inputs (optional — drive the StaffPulse + clean-claims framing)
-  rbtCount: z.coerce.number().min(0).max(5000).optional().default(0),
   lateNoteRate: z.coerce.number().min(0).max(100).optional().default(0),
+  // Lead capture (optional — no PHI)
   contactName: z.string().trim().optional().default(""),
   role: z.string().trim().optional().default(""),
   clinicName: z.string().trim().optional().default(""),
@@ -32,24 +32,18 @@ export type CalculatorResult = {
   scheduledHoursPerWeek: number;
   cancellationsPerWeek: number;
   calloutsPerWeek: number;
+  // The bleed — lost billable hours/$ from interrupted sessions (provable from the clinic's own data)
   hoursAtRiskPerWeek: number;
   weeklyRevenueAtRisk: number;
   monthlyHoursAtRisk: number;
   monthlyRevenueLeakage: number;
-  recoveredSessionsPerWeek: number;
-  recoveredHoursPerWeek: number;
+  annualRevenueLeakage: number;
+  // Operational drag (clinic-estimated, still a loss — admin scramble + note cleanup on interruptions)
   adminHoursSpent: number;
   documentationCleanupHours: number;
-  potentialRecoveredHours10: number;
-  potentialRecoveredHours20: number;
-  potentialRecoveredHours30: number;
-  // Clean-claims (PROVABLE): billable $ at risk from late/missing notes that note-gating protects
+  monthlyAdminHours: number;
+  // Clean-claims at risk — billable $ exposed to denial/recoupment from late/missing notes
   atRiskClaimDollarsMonthly: number;
-  cleanClaimsProtectedMonthly: number;
-  // Retention CONTEXT (story, not a guaranteed saving): size of the turnover problem StaffPulse helps address
-  annualTurnoverCostContext: number;
-  suggestedBottleneck: string;
-  recommendedModules: string[];
   summary: string;
 };
 
@@ -65,44 +59,25 @@ export function calculateLostHours(input: CalculatorInput): CalculatorResult {
 
   const cancellationRate = input.cancellationRate / 100;
   const calloutRate = input.calloutRate / 100;
-  const recoveryRate = input.currentRecoveryRate / 100;
 
   const cancellationsPerWeek = scheduledSessionsPerWeek * cancellationRate;
   const calloutsPerWeek = scheduledSessionsPerWeek * calloutRate;
   const interruptionEvents = cancellationsPerWeek + calloutsPerWeek;
+
+  // Lost billable hours = interrupted sessions × session length. Straight arithmetic, their numbers.
   const hoursAtRiskPerWeek = interruptionEvents * input.sessionLengthHours;
   const weeklyRevenueAtRisk = hoursAtRiskPerWeek * input.reimbursementPerHour;
 
-  const recoveredSessionsPerWeek = interruptionEvents * recoveryRate;
-  const recoveredHoursPerWeek = recoveredSessionsPerWeek * input.sessionLengthHours;
-  // Estimate cleanup on disrupted/recovered-session workflows rather than every scheduled session.
-  // This follows the audit recommendation to keep the admin burden tied to cancellations/callouts.
+  // Operational drag tied to those interruptions (admin scramble + note cleanup), clinic-estimated.
   const documentationCleanupHours =
     interruptionEvents * cleanupHoursPerSession[input.documentationCleanupFrequency];
   const adminHoursSpent =
     (interruptionEvents * input.adminMinutesPerCancellation) / 60 + documentationCleanupHours;
 
-  const suggestedBottleneck = deriveBottleneck({
-    cancellationRate: input.cancellationRate,
-    calloutRate: input.calloutRate,
-    currentRecoveryRate: input.currentRecoveryRate,
-    adminHoursSpent,
-    documentationCleanupFrequency: input.documentationCleanupFrequency,
-    recoveryWorkflowMaturity: input.recoveryWorkflowMaturity
-  });
-
-  const recommendedModules = recommendModules({
-    cancellationRate: input.cancellationRate,
-    calloutRate: input.calloutRate,
-    documentationCleanupFrequency: input.documentationCleanupFrequency,
-    recoveryWorkflowMaturity: input.recoveryWorkflowMaturity
-  });
-
-  // CLEAN CLAIMS (provable): a share of billable hours is at denial/recoupment risk when notes
-  // are late or missing. Note-gating protects most of it. Illustrative; validate with payer mix.
+  // Clean-claims at risk: a share of billable hours is exposed to denial/recoupment when notes are
+  // late or missing. Illustrative; validate against payer mix. (No claim that software fixes it here.)
   const monthlyScheduledHours = scheduledHoursPerWeek * 4;
   const lateNoteShare = (input.lateNoteRate ?? 0) / 100;
-  // If the user didn't give a late-note rate, infer a small one from cleanup frequency.
   const inferredLateShare =
     lateNoteShare > 0
       ? lateNoteShare
@@ -112,12 +87,6 @@ export function calculateLostHours(input: CalculatorInput): CalculatorResult {
           ? 0.03
           : 0.015;
   const atRiskClaimDollarsMonthly = monthlyScheduledHours * inferredLateShare * input.reimbursementPerHour;
-  // Note-gating doesn't fix payer-side denials, but it closes the documentation-caused share. ~80%.
-  const cleanClaimsProtectedMonthly = atRiskClaimDollarsMonthly * 0.8;
-
-  // RETENTION CONTEXT (story, NOT a guaranteed saving): size of the annual turnover problem.
-  // RBT turnover ~90%/yr midpoint; ~$4,000 to replace one (recruit+train+ramp+rapport). Illustrative.
-  const annualTurnoverCostContext = (input.rbtCount ?? 0) * 0.9 * 4000;
 
   return {
     scheduledSessionsPerWeek,
@@ -128,78 +97,18 @@ export function calculateLostHours(input: CalculatorInput): CalculatorResult {
     weeklyRevenueAtRisk,
     monthlyHoursAtRisk: hoursAtRiskPerWeek * 4,
     monthlyRevenueLeakage: weeklyRevenueAtRisk * 4,
-    recoveredSessionsPerWeek,
-    recoveredHoursPerWeek,
+    annualRevenueLeakage: weeklyRevenueAtRisk * 52,
     adminHoursSpent,
     documentationCleanupHours,
-    potentialRecoveredHours10: hoursAtRiskPerWeek * 0.1,
-    potentialRecoveredHours20: hoursAtRiskPerWeek * 0.2,
-    potentialRecoveredHours30: hoursAtRiskPerWeek * 0.3,
+    monthlyAdminHours: adminHoursSpent * 4,
     atRiskClaimDollarsMonthly,
-    cleanClaimsProtectedMonthly,
-    annualTurnoverCostContext,
-    suggestedBottleneck,
-    recommendedModules,
-    summary: buildSummary(hoursAtRiskPerWeek, weeklyRevenueAtRisk, suggestedBottleneck)
+    summary: buildSummary(hoursAtRiskPerWeek, weeklyRevenueAtRisk, weeklyRevenueAtRisk * 52)
   };
 }
 
-function deriveBottleneck(input: {
-  cancellationRate: number;
-  calloutRate: number;
-  currentRecoveryRate: number;
-  adminHoursSpent: number;
-  documentationCleanupFrequency: CalculatorInput["documentationCleanupFrequency"];
-  recoveryWorkflowMaturity: CalculatorInput["recoveryWorkflowMaturity"];
-}) {
-  if (input.recoveryWorkflowMaturity === "none" && input.currentRecoveryRate < 25) {
-    return "No formal recovery workflow: cancelled and callout-affected sessions are likely being handled reactively.";
-  }
-  if (input.cancellationRate >= 15 && input.currentRecoveryRate < 50) {
-    return "Scheduling recovery gap: cancellations are high and too few sessions are recovered.";
-  }
-  if (input.calloutRate >= 10) {
-    return "Staff coverage gap: callouts are creating coverage risk and manual scramble.";
-  }
-  if (input.documentationCleanupFrequency === "often" || input.adminHoursSpent >= 20) {
-    return "Documentation readiness gap: cleanup work is consuming operational time after sessions.";
-  }
-  if (input.recoveryWorkflowMaturity === "manual") {
-    return "Manual recovery gap: your team has a process, but it depends heavily on scheduler effort.";
-  }
-  return "Recovery workflow opportunity: your baseline is measurable, and small process improvements could protect more authorized hours.";
-}
-
-function recommendModules(input: {
-  cancellationRate: number;
-  calloutRate: number;
-  documentationCleanupFrequency: CalculatorInput["documentationCleanupFrequency"];
-  recoveryWorkflowMaturity: CalculatorInput["recoveryWorkflowMaturity"];
-}) {
-  const modules = new Set<string>();
-
-  if (input.cancellationRate >= 10 || input.recoveryWorkflowMaturity === "none") {
-    modules.add("Scheduler AI™");
-    modules.add("Auth Utilization War Room™");
-  }
-
-  if (input.calloutRate >= 8) {
-    modules.add("SubPool™ Marketplace");
-    modules.add("FieldPocket™");
-    modules.add("Care Pocket™");
-  }
-
-  if (input.documentationCleanupFrequency !== "rarely") {
-    modules.add("Compliance Sentinel™");
-  }
-
-  modules.add("API Integration Hub™");
-
-  return Array.from(modules);
-}
-
-function buildSummary(hoursAtRiskPerWeek: number, weeklyRevenueAtRisk: number, bottleneck: string) {
+function buildSummary(hoursAtRiskPerWeek: number, weeklyRevenueAtRisk: number, annualRevenueAtRisk: number) {
   const roundedHours = Math.round(hoursAtRiskPerWeek * 10) / 10;
-  const roundedRevenue = Math.round(weeklyRevenueAtRisk);
-  return `Your current pattern puts about ${roundedHours} weekly hours at risk, or roughly $${roundedRevenue.toLocaleString()} in weekly revenue exposure. Main bottleneck: ${bottleneck}`;
+  const roundedWeekly = Math.round(weeklyRevenueAtRisk);
+  const roundedAnnual = Math.round(annualRevenueAtRisk);
+  return `About ${roundedHours} billable hours slip away each week — roughly $${roundedWeekly.toLocaleString()} in weekly revenue, or about $${roundedAnnual.toLocaleString()} a year in unrecovered hours.`;
 }

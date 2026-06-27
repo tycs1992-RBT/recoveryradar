@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   calculateLostHours,
   calculatorInputSchema,
@@ -16,11 +17,8 @@ const initialInput: CalculatorInput = {
   cancellationRate: 15,
   calloutRate: 8,
   reimbursementPerHour: 75,
-  currentRecoveryRate: 20,
   adminMinutesPerCancellation: 12,
   documentationCleanupFrequency: "sometimes",
-  recoveryWorkflowMaturity: "manual",
-  rbtCount: 25,
   lateNoteRate: 0,
   contactName: "",
   role: "",
@@ -57,49 +55,39 @@ function buildReportHtml(input: CalculatorInput, result: CalculatorResult) {
     ["Average session length", `${input.sessionLengthHours} hours`],
     ["Cancellation rate", `${input.cancellationRate}%`],
     ["RBT callout rate", `${input.calloutRate}%`],
-    ["Reimbursement per hour", currency(input.reimbursementPerHour)],
-    ["Current recovery rate", `${input.currentRecoveryRate}%`],
+    ["Collected rate per hour", currency(input.reimbursementPerHour)],
     ["Admin minutes per cancellation", input.adminMinutesPerCancellation],
     ["Documentation cleanup", input.documentationCleanupFrequency],
-    ["Recovery workflow maturity", input.recoveryWorkflowMaturity],
     ["Current EMR", input.currentEmr || "Not provided"]
   ];
   const metrics = [
-    ["Weekly hours at risk", number(result.hoursAtRiskPerWeek)],
-    ["Monthly hours at risk", number(result.monthlyHoursAtRisk)],
-    ["Monthly revenue leakage", currency(result.monthlyRevenueLeakage)],
-    ["Admin hours spent", number(result.adminHoursSpent)],
-    ["10% workflow lift", `${number(result.potentialRecoveredHours10)} hrs/wk`],
-    ["20% workflow lift", `${number(result.potentialRecoveredHours20)} hrs/wk`],
-    ["30% workflow lift", `${number(result.potentialRecoveredHours30)} hrs/wk`],
-    ["At-risk billing / month (late notes)", currency(result.atRiskClaimDollarsMonthly)],
-    ["Clean claims protected by note-gating / month", currency(result.cleanClaimsProtectedMonthly)],
-    ["Annual RBT turnover cost (context, not a saving)", currency(result.annualTurnoverCostContext)]
+    ["Weekly billable hours lost", number(result.hoursAtRiskPerWeek)],
+    ["Weekly revenue lost", currency(result.weeklyRevenueAtRisk)],
+    ["Monthly revenue lost", currency(result.monthlyRevenueLeakage)],
+    ["Annual revenue lost", currency(result.annualRevenueLeakage)],
+    ["Admin hours lost / week", number(result.adminHoursSpent)],
+    ["At-risk billing / month (late notes)", currency(result.atRiskClaimDollarsMonthly)]
   ];
 
-  return `<!doctype html><html><head><meta charset="utf-8" /><title>Infinite Suite OS Lost Hours Report</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:32px;line-height:1.55}h1{font-size:30px;margin-bottom:6px}.eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#0891b2;font-size:12px}.box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin:18px 0}.dark{background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}th{background:#f8fafc}.cta{background:#ecfeff;border:1px solid #a5f3fc;border-radius:18px;padding:18px;margin-top:18px}</style></head><body><p class="eyebrow">Infinite Suite OS™ · Lost Hours Calculator</p><h1>Before you switch EMRs, calculate your lost-hours baseline.</h1><p>Generated ${htmlEscape(generatedAt)}. This report uses clinic-level estimates only and should not include PHI.</p><div class="box dark"><h2>${number(result.hoursAtRiskPerWeek)} weekly hours at risk</h2><p>${htmlEscape(result.summary)}</p></div><div class="grid"><div class="box"><h2>Clinic-level assumptions</h2><table>${rows.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div><div class="box"><h2>Estimated results</h2><table>${metrics.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div></div><div class="box"><h2>Recommended recovery path</h2><p><strong>Suggested bottleneck:</strong> ${htmlEscape(result.suggestedBottleneck)}</p><p><strong>Recommended modules:</strong> ${htmlEscape(result.recommendedModules.join(", "))}</p></div><div class="cta"><h2>Your EMR may track the session. Infinite Suite OS™ is built to help recover the session before it disappears.</h2><p>Next step: tour the Provider Portal at https://www.infinitepieces.ai/provider-portal</p><p>No-PHI disclaimer: do not submit patient names, dates of birth, insurance IDs, treatment notes or clinical details. This is an operational estimate, not a payer, billing, legal or compliance guarantee.</p></div></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8" /><title>Infinite Pieces — Lost Hours Report</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:32px;line-height:1.55}h1{font-size:30px;margin-bottom:6px}.eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#0891b2;font-size:12px}.box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin:18px 0}.dark{background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}th{background:#f8fafc}.cta{background:#ecfeff;border:1px solid #a5f3fc;border-radius:18px;padding:18px;margin-top:18px}</style></head><body><p class="eyebrow">Infinite Pieces AI · Lost Hours Calculator</p><h1>How much your clinic is losing to unrecovered hours.</h1><p>Generated ${htmlEscape(generatedAt)}. This report uses clinic-level estimates only and should not include PHI.</p><div class="box dark"><h2>${currency(result.annualRevenueLeakage)} a year in unrecovered hours</h2><p>${htmlEscape(result.summary)}</p></div><div class="grid"><div class="box"><h2>Clinic-level assumptions</h2><table>${rows.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div><div class="box"><h2>What you're losing</h2><table>${metrics.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div></div><div class="cta"><h2>That's the bleed. See how much of it you could recover.</h2><p>Next step: the Recovery ROI Simulator at https://www.infinitepieces.ai/roi-simulator</p><p>No-PHI disclaimer: do not submit patient names, dates of birth, insurance IDs, treatment notes or clinical details. These are clinic-level operating estimates, not a payer, billing, legal or compliance guarantee.</p></div></body></html>`;
 }
 
 function buildEmailReport(input: CalculatorInput, result: CalculatorResult) {
   return [
-    "Subject: Lost-hours baseline report for your ABA clinic",
+    "Subject: How much your ABA clinic is losing to unrecovered hours",
     "",
-    "Before you switch EMRs, calculate your lost-hours baseline.",
+    "How much your clinic is losing to unrecovered hours.",
     "",
     `Clinic: ${input.clinicName || "Not provided"}`,
     `Current EMR: ${input.currentEmr || "Not provided"}`,
-    `Weekly hours at risk: ${number(result.hoursAtRiskPerWeek)}`,
-    `Monthly hours at risk: ${number(result.monthlyHoursAtRisk)}`,
-    `Monthly revenue leakage: ${currency(result.monthlyRevenueLeakage)}`,
-    `Admin hours spent: ${number(result.adminHoursSpent)}`,
-    `Current recovery rate: ${input.currentRecoveryRate}%`,
+    `Weekly billable hours lost: ${number(result.hoursAtRiskPerWeek)}`,
+    `Weekly revenue lost: ${currency(result.weeklyRevenueAtRisk)}`,
+    `Monthly revenue lost: ${currency(result.monthlyRevenueLeakage)}`,
+    `Annual revenue lost: ${currency(result.annualRevenueLeakage)}`,
+    `Admin hours lost / week: ${number(result.adminHoursSpent)}`,
     "",
-    `Suggested bottleneck: ${result.suggestedBottleneck}`,
-    `Recommended module path: ${result.recommendedModules.join(", ")}`,
-    "",
-    "Your EMR may track the session. Infinite Suite OS™ is built to help recover the session before it disappears.",
-    "",
-    "Tour Provider Portal: https://www.infinitepieces.ai/provider-portal",
+    "That's the bleed. See how much of it you could recover:",
+    "Recovery ROI Simulator: https://www.infinitepieces.ai/roi-simulator",
     "",
     "No-PHI disclaimer: this report uses clinic-level estimates only and is not a billing, payer, legal or compliance guarantee."
   ].join("\n");
@@ -150,7 +138,7 @@ export function LostHoursCalculator() {
   }
 
   function downloadReport() {
-    downloadBlob("infinite-suite-lost-hours-report.html", buildReportHtml(input, result), "text/html;charset=utf-8");
+    downloadBlob("infinite-pieces-lost-hours-report.html", buildReportHtml(input, result), "text/html;charset=utf-8");
   }
 
   async function copyEmailReport() {
@@ -162,10 +150,10 @@ export function LostHoursCalculator() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
       <section className="card">
         <div className="flex flex-col gap-2 border-b border-slate-100 pb-5">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-slate-400">Estimate inputs</p>
-          <h2 className="text-2xl font-black text-slate-950">Find your weekly lost-hours baseline</h2>
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-slate-400">Your numbers</p>
+          <h2 className="text-2xl font-black text-slate-950">See how much your clinic is losing on unrecovered hours</h2>
           <p className="text-sm leading-6 text-slate-500">
-            Do not enter patient names or PHI. Use clinic-level operating estimates only.
+            Every input below is a number you already know. Do not enter patient names or PHI — clinic-level operating estimates only.
           </p>
         </div>
 
@@ -175,10 +163,8 @@ export function LostHoursCalculator() {
           <NumberField label="Average session length" suffix="hours" value={input.sessionLengthHours} min={0.25} step={0.25} onChange={(v) => update("sessionLengthHours", v)} />
           <NumberField label="Cancellation rate" suffix="%" value={input.cancellationRate} min={0} max={100} onChange={(v) => update("cancellationRate", v)} />
           <NumberField label="RBT callout rate" suffix="%" value={input.calloutRate} min={0} max={100} onChange={(v) => update("calloutRate", v)} />
-          <NumberField label="Reimbursement per hour" prefix="$" value={input.reimbursementPerHour} min={0} onChange={(v) => update("reimbursementPerHour", v)} />
-          <NumberField label="Current makeup/recovery rate" suffix="%" value={input.currentRecoveryRate} min={0} max={100} onChange={(v) => update("currentRecoveryRate", v)} />
+          <NumberField label="Collected rate per hour" prefix="$" value={input.reimbursementPerHour} min={0} onChange={(v) => update("reimbursementPerHour", v)} />
           <NumberField label="Admin minutes per cancellation" value={input.adminMinutesPerCancellation} min={0} onChange={(v) => update("adminMinutesPerCancellation", v)} />
-          <NumberField label="RBTs on staff" value={input.rbtCount ?? 0} min={0} onChange={(v) => update("rbtCount", v)} />
           <NumberField label="Late/missing note rate" suffix="%" value={input.lateNoteRate ?? 0} min={0} max={100} onChange={(v) => update("lateNoteRate", v)} />
 
           <label className="space-y-2">
@@ -193,28 +179,14 @@ export function LostHoursCalculator() {
               <option value="often">Often</option>
             </select>
           </label>
-
-          <label className="space-y-2">
-            <span className="label">Formal recovery workflow</span>
-            <select
-              className="input"
-              value={input.recoveryWorkflowMaturity}
-              onChange={(event) => update("recoveryWorkflowMaturity", event.target.value as CalculatorInput["recoveryWorkflowMaturity"])}
-            >
-              <option value="none">None</option>
-              <option value="manual">Manual</option>
-              <option value="partial">Partial</option>
-              <option value="automated">Automated</option>
-            </select>
-          </label>
         </div>
 
         <input className="hidden" tabIndex={-1} autoComplete="off" value={botTrap} onChange={(event) => setBotTrap(event.target.value)} aria-hidden="true" />
 
         <div className="mt-8 rounded-3xl bg-slate-50 p-5">
-          <p className="text-sm font-black text-slate-950">Request detailed report</p>
+          <p className="text-sm font-black text-slate-950">Email me the full breakdown</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">
-            The summary above is instant. The detailed report capture is optional and requires explicit consent.
+            The summary on the right is instant. The detailed report is optional and requires explicit consent.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <TextField label="Name" value={input.contactName ?? ""} onChange={(v) => update("contactName", v)} />
@@ -355,17 +327,18 @@ function TextField({ label, value, onChange, type = "text" }: { label: string; v
 
 function CalculatorResults({ result }: { result: CalculatorResult }) {
   const metrics = [
-    { label: "Weekly hours at risk", value: number(result.hoursAtRiskPerWeek) },
-    { label: "Monthly hours at risk", value: number(result.monthlyHoursAtRisk) },
-    { label: "Monthly revenue leakage", value: currency(result.monthlyRevenueLeakage) },
-    { label: "Admin hours spent", value: number(result.adminHoursSpent) }
+    { label: "Weekly billable hours lost", value: number(result.hoursAtRiskPerWeek) },
+    { label: "Weekly revenue lost", value: currency(result.weeklyRevenueAtRisk) },
+    { label: "Monthly revenue lost", value: currency(result.monthlyRevenueLeakage) },
+    { label: "Admin hours lost / week", value: number(result.adminHoursSpent) }
   ];
 
   return (
     <aside className="space-y-5">
       <div className="card bg-slate-950 text-white">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-slate-400">Instant summary</p>
-        <h2 className="mt-3 text-3xl font-black tracking-tight">{number(result.hoursAtRiskPerWeek)} weekly hours at risk</h2>
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-slate-400">What you&rsquo;re losing</p>
+        <h2 className="mt-3 text-3xl font-black tracking-tight text-rose-300">{currency(result.annualRevenueLeakage)}<span className="text-lg font-bold text-slate-400"> / year</span></h2>
+        <p className="mt-2 text-sm font-semibold text-slate-300">in unrecovered billable hours</p>
         <p className="mt-4 text-sm leading-6 text-slate-300">{result.summary}</p>
       </div>
 
@@ -379,65 +352,24 @@ function CalculatorResults({ result }: { result: CalculatorResult }) {
       </div>
 
       <div className="card">
-        <h3 className="text-lg font-black text-slate-950">Potential additional recovered hours</h3>
-        <div className="mt-5 space-y-4">
-          <RecoveryBar label="10% workflow lift" value={result.potentialRecoveredHours10} max={result.potentialRecoveredHours30} />
-          <RecoveryBar label="20% workflow lift" value={result.potentialRecoveredHours20} max={result.potentialRecoveredHours30} />
-          <RecoveryBar label="30% workflow lift" value={result.potentialRecoveredHours30} max={result.potentialRecoveredHours30} />
+        <h3 className="text-lg font-black text-slate-950">Billing at risk from late notes</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-500">Late and missing notes put billable dollars at denial/recoupment risk — a separate leak from cancelled sessions.</p>
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-400">At-risk billing / month</p>
+          <p className="mt-2 text-2xl font-black text-slate-950">{currency(result.atRiskClaimDollarsMonthly)}</p>
         </div>
+        <p className="mt-3 text-xs font-semibold text-slate-400">Illustrative; validate against your payer mix. This sizes the exposure — it does not assume any tool fixes it.</p>
       </div>
 
-      <div className="card">
-        <h3 className="text-lg font-black text-slate-950">Clean-claims protection</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-500">Late and missing notes put billable dollars at denial/recoupment risk. Note-gating closes most of the documentation-caused share.</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">At-risk billing / month</p>
-            <p className="mt-2 text-2xl font-black text-slate-950">{currency(result.atRiskClaimDollarsMonthly)}</p>
-          </div>
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Protected by note-gating</p>
-            <p className="mt-2 text-2xl font-black text-emerald-800">{currency(result.cleanClaimsProtectedMonthly)}</p>
-          </div>
-        </div>
-        <p className="mt-3 text-xs font-semibold text-slate-400">Illustrative; measured in your pilot. Note-gating addresses documentation-caused denials, not payer-side determinations.</p>
-      </div>
-
-      <div className="card border-amber-200 bg-amber-50">
-        <h3 className="text-lg font-black text-amber-950">Staff retention — the size of the problem</h3>
-        <p className="mt-2 text-2xl font-black text-amber-900">{currency(result.annualTurnoverCostContext)}<span className="text-sm font-bold text-amber-700"> / year in RBT turnover cost</span></p>
-        <p className="mt-3 text-sm leading-6 text-amber-800">
-          This is context, not a promise. When StaffPulse flags an RBT as burned out in a post-session report, you can step in <em>before</em> they quit — and a clinic that isn&rsquo;t bleeding hours and drowning in late notes is one people stay at. We don&rsquo;t claim a dollar of this as savings, because retention can&rsquo;t be cleanly attributed. We show recovery and clean claims as the proof; retention is the problem this helps you chip away at.
+      <div className="card border-cyan-200 bg-cyan-50">
+        <h3 className="text-lg font-black text-cyan-950">That&rsquo;s the bleed. How much could you recover?</h3>
+        <p className="mt-2 text-sm leading-6 text-cyan-900">
+          This page only measures what you&rsquo;re losing today — no software, no claims. The next step is the payback: how much of this an Infinite Pieces recovery layer could put back.
         </p>
-      </div>
-
-      <div className="card">
-        <h3 className="text-lg font-black text-slate-950">Suggested bottleneck</h3>
-        <p className="mt-3 text-sm leading-6 text-slate-600">{result.suggestedBottleneck}</p>
-        <h4 className="mt-6 text-sm font-black uppercase tracking-wide text-slate-400">Recommended module path</h4>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {result.recommendedModules.map((module) => (
-            <span key={module} className="badge bg-slate-50">
-              {module}
-            </span>
-          ))}
-        </div>
+        <Link href="/roi-simulator" className="mt-4 inline-block rounded-full bg-cyan-600 px-5 py-3 text-sm font-black text-white hover:bg-cyan-500">
+          See your recovery in the ROI Simulator →
+        </Link>
       </div>
     </aside>
-  );
-}
-
-function RecoveryBar({ label, value, max }: { label: string; value: number; max: number }) {
-  const width = max > 0 ? `${Math.min(100, (value / max) * 100)}%` : "0%";
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-semibold text-slate-700">{label}</span>
-        <span className="font-black text-slate-950">{number(value)} hrs/wk</span>
-      </div>
-      <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-slate-950" style={{ width }} />
-      </div>
-    </div>
   );
 }

@@ -203,9 +203,11 @@ export function generateSeoPage(input: GenerateInput): SeoLandingPage {
   const locationSuffix = input.location?.trim() ? ` in ${input.location.trim()}` : "";
 
   const h1 = `${capitalize(keyword)}${locationSuffix}: recover the hours before you migrate`;
-  const seoTitle = `${capitalize(keyword)} | Recover Lost Hours | Infinite Suite OS™`.slice(0, 60);
-  const metaDescription =
-    `Evaluating ${keyword}? Keep your current EMR and add Infinite Suite OS™ beside it to recover cancellations and RBT callouts. Calculate your lost-hours baseline first.`.slice(0, 158);
+  const seoTitle = trimToLength(`${capitalize(keyword)} | Recover Lost Hours | Infinite Suite OS™`, 60);
+  const metaDescription = trimToLength(
+    `Evaluating ${keyword}? Keep your current EMR and add Infinite Suite OS™ beside it to recover cancellations and RBT callouts. Calculate your lost-hours baseline first.`,
+    158
+  );
 
   const faq = buildFaq(keyword);
   const sections = buildSections(keyword, audience, input.recoveryFocus, input.competitorAngle);
@@ -246,6 +248,15 @@ export function generateSeoPage(input: GenerateInput): SeoLandingPage {
     createdAt: now,
     updatedAt: now
   };
+}
+
+function trimToLength(value: string, max: number): string {
+  if (value.length <= max) return value;
+  // Cut at the last word boundary before the limit so titles/descriptions never end mid-word.
+  const slice = value.slice(0, max);
+  const lastSpace = slice.lastIndexOf(" ");
+  const cut = lastSpace > max * 0.6 ? slice.slice(0, lastSpace) : slice;
+  return cut.replace(/[\s\u2013\u2014|,;:.]+$/, "");
 }
 
 function capitalize(value: string): string {
