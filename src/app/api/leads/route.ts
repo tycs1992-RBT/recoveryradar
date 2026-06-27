@@ -1,3 +1,4 @@
+import { requireWorkspace } from "@/lib/api-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +18,9 @@ const leadSchema = z.object({
 });
 
 export async function GET() {
+  const denied = await requireWorkspace();
+  if (denied) return denied;
+
   if (!process.env.DATABASE_URL) {
     return NextResponse.json({ leads: [], source: "clean_slate", warning: "DATABASE_URL is not configured." });
   }
@@ -35,6 +39,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireWorkspace();
+  if (denied) return denied;
+
   const body = await request.json();
   const parsed = leadSchema.safeParse(body);
 

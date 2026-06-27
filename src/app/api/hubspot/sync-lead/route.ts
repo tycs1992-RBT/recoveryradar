@@ -1,3 +1,4 @@
+import { requireWorkspace } from "@/lib/api-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -25,7 +26,7 @@ async function hubspot(path: string, token: string, body: unknown) {
     body: JSON.stringify(body)
   });
   const text = await response.text();
-  let data: any = text;
+  let data: unknown = text;
   try { data = JSON.parse(text); } catch {}
   if (!response.ok) {
     throw new Error(`${response.status} ${typeof data === "string" ? data : JSON.stringify(data).slice(0, 500)}`);
@@ -42,6 +43,9 @@ function splitName(name: string) {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireWorkspace();
+  if (denied) return denied;
+
   const token = process.env.HUBSPOT_PRIVATE_APP_TOKEN;
   if (!token) {
     return NextResponse.json({ error: "HUBSPOT_PRIVATE_APP_TOKEN is not configured." }, { status: 400 });

@@ -137,7 +137,7 @@ Default local workspace login:
 
 ```txt
 Email: founders@infinitepieces.ai
-Password: infinitemark2026
+Password: (set DEMO_ADMIN_PASSWORD in your environment — not committed)
 ```
 
 Change these in Vercel before treating the workspace as production secure.

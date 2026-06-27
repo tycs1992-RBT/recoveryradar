@@ -1,8 +1,12 @@
+import { requireWorkspace } from "@/lib/api-guard";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toCsv } from "@/lib/utils";
 
 export async function GET() {
+  const denied = await requireWorkspace();
+  if (denied) return denied;
+
   let rows: Array<Record<string, unknown>> = [];
 
   if (process.env.DATABASE_URL) {

@@ -14,6 +14,7 @@ export default function ProviderPortalPage() {
         src="/provider-os/index.html"
         title="Infinite Suite OS™ — Provider Portal tour (sample data, no PHI)"
         className="absolute inset-0 h-full w-full border-0"
+        referrerPolicy="strict-origin-when-cross-origin"
       />
     </main>
   );

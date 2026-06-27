@@ -116,7 +116,7 @@ async function enrichWithCustomSearch(ideas: KeywordIdea[]) {
       enriched.push({
         ...idea,
         competitionResults: data.searchInformation?.formattedTotalResults ?? data.searchInformation?.totalResults,
-        topResultTitles: (data.items ?? []).slice(0, 3).map((item: any) => item.title).filter(Boolean)
+        topResultTitles: (data.items ?? []).slice(0, 3).map((item: { title?: string }) => item.title).filter(Boolean)
       });
     } catch (error) {
       errors.push(error instanceof Error ? error.message : "Custom Search competition check failed");

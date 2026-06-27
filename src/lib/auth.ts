@@ -3,8 +3,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 export type AppRole = "admin" | "growth" | "viewer" | "owner";
 
+const isProd = process.env.NODE_ENV === "production";
+const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+if (isProd && !nextAuthSecret) {
+  throw new Error("NEXTAUTH_SECRET is required in production. Set it in your environment.");
+}
+
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET || "recovery-radar-local-dev-secret-change-before-deploy",
+  secret: nextAuthSecret ?? "dev-only-insecure-secret-not-used-in-production",
   pages: {
     signIn: "/login"
   },
@@ -24,8 +30,8 @@ export const authOptions: NextAuthOptions = {
 
         // Founder workspace login (internal growth/intel suite).
         const founderEmail = (process.env.DEMO_ADMIN_EMAIL ?? "founders@infinitepieces.ai").toLowerCase();
-        const founderPassword = process.env.DEMO_ADMIN_PASSWORD ?? "infinitemark2026";
-        if (email === founderEmail && password === founderPassword) {
+        const founderPassword = process.env.DEMO_ADMIN_PASSWORD ?? (isProd ? "" : "infinitemark2026");
+        if (founderPassword && email === founderEmail && password === founderPassword) {
           return {
             id: "demo-admin",
             name: process.env.DEMO_ADMIN_NAME ?? "Founders",
@@ -36,8 +42,8 @@ export const authOptions: NextAuthOptions = {
 
         // Owner workspace login — clinic CEO's Recovery Radar dashboard (demo tenant).
         const ownerEmail = (process.env.DEMO_OWNER_EMAIL ?? "demo@infinitepieces.ai").toLowerCase();
-        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? "infinitedemo";
-        if (email === ownerEmail && password === ownerPassword) {
+        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? (isProd ? "" : "infinitedemo");
+        if (ownerPassword && email === ownerEmail && password === ownerPassword) {
           return {
             id: "demo-owner",
             name: "North Star ABA (demo)",

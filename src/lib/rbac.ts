@@ -1,8 +1,8 @@
 import type { AppRole } from "./auth";
 
 const permissions: Record<AppRole, string[]> = {
-  admin: ["read", "write", "score", "approve_outreach", "settings"],
-  growth: ["read", "write", "score", "draft_outreach"],
+  admin: ["read", "write", "score", "approve_outreach", "settings", "workspace"],
+  growth: ["read", "write", "score", "draft_outreach", "workspace"],
   viewer: ["read"],
   owner: ["read", "view_own_clinic"]
 };
