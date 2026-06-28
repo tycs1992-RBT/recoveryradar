@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { MarketingHeader } from "@/components/layout/MarketingHeader";
 import { MarketingFooter } from "@/components/layout/MarketingFooter";
-import { coreMessage, coreModules } from "@/lib/constants";
+import { coreModules } from "@/lib/constants";
 import { offer } from "@/lib/pricing";
 
 const visualAssets = {
@@ -82,59 +82,57 @@ export default function HomePage() {
 
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">Founding offer</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Start with the pilot. Pricing follows the proof.</h2>
-            <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
-              Infinite Suite OS™ is not priced to punish staff growth, RBT turnover, substitutes, supervisors, caregivers, or floaters. Founding clinics start on a performance-based pilot — you see what it recovers before you pay a flat fee.
-            </p>
+            <p className="text-sm font-black uppercase tracking-[0.35em] text-slate-400">{offer.foundingProgram.eyebrow}</p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">{offer.foundingProgram.headline}</h2>
+            <p className="mt-2 text-sm font-black uppercase tracking-[0.25em] text-cyan-700">{offer.foundingProgram.limited}</p>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-600">{offer.foundingProgram.subhead}</p>
           </div>
 
-          {/* HERO: Founding Pilot — the one thing we want clinics to start with */}
+          {/* The program — numberless. What's included + the demo CTA. */}
           <div className="mt-8 overflow-hidden rounded-[2rem] border-2 border-cyan-300 bg-gradient-to-br from-cyan-50 to-white shadow-soft">
             <div className="grid gap-6 p-8 lg:grid-cols-[1.1fr_1fr] lg:p-10">
               <div>
                 <span className="inline-flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-white">Start here</span>
-                <p className="mt-5 text-xs font-black uppercase tracking-[0.25em] text-cyan-700">{offer.plans[0].name}</p>
-                <p className="mt-2 text-4xl font-black tracking-tight text-slate-950">{offer.plans[0].price}</p>
-                <p className="mt-2 text-sm font-black text-cyan-800">{offer.plans[0].subprice}</p>
-                <p className="mt-3 text-base font-bold leading-7 text-slate-600">{offer.plans[0].bestFor}</p>
+                <p className="mt-5 text-2xl font-black leading-snug tracking-tight text-slate-950">{offer.positioning}</p>
                 <a
                   href={foundingApplyHref}
                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft transition hover:bg-slate-800"
                 >
-                  Apply as a founding clinic →
+                  {offer.foundingProgram.cta.label} →
                 </a>
-                <p className="mt-2 text-xs font-semibold text-slate-400">Opens an email to our founding team — no commitment.</p>
+                <p className="mt-2 text-xs font-semibold text-slate-400">{offer.foundingProgram.cta.note}</p>
               </div>
               <ul className="space-y-3 text-sm font-semibold leading-6 text-slate-700 lg:border-l lg:border-cyan-200 lg:pl-8">
-                {offer.plans[0].details.map((detail) => <li key={detail}>• {detail}</li>)}
+                {offer.foundingProgram.includes.map((item) => <li key={item}>• {item}</li>)}
               </ul>
             </div>
           </div>
 
-          {/* DEMOTED: standard tiers — directional, set after the pilot proves out */}
-          <div className="mt-10">
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">{offer.tiersHeading}</p>
-            <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-slate-500">{offer.tiersFraming}</p>
-            <div className="mt-5 grid gap-4 lg:grid-cols-3">
-              {offer.plans.slice(1).map((plan) => (
-                <article key={plan.name} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">{plan.name}</p>
-                  <p className="mt-3 text-2xl font-black text-slate-700">{plan.price}</p>
-                  {plan.subprice ? <p className="mt-1 text-xs font-bold text-slate-500">{plan.subprice}</p> : null}
-                  {plan.bestFor ? <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">{plan.bestFor}</p> : null}
-                </article>
-              ))}
+          {/* Risk reversal — the real unlock for an early brand: free pilot + guarantee. */}
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-6 text-emerald-950">
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-700">{offer.foundingProgram.pilot.label}</p>
+              <p className="mt-2 text-sm font-semibold leading-7">{offer.foundingProgram.pilot.body}</p>
             </div>
-            <p className="mt-4 text-xs font-semibold leading-6 text-slate-400">
-              {offer.breakEvenDisclaimer}
-            </p>
+            <div className="rounded-[2rem] border border-cyan-200 bg-white p-6 text-slate-800">
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-700">{offer.foundingProgram.guarantee.label}</p>
+              <p className="mt-2 text-sm font-semibold leading-7">{offer.foundingProgram.guarantee.body}</p>
+            </div>
           </div>
 
+          {/* How it's priced (model only — no numbers). */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {offer.pricingModel.map((m) => (
+              <span key={m} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600">{m}</span>
+            ))}
+          </div>
+
+          {/* ROI framing — recovered dollars vs. the fee, illustrative (never per-learner). */}
           <div className="mt-8 rounded-[2rem] border border-cyan-100 bg-cyan-50 p-6 text-cyan-950">
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">Sales math</p>
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-cyan-700">The math that matters</p>
             <p className="mt-3 text-lg font-black">{offer.roiLine}</p>
-            <p className="mt-2 text-sm font-semibold leading-6">One recovered session ≈ 2 billable hours ≈ ~$155 collected. A clinic losing 20+ sessions a month — well within the industry 24–38% cancellation range — recovers a Recovery Core plan several times over, and watches it on the scoreboard. (Illustrative; validated in your pilot.)</p>
+            <p className="mt-2 text-sm font-semibold leading-6">Run your own numbers in the Lost Hours Calculator — recovering even a handful of cancelled sessions a month can cover a plan and show up on your scoreboard. (Illustrative; validated against your real numbers in the pilot.)</p>
+            <p className="mt-3 text-xs font-semibold leading-6 text-cyan-900/70">{offer.breakEvenDisclaimer}</p>
           </div>
         </section>
 

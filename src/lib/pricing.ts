@@ -1,76 +1,73 @@
+// ============================================================================
+// PUBLIC PRICING — intentionally NUMBERLESS.
+// ----------------------------------------------------------------------------
+// The public site shows a "Founding Clinic Program" with a demo CTA — no tiers,
+// no dollar figures. We quote exact pricing per clinic from a private sheet AFTER
+// a pilot proves the lift, and founding clinics lock their rate for life.
+//
+// Why numberless:
+//   • As an early/unknown brand we don't yet have the data to publish a permanent
+//     number — so we never publish one we'd have to walk back.
+//   • Every conversation is anchored to RECOVERED DOLLARS vs. the fee — never to
+//     per-learner math, which would make an add-on look pricier than the EMR it
+//     sits beside.
+//   • The model we DO lock: priced by clinic size (active learners), unlimited
+//     staff + caregiver seats, free pilot, grandfathered founding rates.
+//
+// Exact tiers live in docs/INTERNAL_PRICING_SHEET.md (NOT rendered, NOT public).
+// ============================================================================
 export const offer = {
   positioning: "Keep your current EMR. Add Infinite Suite OS™ beside it.",
   marketLine: "Competitors manage the record. Infinite recovers the hour — and proves it.",
-  pricingModel: ["Performance pilot to prove the lift", "Flat per-site plans to scale", "Unlimited staff + caregiver seats"],
-  // Strategy: performance pricing is the FOUNDING PROOF tool (cleanest way to show the
-  // recovered-dollar lift). Clinics then convert to flat per-site tiers, which scale with
-  // site count and avoid monthly "what counts as recovered" disputes.
-  plans: [
-    {
-      name: "Founding Pilot",
-      price: "Performance-based",
-      subprice: "90-day proof window · 1–2 clinics per cohort",
-      bestFor: "Best for proving the lift before you pay a flat fee",
-      details: [
-        "we measure your current recovery rate first",
-        "you pay a small share only of what we recover above that line",
-        "no flat fee during the proof window",
-        "see the recovered-hour number before you commit"
-      ]
+
+  foundingProgram: {
+    eyebrow: "Founding Clinic Program",
+    headline: "Founding Clinic Program",
+    limited: "Limited to the first 10 clinics.",
+    subhead:
+      "Keep your EMR. Add Infinite beside it to recover lost operational value. We price against what it actually recovers for your clinic — proven in a pilot first, then locked in for life.",
+    includes: [
+      "No EMR migration — Infinite runs beside your current system",
+      "Unlimited staff seats — never penalized for turnover, substitutes, or supervisors",
+      "Unlimited caregiver seats",
+      "Founder-led onboarding",
+      "Founding pricing, locked for life for the first 10 clinics",
+      "Month-to-month — no annual lock-in"
+    ],
+    pilot: {
+      label: "Free design-partner pilot",
+      body:
+        "The first 1–2 clinics start on a free 3–6 month pilot — you see your recovered-hour number before you pay anything."
     },
-    {
-      name: "Recovery Core",
-      price: "~$1,000 / site / month",
-      subprice: "break-even ≈ 7 recovered sessions/mo",
-      bestFor: "Best for cancellations, callouts, recovery routing, scorecard",
-      details: [
-        "the full recovery cascade + scoreboard",
-        "note-gating compliance (clean claims)",
-        "unlimited staff + caregiver seats",
-        "no implementation fee on pilot conversion"
-      ]
+    guarantee: {
+      label: "Recover, or don't pay",
+      body:
+        "If Infinite doesn't recover a meaningful, agreed-upon number of hours in your first 90 days, you don't pay for them."
     },
-    {
-      name: "Core + Compliance",
-      price: "~$1,500 / site / month",
-      subprice: "break-even ≈ 10 recovered sessions/mo",
-      bestFor: "Best for recovery plus documentation readiness and proof packets",
-      details: [
-        "everything in Recovery Core",
-        "Compliance Sentinel proof packets",
-        "documentation-defect tracking before export"
-      ]
-    },
-    {
-      name: "Full Stack",
-      price: "~$2,000–2,500 / site / month",
-      subprice: "+ API Integration Hub",
-      bestFor: "Best for API Hub, exports, larger operational workflow",
-      details: [
-        "everything in Core + Compliance",
-        "export bridges beside your current EMR",
-        "priced around recovered operational value",
-        "Enterprise (multi-site): custom, per-site — scales with site count"
-      ]
+    cta: {
+      label: "Book a demo for a custom proposal",
+      note: "We'll run the recovery calculator with you on the call — your pricing follows your numbers."
     }
-  ],
-  // Realistic anchor: 1 recovered session ≈ 2 billable hrs × ~$77 collected ≈ ~$155.
-  // (Illustrative — validate against real payer mix.)
-  salesMath: {
-    sessionsRecovered: 7,
-    hoursPerSession: 2,
-    ratePerHour: 77,
-    monthlyRecoveredValue: 1078
   },
-  roiLine: "If Infinite Suite OS™ recovers just a few missed sessions per month, it can begin paying for itself.",
-  breakEvenDisclaimer: "Break-even estimates assume an average recovered session value of about $150. Actual value depends on session length, reimbursement rate, payer mix, and recovery workflow.",
-  tiersHeading: "Where pricing lands after your pilot",
-  tiersFraming: "Founding clinics lock in founding rates. We set your standard plan together once the 90-day pilot shows what Infinite Suite OS™ actually recovers for you — so you choose a tier against a proven number, not a guess. Figures below are directional.",
+
+  // What we lock publicly (the model), without committing to a number.
+  pricingModel: [
+    "Priced by clinic size — not per user",
+    "Unlimited staff + caregiver seats",
+    "A free pilot proves the lift before you pay"
+  ],
+
+  // ROI framing — ALWAYS lead with recovered dollars vs. the fee, never per-learner math.
+  salesMath: { sessionsRecovered: 7, hoursPerSession: 2, ratePerHour: 77, monthlyRecoveredValue: 1078 },
+  roiLine: "If Infinite Suite OS™ recovers just a few missed sessions a month, it can begin paying for itself.",
+  breakEvenDisclaimer:
+    "Recovery and dollar figures are illustrative and depend on session length, reimbursement rate, payer mix, and recovery workflow — validated against your real numbers in the pilot. This is not a billing or clinical system of record.",
+
   objections: [
     ["We already have an EMR.", "Keep it. Infinite sits beside it — no migration."],
-    ["Per-user pricing gets expensive.", "Flat per-site. Unlimited staff and caregiver seats."],
-    ["We don't know if it will work.", "Founding pilot is performance-based — you see the recovered-hour number before you pay a flat fee."],
-    ["Why not just pay you a percentage forever?", "Flat pricing is predictable, avoids monthly disputes over what counts as 'recovered,' and scales with you through site count — not by taxing your success."],
-    ["Our biggest pain is staff turnover.", "Recovery + note-gating protect hours and clean claims; the retention relief follows from a clinic that isn't drowning in lost hours and late notes."]
+    ["Per-user pricing gets expensive.", "We don't charge per user. Pricing is by clinic size, with unlimited staff and caregiver seats."],
+    ["We don't know if it will work.", "That's what the free pilot is for — you see the recovered-hour number before you pay anything."],
+    ["We're cautious about a newer vendor.", "Start free, stay month-to-month, and keep your EMR. If it doesn't recover hours, you don't pay."],
+    ["Our biggest pain is staff turnover.", "Recovering lost hours and gating clean notes takes pressure off the floor — the retention relief follows a clinic that isn't drowning in lost hours."]
   ]
 } as const;

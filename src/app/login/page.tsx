@@ -64,7 +64,7 @@ function LoginForm() {
           : "Sign in to your private workspace."}
       </p>
       <p className="mt-2 text-xs leading-5 text-slate-500">
-        {isOwner ? "Demo owner login: demo@infinitepieces.ai / infinitedemo" : null}
+        {isOwner ? "Demo owner login: demo@company.com / infinitecompany" : null}
       </p>
 
       {errorMessage ? (

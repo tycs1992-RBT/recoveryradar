@@ -28,8 +28,13 @@ export const authOptions: NextAuthOptions = {
         const email = credentials?.email?.toLowerCase() ?? "";
         const password = credentials?.password ?? "";
 
-        // Founder workspace login (internal growth/intel suite).
-        const founderEmail = (process.env.DEMO_ADMIN_EMAIL ?? "founders@infinitepieces.ai").toLowerCase();
+        // Founder / worker login — the private internal lead-gen suite (for me and my
+        // staff). This is the SENSITIVE login, so its password stays environment-gated
+        // (never hard-coded — this repo is public). It is checked FIRST, so its email
+        // MUST be different from the owner demo email below; otherwise the demo login
+        // would match here and land on the founder view instead of the owner dashboard.
+        // In production set DEMO_ADMIN_EMAIL + DEMO_ADMIN_PASSWORD in Vercel.
+        const founderEmail = (process.env.DEMO_ADMIN_EMAIL ?? "worker@infinitepieces.ai").toLowerCase();
         const founderPassword = process.env.DEMO_ADMIN_PASSWORD ?? (isProd ? "" : "infinitemark2026");
         if (founderPassword && email === founderEmail && password === founderPassword) {
           return {
@@ -40,9 +45,13 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // Owner workspace login — clinic CEO's Recovery Radar dashboard (demo tenant).
-        const ownerEmail = (process.env.DEMO_OWNER_EMAIL ?? "demo@infinitepieces.ai").toLowerCase();
-        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? "infinitedemo";;
+        // Owner demo login — the clinic CEO's Recovery Radar dashboard (demo tenant).
+        // This is a PUBLIC showcase login: its credentials are shown on the login page
+        // and it only exposes demo aggregate data (no PHI), so it's enabled in production.
+        // Distinct from the founder/worker email above so the two never collide.
+        // Override in Vercel with DEMO_OWNER_EMAIL / DEMO_OWNER_PASSWORD if you want.
+        const ownerEmail = (process.env.DEMO_OWNER_EMAIL ?? "demo@company.com").toLowerCase();
+        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? "infinitecompany";
         if (ownerPassword && email === ownerEmail && password === ownerPassword) {
           return {
             id: "demo-owner",
