@@ -2,13 +2,33 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { navItems } from "@/lib/constants";
+import { navItems, primaryNavHrefs } from "@/lib/constants";
 import { roleLabel } from "@/lib/rbac";
 
 export async function AppShell({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
   const role = (session?.user as { role?: "admin" | "growth" | "viewer" } | undefined)?.role;
   const email = session?.user?.email ?? "Founders";
+
+  const primaryItems = navItems.filter((i) => primaryNavHrefs.includes(i.href));
+  const moreItems = navItems.filter((i) => !primaryNavHrefs.includes(i.href));
+  const renderItem = (item: (typeof navItems)[number]) => {
+    const initials = item.label.split(" ").map((word) => word[0]).join("").slice(0, 2).toUpperCase();
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className="workspace-nav-item group flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
+        title={item.label}
+      >
+        <span className="sidebar-collapsed-nav-label hidden">{initials}</span>
+        <span className="sidebar-label min-w-0 truncate">{item.label}</span>
+        <span className="sidebar-eyebrow text-[10px] font-medium uppercase tracking-wide text-slate-400 group-hover:text-slate-500">
+          {item.eyebrow}
+        </span>
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -34,29 +54,16 @@ export async function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="workspace-nav min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
-          {navItems.map((item) => {
-            const initials = item.label
-              .split(" ")
-              .map((word) => word[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase();
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="workspace-nav-item group flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
-                title={item.label}
-              >
-                <span className="sidebar-collapsed-nav-label hidden">{initials}</span>
-                <span className="sidebar-label min-w-0 truncate">{item.label}</span>
-                <span className="sidebar-eyebrow text-[10px] font-medium uppercase tracking-wide text-slate-400 group-hover:text-slate-500">
-                  {item.eyebrow}
-                </span>
-              </Link>
-            );
-          })}
+          {primaryItems.map(renderItem)}
+          {moreItems.length > 0 && (
+            <details className="workspace-more group mt-2 border-t border-slate-100 pt-2">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-slate-500 transition hover:bg-slate-100">
+                <span className="sidebar-label min-w-0 truncate">More tools</span>
+                <span className="sidebar-eyebrow text-xs text-slate-400 transition group-open:rotate-90">›</span>
+              </summary>
+              <div className="mt-1 space-y-1">{moreItems.map(renderItem)}</div>
+            </details>
+          )}
         </nav>
 
         <details className="workspace-account mt-4 shrink-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">

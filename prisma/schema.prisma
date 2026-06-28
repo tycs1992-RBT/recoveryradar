@@ -349,3 +349,43 @@ model SuppressionListEntry {
   @@index([domain])
   @@index([createdAt])
 }
+
+/// New Clinic Watch — manually curated newly-opened / opening ABA clinics + their
+/// public social links. Single-workspace (Tyler's internal prospecting). No PHI.
+model ClinicWatch {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  status    String   @default("Opening soon") // "Opening soon" | "Newly opened"
+  location  String?
+  website   String?
+  facebook  String?
+  instagram String?
+  notes     String?  @db.Text
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Visitor Intel — company-level reverse-IP signals on who's browsing the public
+/// site (especially high-intent pages like pricing/calculator). Best-effort:
+/// corporate networks resolve to a company; residential/mobile IPs resolve only
+/// to their ISP. A B2B intent signal, not personal tracking.
+model VisitorIntel {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  path         String
+  ip           String?
+  company      String?
+  city         String?
+  region       String?
+  country      String?
+  referer      String?
+  userAgent    String?  @db.Text
+  isHighIntent Boolean  @default(false)
+
+  @@index([createdAt])
+  @@index([company])
+  @@index([isHighIntent])
+}

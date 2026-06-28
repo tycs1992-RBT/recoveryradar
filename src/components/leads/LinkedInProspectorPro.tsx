@@ -3,6 +3,15 @@
 import { useMemo, useState } from "react";
 import { EditableNumberInput } from "@/components/ui/EditableNumberInput";
 
+// Builds a pre-filled Google search restricted to a social network for a given
+// person + company. We can't reliably auto-resolve a person's personal FB/IG
+// (private, unindexed, name collisions), so we hand the user a one-click search
+// to find and VERIFY the profile manually before saving it.
+function socialSearch(network: "facebook" | "instagram", name: string, company: string) {
+  const co = company && !/review profile/i.test(company) ? ` ${company}` : "";
+  return `https://www.google.com/search?q=${encodeURIComponent(`site:${network}.com "${name}"${co}`)}`;
+}
+
 type ExecutiveProspect = {
   id: string;
   name: string;
@@ -192,7 +201,7 @@ export function LinkedInProspectorPro() {
               </button>
             </div>
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-600">Search indexed public LinkedIn profile snippets for executives. Results are alphabetized and can be saved to the Intelligence Bank.</p>
+          <p className="mt-4 text-sm leading-6 text-slate-600">Search indexed public LinkedIn profile snippets for executives. Results are alphabetized and can be saved to the Intelligence Bank. Each row also has one-click Facebook and Instagram searches to help you find and verify a person&rsquo;s other public profiles manually.</p>
           <div className="mt-6 space-y-4">
             <label className="block space-y-2"><span className="label">Company / niche keywords, one per line</span><textarea className="input min-h-28" value={keywordsText} onChange={(event) => setKeywordsText(event.target.value)} /></label>
             <label className="block space-y-2"><span className="label">Location / market</span><input className="input" value={location} onChange={(event) => setLocation(event.target.value)} /></label>
@@ -224,7 +233,14 @@ export function LinkedInProspectorPro() {
                   <td className="px-4 py-4 align-top font-black text-slate-950">{prospect.name}</td>
                   <td className="px-4 py-4 align-top text-slate-700">{prospect.title}</td>
                   <td className="px-4 py-4 align-top text-slate-700">{prospect.company}</td>
-                  <td className="px-4 py-4 align-top"><a href={prospect.profileUrl} target="_blank" rel="noreferrer" className="font-bold underline">LinkedIn</a><p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">{prospect.snippet}</p></td>
+                  <td className="px-4 py-4 align-top">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <a href={prospect.profileUrl} target="_blank" rel="noreferrer" className="font-bold text-sky-700 underline">LinkedIn</a>
+                      <a href={socialSearch("facebook", prospect.name, prospect.company)} target="_blank" rel="noreferrer" title="Opens a pre-filled Facebook search — verify it's the right person before saving" className="text-xs font-bold text-blue-700 underline">Search FB</a>
+                      <a href={socialSearch("instagram", prospect.name, prospect.company)} target="_blank" rel="noreferrer" title="Opens a pre-filled Instagram search — verify it's the right person before saving" className="text-xs font-bold text-pink-700 underline">Search IG</a>
+                    </div>
+                    <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">{prospect.snippet}</p>
+                  </td>
                   <td className="px-4 py-4 align-top"><span className="badge bg-emerald-50 text-emerald-700">{prospect.confidence}/100</span></td>
                 </tr>
               ))}

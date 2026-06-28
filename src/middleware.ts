@@ -32,6 +32,9 @@ export const config = {
     "/campaign-planner/:path*",
     "/analytics/:path*",
     "/audit-suggestions/:path*",
-    "/settings/:path*"
+    "/settings/:path*",
+    "/new-clinic-watch/:path*",
+    "/visitor-intel/:path*",
+    "/npi-radar/:path*"
   ]
 };

@@ -56,6 +56,9 @@ export const navItems = [
   { href: "/executive-prospector", label: "Executive Prospector", eyebrow: "Execs" },
   { href: "/intelligence-bank", label: "Intelligence Bank", eyebrow: "Deduped" },
   { href: "/lead-finder", label: "Social Source Finder", eyebrow: "Signals" },
+  { href: "/new-clinic-watch", label: "New Clinic Watch", eyebrow: "Clinic socials" },
+  { href: "/visitor-intel", label: "Visitor Intel", eyebrow: "Who's shopping" },
+  { href: "/npi-radar", label: "New Clinic Radar", eyebrow: "NPI registrations" },
   { href: "/keyword-radar", label: "Keyword Radar", eyebrow: "SEO + ads" },
   { href: "/seo-command-center", label: "SEO Command Center", eyebrow: "Keywords" },
   { href: "/seo-page-factory", label: "SEO Page Factory", eyebrow: "Publish pages" },
@@ -72,6 +75,24 @@ export const navItems = [
   { href: "/analytics", label: "Analytics", eyebrow: "Conversion" },
   { href: "/audit-suggestions", label: "Audit Suggestions", eyebrow: "Action board" },
   { href: "/settings", label: "Settings", eyebrow: "Compliance" }
+];
+
+// The handful of tabs that matter day-to-day. Everything else collapses under a
+// "More tools" disclosure in the sidebar so the workspace stops overwhelming.
+// Nothing is removed — just tucked away until it's needed.
+export const primaryNavHrefs = [
+  "/dashboard",
+  "/seo-page-factory",
+  "/seo-command-center",
+  "/executive-prospector",
+  "/new-clinic-watch",
+  "/visitor-intel",
+  "/npi-radar",
+  "/outreach",
+  "/outreach-approval",
+  "/crm",
+  "/calculator",
+  "/quiz"
 ];
 
 export const keywordGroups = [
@@ -285,3 +306,9 @@ export const compliancePrinciples = [
   "Include truthful sender details, postal address and opt-out instructions in commercial emails.",
   "Audit access, consent and status changes."
 ];
+
+// Demo booking link. Set NEXT_PUBLIC_BOOKING_URL to your Calendly/Cal.com link
+// and every "Book a demo" button uses it. Falls back to email until you do.
+export const bookingHref =
+  process.env.NEXT_PUBLIC_BOOKING_URL ||
+  "mailto:founders@infinitepieces.ai?subject=Infinite%20Suite%20OS%20demo%20request";

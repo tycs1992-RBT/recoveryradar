@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VisitorBeacon } from "@/components/analytics/VisitorBeacon";
 
 // Names presented publicly with a ™ common-law claim. Distinctive marks (worth federal
 // filing) and descriptive ones (™ only, weak for registration) are listed together here —
@@ -24,6 +25,7 @@ export function MarketingFooter() {
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-slate-200 bg-slate-50">
+      <VisitorBeacon />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 font-black tracking-tight text-slate-950">
@@ -36,6 +38,8 @@ export function MarketingFooter() {
           <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold text-slate-600">
             <Link href="/lost-hours-calculator" className="hover:text-slate-900">Lost Hours Calculator</Link>
             <Link href="/topics" className="hover:text-slate-900">ABA Topics</Link>
+            <Link href="/compare" className="hover:text-slate-900">Compare</Link>
+            <Link href="/playbook" className="hover:text-slate-900">Playbook</Link>
             <Link href="/school-portal" className="hover:text-slate-900">School edition</Link>
             <Link href="/trademarks" className="hover:text-slate-900">Trademarks</Link>
           </nav>

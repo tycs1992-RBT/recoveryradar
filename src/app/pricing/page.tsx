@@ -40,6 +40,7 @@ const faqs: [string, string][] = [
 export default function PricingPage() {
   const fp = offer.foundingProgram;
   const demoHref =
+    process.env.NEXT_PUBLIC_BOOKING_URL ||
     "mailto:founders@infinitepieces.ai" +
     "?subject=" +
     encodeURIComponent("Demo request — Infinite Suite OS Founding Clinic Program") +
