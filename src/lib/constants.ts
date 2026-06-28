@@ -1,5 +1,5 @@
 export const coreMessage =
-  "Keep your current EMR. Add Infinite Suite beside it. Recover lost hours, support staff and caregivers, and prepare cleaner, review-ready documentation.";
+  "Keep your current EMR. Add Infinite Suite beside it so the care your clients are already approved for actually gets delivered when sessions cancel — and so you can see it's producing progress, not just hours. Support staff and caregivers with cleaner, review-ready documentation. Infinite never sets or recommends a child's hours; the BCBA owns the plan.";
 
 export const primaryCta =
   "Go to demo.infinitepieces.ai, review the lost-hours homepage, then click Provider Portal to enter the mock operating system.";

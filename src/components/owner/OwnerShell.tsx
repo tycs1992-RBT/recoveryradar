@@ -4,6 +4,7 @@ import Link from "next/link";
 const ownerNav = [
   { href: "/recovery-radar", label: "Radar Overview" },
   { href: "/recovery-radar/learners", label: "By Site & Setting" },
+  { href: "/recovery-radar/outcomes", label: "Outcomes" },
   { href: "/recovery-radar/waterfall", label: "Recovery Waterfall" },
   { href: "/recovery-radar/pulse", label: "Staff Pulse" },
   { href: "/recovery-radar/alerts", label: "Alerts" },

@@ -62,6 +62,22 @@ export type StaffPulse = {
   interventions: Intervention[];  // plays the owner can fund from the recovered budget
 };
 
+/** Outcomes — aggregate, clinician-entered goal progress. Answers "are recovered
+ *  (already-authorized) hours actually producing progress — not just getting billed?"
+ *  AGGREGATE ONLY — never a single child. Infinite DISPLAYS clinician-entered progress;
+ *  it never sets, recommends, or optimizes a child's hours. The BCBA owns the plan. */
+export type OutcomeDomain = { domain: string; goalsTracked: number; onTrackPct: number; trend: "up" | "down" | "flat" };
+export type OutcomeSetting = { setting: "In-home" | "Center" | "School"; goalsOnTrackPct: number; recoveredHoursShare: number };
+export type Outcomes = {
+  goalsOnTrackPct: number;        // clinic-wide % of active goals progressing (current period)
+  status: Status;
+  masteredThisPeriod: number;     // aggregate goals mastered this period
+  weeklyProgress: { weekLabel: string; onTrackPct: number }[];
+  recoveredVsProgress: { weekLabel: string; recoveredSessions: number; onTrackPct: number }[];
+  byDomain: OutcomeDomain[];
+  bySetting: OutcomeSetting[];
+};
+
 export type OwnerRadarData = {
   clinicName: string;
   periodLabel: string;
@@ -83,6 +99,7 @@ export type OwnerRadarData = {
   byMethod: MethodBreakdown[];
   alerts: AlertItem[];
   staffPulse: StaffPulse;
+  outcomes: Outcomes;
 };
 
 const DEMO_CLINIC: OwnerRadarData = {
@@ -157,6 +174,35 @@ const DEMO_CLINIC: OwnerRadarData = {
       { title: "Quota bonus for hitting recovery target", detail: "Reward staff at red sites for meeting the weekly recovery quota. The recovered hours more than cover the bonus pool.", estCost: 6000, lever: "Bonus pool" },
       { title: "Restock materials & reinforcer kits", detail: "\u201cNeed better materials\u201d is a recurring concern theme. Refresh kits for the two red sites.", estCost: 2500, lever: "Materials" },
       { title: "Clinic appreciation event", detail: "A team event lifts morale broadly — most cost-effective when a site has climbed back toward green.", estCost: 1800, lever: "Recognition" }
+    ]
+  },
+  outcomes: {
+    goalsOnTrackPct: 76,
+    status: "green",
+    masteredThisPeriod: 34,
+    weeklyProgress: [
+      { weekLabel: "Wk 1", onTrackPct: 68 },
+      { weekLabel: "Wk 2", onTrackPct: 70 },
+      { weekLabel: "Wk 3", onTrackPct: 73 },
+      { weekLabel: "Wk 4", onTrackPct: 76 }
+    ],
+    recoveredVsProgress: [
+      { weekLabel: "Wk 1", recoveredSessions: 21, onTrackPct: 68 },
+      { weekLabel: "Wk 2", recoveredSessions: 27, onTrackPct: 70 },
+      { weekLabel: "Wk 3", recoveredSessions: 26, onTrackPct: 73 },
+      { weekLabel: "Wk 4", recoveredSessions: 27, onTrackPct: 76 }
+    ],
+    byDomain: [
+      { domain: "Functional communication", goalsTracked: 86, onTrackPct: 81, trend: "up" },
+      { domain: "Daily living skills", goalsTracked: 64, onTrackPct: 74, trend: "up" },
+      { domain: "Social skills", goalsTracked: 58, onTrackPct: 70, trend: "flat" },
+      { domain: "Safety & behavior reduction", goalsTracked: 47, onTrackPct: 72, trend: "up" },
+      { domain: "School readiness", goalsTracked: 39, onTrackPct: 66, trend: "down" }
+    ],
+    bySetting: [
+      { setting: "Center", goalsOnTrackPct: 79, recoveredHoursShare: 47 },
+      { setting: "In-home", goalsOnTrackPct: 73, recoveredHoursShare: 41 },
+      { setting: "School", goalsOnTrackPct: 66, recoveredHoursShare: 12 }
     ]
   }
 };

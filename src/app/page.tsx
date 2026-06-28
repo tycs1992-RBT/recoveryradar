@@ -58,7 +58,7 @@ export default function HomePage() {
               </h1>
               <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">{offer.positioning}</p>
               <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-slate-600">
-                Recover lost hours, reduce scheduler scramble, support staff, improve caregiver communication, and create cleaner proof packets without starting with a full EMR migration.
+                When a session cancels, Infinite recovers the care a child was already approved for — restoring continuity, not adding hours — while it reduces scheduler scramble, supports staff, improves caregiver communication, and produces cleaner proof packets. No full EMR migration.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">Calculate lost hours</Link>
@@ -72,11 +72,19 @@ export default function HomePage() {
             <div className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-[0_24px_90px_rgba(6,17,37,.18)]">
               <img src={visualAssets.hero} alt="Infinite Pieces AI recovery workflow visual" className="w-full rounded-[1.5rem] object-cover" />
               <div className="mt-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
-                <p className="font-black text-slate-950">Founding Pilot — prove it on our dime</p>
-                <p className="mt-2 text-2xl font-black text-slate-950">Performance-based · 90 days</p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">We measure your current recovery rate first, then you pay a small share only of what we recover above it. See the recovered-hour number before you ever commit to a plan. Unlimited staff + caregiver seats.</p>
+                <p className="font-black text-slate-950">Founding Clinic Program — first 10 clinics</p>
+                <p className="mt-2 text-2xl font-black text-slate-950">Free pilot · keep your EMR</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">Start on a free design-partner pilot: see the care you recover — and whether it&rsquo;s moving outcomes — before you pay anything. Infinite never adds or recommends hours; it delivers the ones already authorized. Unlimited staff + caregiver seats.</p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Care frame — answers "isn't this just more hours/revenue?" up front. */}
+        <section className="border-y border-cyan-100 bg-cyan-50/40">
+          <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-cyan-700">{offer.careFrameTag}</p>
+            <p className="mt-3 text-lg font-bold leading-8 text-slate-800">{offer.careFrame}</p>
           </div>
         </section>
 

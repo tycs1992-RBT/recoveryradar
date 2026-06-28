@@ -10,6 +10,33 @@ export const metadata = {
   robots: { index: true, follow: true }
 };
 
+// Clinical-integrity FAQ — the questions a clinical buyer asks after the
+// "hours billed vs. outcomes" debate. Lives here (pricing-page-specific). The
+// generic sales objections (offer.objections) are filtered to avoid repeating
+// the "billing more hours" item, which gets its full answer below.
+const faqs: [string, string][] = [
+  [
+    "Isn't this just a way to bill more hours?",
+    "No. Infinite never adds or recommends hours — the BCBA sets every child's plan. It recovers sessions that were already authorized and then lost to a cancellation or callout, so the care a family was already promised actually happens. That's continuity of approved care, not more of it — and the Outcomes view shows whether those hours are producing progress, not just that they were billed."
+  ],
+  [
+    "Does Infinite decide how many hours a child gets?",
+    "Never. Dosage and the clinical plan belong to the BCBA, full stop. Infinite is dosage-agnostic: it delivers whatever was authorized — whether that's 12 hours a week or 40 — and surfaces whether it's working. It makes no clinical recommendations and sets no targets."
+  ],
+  [
+    "Is Infinite a clinical or billing system of record?",
+    "No. Infinite runs beside your EMR as an operational layer — recovering authorized sessions and rolling up progress. Your EMR stays the source of truth for clinical documentation and billing. There's no migration and nothing to rip out."
+  ],
+  [
+    "Where does the Outcomes data come from — is it per-child?",
+    "It's the goal progress your clinicians already record, rolled up to clinic, setting, and domain level. Owners and directors see aggregates only — never an individual child's record. Client-level detail stays inside the clinical workflow, role-restricted to the people assigned to that child."
+  ],
+  [
+    "How is pricing set if there are no numbers on this page?",
+    "Pricing follows your clinic's size and what Infinite actually recovers for you — proven in a free pilot first, then locked for life for the first 10 founding clinics. We build the proposal with you on a call using your real numbers, so the price always maps to the value."
+  ]
+];
+
 export default function PricingPage() {
   const fp = offer.foundingProgram;
   const demoHref =
@@ -53,6 +80,14 @@ export default function PricingPage() {
               {fp.cta.label} →
             </a>
             <p className="mt-2 text-xs font-semibold text-slate-400">{fp.cta.note}</p>
+          </div>
+        </section>
+
+        {/* Care frame — precision over volume */}
+        <section className="border-b border-cyan-100 bg-cyan-50/40">
+          <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-cyan-700">{offer.careFrameTag}</p>
+            <p className="mt-3 text-lg font-bold leading-8 text-slate-800">{offer.careFrame}</p>
           </div>
         </section>
 
@@ -109,13 +144,33 @@ export default function PricingPage() {
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">Straight answers</p>
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {offer.objections.map(([question, answer]) => (
+              {offer.objections.filter(([q]) => !q.toLowerCase().includes("billing more")).map(([question, answer]) => (
                 <div key={question} className="rounded-2xl border border-slate-200 bg-white p-5">
                   <p className="text-sm font-black text-slate-900">{question}</p>
                   <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{answer}</p>
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* FAQ — clinical integrity & how it works (native accordion, no JS) */}
+        <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">Questions clinical leaders ask</p>
+          <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Precision over volume — in practice</h2>
+          <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-600">
+            Recovering a cancelled session delivers care a child is already approved for. Infinite never sets or recommends a child&rsquo;s hours — that&rsquo;s the BCBA&rsquo;s call. Here&rsquo;s how that line stays clean.
+          </p>
+          <div className="mt-7 space-y-3">
+            {faqs.map(([q, a]) => (
+              <details key={q} className="group rounded-2xl border border-slate-200 bg-white p-5 open:bg-slate-50/60">
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-base font-black text-slate-900 marker:hidden">
+                  <span>{q}</span>
+                  <span className="mt-0.5 shrink-0 text-lg leading-none text-cyan-600 transition group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{a}</p>
+              </details>
+            ))}
           </div>
         </section>
 
