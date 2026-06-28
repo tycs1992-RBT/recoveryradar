@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
 
         // Owner workspace login — clinic CEO's Recovery Radar dashboard (demo tenant).
         const ownerEmail = (process.env.DEMO_OWNER_EMAIL ?? "demo@infinitepieces.ai").toLowerCase();
-        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? (isProd ? "" : "infinitedemo");
+        const ownerPassword = process.env.DEMO_OWNER_PASSWORD ?? "infinitedemo";;
         if (ownerPassword && email === ownerEmail && password === ownerPassword) {
           return {
             id: "demo-owner",
