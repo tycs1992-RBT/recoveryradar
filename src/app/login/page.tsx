@@ -30,7 +30,10 @@ function LoginShell({ children, loadingMessage }: { children?: React.ReactNode; 
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  // Default landing is the provider workspace (the embedded Infinite Suite OS),
+  // so logging in always drops you into the sandbox regardless of how you reached
+  // this page. Owner/provider-specific callbackUrls still override this.
+  const callbackUrl = searchParams.get("callbackUrl") || "/provider-workspace";
   const isOwner = callbackUrl.includes("recovery-radar");
   const isProvider = callbackUrl.includes("provider-workspace");
   const error = searchParams.get("error");
