@@ -32,6 +32,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const isOwner = callbackUrl.includes("recovery-radar");
+  const isProvider = callbackUrl.includes("provider-workspace");
   const error = searchParams.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,10 +58,12 @@ function LoginForm() {
 
   return (
     <LoginShell>
-      <h1 className="mt-4 text-4xl font-black tracking-tight">{isOwner ? "Owner login" : "Team login"}</h1>
+      <h1 className="mt-4 text-4xl font-black tracking-tight">{isOwner ? "Owner login" : isProvider ? "Provider login" : "Team login"}</h1>
       <p className="mt-3 text-sm leading-6 text-slate-300">
         {isOwner
           ? "Your clinic's Recovery Radar™ dashboard — see how Infinite Suite OS™ is recovering hours across your sites."
+          : isProvider
+          ? "Sign in to the full Infinite Suite OS™ provider workspace."
           : "Sign in to your private workspace."}
       </p>
       <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -113,7 +116,7 @@ function LoginForm() {
 
       <div className="mt-5 flex items-center justify-between text-sm font-bold">
         <Link href="/" className="text-slate-300 hover:text-white">Back to public site</Link>
-        <Link href="/provider-portal" className="text-cyan-300 hover:text-cyan-200">Provider Portal</Link>
+        <Link href="/provider-portal" className="text-cyan-300 hover:text-cyan-200">Take a Tour</Link>
       </div>
     </LoginShell>
   );

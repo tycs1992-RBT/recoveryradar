@@ -78,6 +78,58 @@ export type Outcomes = {
   bySetting: OutcomeSetting[];
 };
 
+// ---- Hours & Utilization (operational hours; sourced from the suite today) ----
+export type UtilizationSite = { site: string; authUtilPct: number; staffUtilPct: number; deliveredHours: number; authorizedHours: number; status: Status };
+export type Utilization = {
+  authUtilizationPct: number;   // clinic-wide delivered authorized ÷ total authorized
+  staffUtilizationPct: number;  // clinic-wide billable ÷ available (healthy band ~85%)
+  status: Status;
+  authorizedHours: number;      // allotted this period
+  scheduledHours: number;
+  deliveredHours: number;       // rendered (includes recovered)
+  lostHours: number;            // cancelled and NOT recovered
+  recoveredHours: number;       // made up
+  weekly: { weekLabel: string; authUtilPct: number; staffUtilPct: number }[];
+  bySite: UtilizationSite[];
+};
+
+// ---- Finances (MVP source = manual/CSV entry; future = billing/clearinghouse integration) ----
+export type ArBucket = { label: string; amount: number };
+export type PayerSlice = { payer: string; sharePct: number };
+export type FinanceSite = { site: string; revenuePerHour: number; collectedPct: number; status: Status };
+export type Finances = {
+  source: "manual" | "billing-integration"; // swap marker — manual today, integration later
+  periodLabel: string;
+  billed: number;
+  collected: number;
+  netCollectionRatePct: number;
+  denialRatePct: number;
+  firstPassAcceptancePct: number;
+  daysInAR: number;
+  daysToBill: number;
+  revenuePerBillableHour: number;
+  recoveredDollars: number;     // recovered-hours $ shown in context of collected
+  arBuckets: ArBucket[];        // 0-30 / 31-60 / 61-90 / 90+
+  payerMix: PayerSlice[];
+  monthly: { monthLabel: string; billed: number; collected: number }[];
+  bySite: FinanceSite[];
+};
+
+// ---- Adoption / proof-of-use (sourced from suite telemetry) ----
+export type ModuleUsage = { module: string; usagePct: number; weeklyActive: number; trend: "up" | "down" | "flat" };
+export type AdoptionSite = { site: string; adoptionPct: number; status: Status };
+export type Adoption = {
+  overallActivePct: number;     // % of licensed staff active this week
+  status: Status;
+  loginsThisPeriod: number;
+  sessionsLoggedInApp: number;  // sessions documented through the app
+  caregiverAppActivePct: number;// % of caregivers active in Care Pocket
+  hoursTouchedBySystem: number; // hours that flowed through the suite this period
+  weeklyActive: { weekLabel: string; pct: number }[];
+  byModule: ModuleUsage[];      // which modules are used most
+  bySite: AdoptionSite[];
+};
+
 export type OwnerRadarData = {
   clinicName: string;
   periodLabel: string;
@@ -100,6 +152,9 @@ export type OwnerRadarData = {
   alerts: AlertItem[];
   staffPulse: StaffPulse;
   outcomes: Outcomes;
+  utilization: Utilization;
+  finances: Finances;
+  adoption: Adoption;
 };
 
 const DEMO_CLINIC: OwnerRadarData = {
@@ -203,6 +258,95 @@ const DEMO_CLINIC: OwnerRadarData = {
       { setting: "Center", goalsOnTrackPct: 79, recoveredHoursShare: 47 },
       { setting: "In-home", goalsOnTrackPct: 73, recoveredHoursShare: 41 },
       { setting: "School", goalsOnTrackPct: 66, recoveredHoursShare: 12 }
+    ]
+  },
+  utilization: {
+    authUtilizationPct: 80,
+    staffUtilizationPct: 83,
+    status: "amber",
+    authorizedHours: 5200,
+    scheduledHours: 4600,
+    deliveredHours: 4180,
+    lostHours: 420,
+    recoveredHours: 248,
+    weekly: [
+      { weekLabel: "Wk 1", authUtilPct: 74, staffUtilPct: 79 },
+      { weekLabel: "Wk 2", authUtilPct: 76, staffUtilPct: 80 },
+      { weekLabel: "Wk 3", authUtilPct: 78, staffUtilPct: 82 },
+      { weekLabel: "Wk 4", authUtilPct: 80, staffUtilPct: 83 }
+    ],
+    bySite: [
+      { site: "North Center", authUtilPct: 89, staffUtilPct: 86, deliveredHours: 1240, authorizedHours: 1393, status: "green" },
+      { site: "In-home — East", authUtilPct: 82, staffUtilPct: 84, deliveredHours: 880, authorizedHours: 1073, status: "green" },
+      { site: "Lincoln School", authUtilPct: 76, staffUtilPct: 81, deliveredHours: 690, authorizedHours: 908, status: "amber" },
+      { site: "In-home — West", authUtilPct: 73, staffUtilPct: 80, deliveredHours: 720, authorizedHours: 986, status: "amber" },
+      { site: "South Center", authUtilPct: 66, staffUtilPct: 78, deliveredHours: 650, authorizedHours: 985, status: "red" }
+    ]
+  },
+  finances: {
+    source: "manual",
+    periodLabel: "Last 30 days",
+    billed: 412000,
+    collected: 372000,
+    netCollectionRatePct: 90,
+    denialRatePct: 7,
+    firstPassAcceptancePct: 93,
+    daysInAR: 38,
+    daysToBill: 4,
+    revenuePerBillableHour: 89,
+    recoveredDollars: 38400,
+    arBuckets: [
+      { label: "0–30 days", amount: 84000 },
+      { label: "31–60 days", amount: 38000 },
+      { label: "61–90 days", amount: 19000 },
+      { label: "90+ days", amount: 12000 }
+    ],
+    payerMix: [
+      { payer: "Medicaid", sharePct: 54 },
+      { payer: "Commercial", sharePct: 33 },
+      { payer: "Other / private pay", sharePct: 13 }
+    ],
+    monthly: [
+      { monthLabel: "Mar", billed: 351000, collected: 309000 },
+      { monthLabel: "Apr", billed: 372000, collected: 332000 },
+      { monthLabel: "May", billed: 398000, collected: 356000 },
+      { monthLabel: "Jun", billed: 412000, collected: 372000 }
+    ],
+    bySite: [
+      { site: "North Center", revenuePerHour: 94, collectedPct: 93, status: "green" },
+      { site: "In-home — East", revenuePerHour: 88, collectedPct: 91, status: "green" },
+      { site: "Lincoln School", revenuePerHour: 86, collectedPct: 88, status: "amber" },
+      { site: "In-home — West", revenuePerHour: 87, collectedPct: 86, status: "amber" },
+      { site: "South Center", revenuePerHour: 84, collectedPct: 82, status: "red" }
+    ]
+  },
+  adoption: {
+    overallActivePct: 86,
+    status: "green",
+    loginsThisPeriod: 4820,
+    sessionsLoggedInApp: 3960,
+    caregiverAppActivePct: 71,
+    hoursTouchedBySystem: 4180,
+    weeklyActive: [
+      { weekLabel: "Wk 1", pct: 78 },
+      { weekLabel: "Wk 2", pct: 81 },
+      { weekLabel: "Wk 3", pct: 84 },
+      { weekLabel: "Wk 4", pct: 86 }
+    ],
+    byModule: [
+      { module: "Scheduler AI™", usagePct: 94, weeklyActive: 46, trend: "up" },
+      { module: "FieldPocket™", usagePct: 88, weeklyActive: 43, trend: "up" },
+      { module: "Care Pocket™ (caregiver)", usagePct: 71, weeklyActive: 132, trend: "up" },
+      { module: "SubPool™", usagePct: 63, weeklyActive: 31, trend: "up" },
+      { module: "Compliance Sentinel™", usagePct: 58, weeklyActive: 28, trend: "flat" },
+      { module: "Auth Utilization War Room™", usagePct: 41, weeklyActive: 12, trend: "up" }
+    ],
+    bySite: [
+      { site: "North Center", adoptionPct: 93, status: "green" },
+      { site: "In-home — East", adoptionPct: 88, status: "green" },
+      { site: "Lincoln School", adoptionPct: 81, status: "green" },
+      { site: "In-home — West", adoptionPct: 76, status: "amber" },
+      { site: "South Center", adoptionPct: 68, status: "amber" }
     ]
   }
 };

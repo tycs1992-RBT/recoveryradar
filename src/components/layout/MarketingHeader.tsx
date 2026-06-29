@@ -21,6 +21,13 @@ export function MarketingHeader() {
           <Link href="/playbook" className="font-black text-cyan-700">Playbook</Link>
           <Link href="/aba-keyword-bank">Keyword Bank</Link>
           <Link href="/trademarks">Trademarks</Link>
+          <Link
+            href="/provider-portal"
+            title="Take a guided tour of Infinite Suite OS™ — sample data, no PHI"
+            className="font-black text-cyan-700"
+          >
+            Take a Tour
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
           <Link
@@ -30,17 +37,17 @@ export function MarketingHeader() {
             Owner login
           </Link>
           <Link
-            href="/provider-portal"
+            href="/login?callbackUrl=/provider-workspace"
             className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-soft transition hover:bg-slate-800"
           >
-            Provider Portal
+            Provider login
           </Link>
           <Link
             href="/school-portal"
             title="School edition preview — take a look"
             className="hidden rounded-2xl border border-dashed border-cyan-400/60 bg-cyan-50/50 px-4 py-2 text-sm font-bold text-cyan-700/80 transition hover:border-cyan-400 hover:bg-cyan-50 hover:text-cyan-800 sm:inline-flex"
           >
-            School Portal
+            School login
           </Link>
         </div>
       </div>

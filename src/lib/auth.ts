@@ -63,6 +63,24 @@ export const authOptions: NextAuthOptions = {
           } as { id: string; name: string; email: string; role: AppRole; tenantId: string; clinicName: string };
         }
 
+        // Real PROVIDER login — Tyler's full finalized Infinite Suite OS (the provider
+        // operating system, not the demo tour). This is a REAL login into the actual
+        // suite, so like the founder login its password stays environment-gated (this
+        // repo is public — never hard-code the real password). The value below is a
+        // LOCAL-DEV fallback only; set PROVIDER_LOGIN_EMAIL / PROVIDER_LOGIN_PASSWORD in
+        // Vercel for production. Daniel replaces this single-credential check with real
+        // per-clinic accounts when the backend lands.
+        const providerEmail = (process.env.PROVIDER_LOGIN_EMAIL ?? "tyler@infinitepieces.ai").toLowerCase();
+        const providerPassword = process.env.PROVIDER_LOGIN_PASSWORD ?? (isProd ? "" : "infinitetyler");
+        if (providerPassword && email === providerEmail && password === providerPassword) {
+          return {
+            id: "provider-tyler",
+            name: process.env.PROVIDER_LOGIN_NAME ?? "Tyler — Infinite Pieces AI",
+            email: providerEmail,
+            role: "admin" as AppRole
+          };
+        }
+
         return null;
       }
     })
