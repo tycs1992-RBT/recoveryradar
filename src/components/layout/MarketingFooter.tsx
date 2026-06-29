@@ -40,7 +40,9 @@ export function MarketingFooter() {
             <Link href="/topics" className="hover:text-slate-900">ABA Topics</Link>
             <Link href="/compare" className="hover:text-slate-900">Compare</Link>
             <Link href="/playbook" className="hover:text-slate-900">Playbook</Link>
+            {/* School edition link temporarily closed off (way down the line). Un-comment to restore:
             <Link href="/school-portal" className="hover:text-slate-900">School edition</Link>
+            */}
             <Link href="/trademarks" className="hover:text-slate-900">Trademarks</Link>
           </nav>
         </div>

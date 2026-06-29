@@ -28,19 +28,22 @@ export function MarketingHeader() {
             Take a Tour
           </Link>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link
             href="/login?callbackUrl=/recovery-radar"
-            className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50 sm:inline-flex"
+            className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50 sm:inline-flex"
           >
             Owner login
           </Link>
           <Link
             href="/login?callbackUrl=/provider-workspace"
-            className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-soft transition hover:bg-slate-800"
+            className="rounded-2xl bg-slate-950 px-5 py-2 text-sm font-bold text-white shadow-soft transition hover:bg-slate-800"
           >
             Provider login
           </Link>
+          {/* SCHOOL LOGIN — temporarily closed off (school edition is way down the line).
+              Kept here to drop back in later: just un-comment this block. */}
+          {/*
           <Link
             href="/school-portal"
             title="School edition preview — take a look"
@@ -48,6 +51,7 @@ export function MarketingHeader() {
           >
             School login
           </Link>
+          */}
         </div>
       </div>
     </header>
