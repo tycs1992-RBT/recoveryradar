@@ -26,7 +26,7 @@ export default function CalculatorPage() {
             </div>
             <div className="rounded-2xl bg-white p-4 text-sm font-semibold leading-6 text-slate-700">
               <p className="font-black text-slate-950">The wedge:</p>
-              <p className="mt-2">This calculator only measures the bleed. The <Link href="/roi-simulator" className="font-black text-cyan-700 underline">Recovery ROI Simulator</Link> shows how much of it an Infinite Pieces recovery layer could put back.</p>
+              <p className="mt-2">This calculator measures the operational bleed from unrecovered hours so you can see the scale of the problem at a clinic level.</p>
             </div>
           </div>
         </section>

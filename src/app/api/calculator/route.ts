@@ -72,7 +72,7 @@ export async function POST(request: Request) {
           clinicSize: input.clients,
           leadScore: scoring.score,
           status: scoring.tier === "hot" ? "NEW" : "RESEARCHED",
-          nextStep: "Send lost-hours report and invite to the ROI Simulator",
+          nextStep: "Send the lost-hours report to the prospect",
           notes: [
             result.summary,
             "Consent text version: " + CONSENT_TEXT_VERSION,

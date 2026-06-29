@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   calculateLostHours,
   calculatorInputSchema,
@@ -69,7 +68,7 @@ function buildReportHtml(input: CalculatorInput, result: CalculatorResult) {
     ["At-risk billing / month (late notes)", currency(result.atRiskClaimDollarsMonthly)]
   ];
 
-  return `<!doctype html><html><head><meta charset="utf-8" /><title>Infinite Pieces — Lost Hours Report</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:32px;line-height:1.55}h1{font-size:30px;margin-bottom:6px}.eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#0891b2;font-size:12px}.box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin:18px 0}.dark{background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}th{background:#f8fafc}.cta{background:#ecfeff;border:1px solid #a5f3fc;border-radius:18px;padding:18px;margin-top:18px}</style></head><body><p class="eyebrow">Infinite Pieces AI · Lost Hours Calculator</p><h1>How much your clinic is losing to unrecovered hours.</h1><p>Generated ${htmlEscape(generatedAt)}. This report uses clinic-level estimates only and should not include PHI.</p><div class="box dark"><h2>${currency(result.annualRevenueLeakage)} a year in unrecovered hours</h2><p>${htmlEscape(result.summary)}</p></div><div class="grid"><div class="box"><h2>Clinic-level assumptions</h2><table>${rows.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div><div class="box"><h2>What you're losing</h2><table>${metrics.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div></div><div class="cta"><h2>That's the bleed. See how much of it you could recover.</h2><p>Next step: the Recovery ROI Simulator at https://www.infinitepieces.ai/roi-simulator</p><p>No-PHI disclaimer: do not submit patient names, dates of birth, insurance IDs, treatment notes or clinical details. These are clinic-level operating estimates, not a payer, billing, legal or compliance guarantee.</p></div></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8" /><title>Infinite Pieces — Lost Hours Report</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:32px;line-height:1.55}h1{font-size:30px;margin-bottom:6px}.eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#0891b2;font-size:12px}.box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;margin:18px 0}.dark{background:#0f172a;color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}th{background:#f8fafc}.cta{background:#ecfeff;border:1px solid #a5f3fc;border-radius:18px;padding:18px;margin-top:18px}</style></head><body><p class="eyebrow">Infinite Pieces AI · Lost Hours Calculator</p><h1>How much your clinic is losing to unrecovered hours.</h1><p>Generated ${htmlEscape(generatedAt)}. This report uses clinic-level estimates only and should not include PHI.</p><div class="box dark"><h2>${currency(result.annualRevenueLeakage)} a year in unrecovered hours</h2><p>${htmlEscape(result.summary)}</p></div><div class="grid"><div class="box"><h2>Clinic-level assumptions</h2><table>${rows.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div><div class="box"><h2>What you're losing</h2><table>${metrics.map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value)}</td></tr>`).join("")}</table></div></div><div class="cta"><h2>These are clinic-level operating estimates.</h2><p>No-PHI disclaimer: do not submit patient names, dates of birth, insurance IDs, treatment notes or clinical details. These are clinic-level operating estimates, not a payer, billing, legal or compliance guarantee.</p></div></body></html>`;
 }
 
 function buildEmailReport(input: CalculatorInput, result: CalculatorResult) {
@@ -87,7 +86,7 @@ function buildEmailReport(input: CalculatorInput, result: CalculatorResult) {
     `Admin hours lost / week: ${number(result.adminHoursSpent)}`,
     "",
     "That's the bleed. See how much of it you could recover:",
-    "Recovery ROI Simulator: https://www.infinitepieces.ai/roi-simulator",
+    "These are clinic-level operating estimates, not a payer, billing, legal or compliance guarantee.",
     "",
     "No-PHI disclaimer: this report uses clinic-level estimates only and is not a billing, payer, legal or compliance guarantee."
   ].join("\n");
@@ -359,16 +358,6 @@ function CalculatorResults({ result }: { result: CalculatorResult }) {
           <p className="mt-2 text-2xl font-black text-slate-950">{currency(result.atRiskClaimDollarsMonthly)}</p>
         </div>
         <p className="mt-3 text-xs font-semibold text-slate-400">Illustrative; validate against your payer mix. This sizes the exposure — it does not assume any tool fixes it.</p>
-      </div>
-
-      <div className="card border-cyan-200 bg-cyan-50">
-        <h3 className="text-lg font-black text-cyan-950">That&rsquo;s the bleed. How much could you recover?</h3>
-        <p className="mt-2 text-sm leading-6 text-cyan-900">
-          This page only measures what you&rsquo;re losing today — no software, no claims. The next step is the payback: how much of this an Infinite Pieces recovery layer could put back.
-        </p>
-        <Link href="/roi-simulator" className="mt-4 inline-block rounded-full bg-cyan-600 px-5 py-3 text-sm font-black text-white hover:bg-cyan-500">
-          See your recovery in the ROI Simulator →
-        </Link>
       </div>
     </aside>
   );

@@ -15,7 +15,6 @@ export function MarketingHeader() {
           <Link href="/pricing" className="font-black text-slate-900">Pricing</Link>
           <Link href="/compare">Compare</Link>
           <Link href="/calculator">Lost Hours Calculator</Link>
-          <Link href="/roi-simulator">ROI Simulator</Link>
           <Link href="/quiz">Operations Quiz</Link>
           <Link href="/topics">ABA Topics</Link>
           <Link href="/playbook" className="font-black text-cyan-700">Playbook</Link>
