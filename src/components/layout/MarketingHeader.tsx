@@ -13,6 +13,7 @@ export function MarketingHeader() {
         </Link>
         <nav className="hidden items-center gap-5 text-sm font-semibold text-slate-600 md:flex">
           <Link href="/pricing" className="font-black text-slate-900">Pricing</Link>
+          <Link href="/about" className="font-black text-slate-900">Our Purpose</Link>
           <Link href="/compare">Compare</Link>
           <Link href="/calculator">Lost Hours Calculator</Link>
           <Link href="/quiz">Operations Quiz</Link>

@@ -175,6 +175,40 @@ export default function PricingPage() {
           </div>
         </section>
 
+        {/* Fair terms / data ownership — the anti-incumbent promise. Built from
+            real reviews of the market leader: nickel-and-dime add-ons, auto-renew
+            traps, and records held hostage on exit are the loudest complaints. */}
+        <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">No traps. No hostages.</p>
+          <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">The fair-terms promise</h2>
+          <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-600">
+            The biggest complaints about legacy ABA software aren&rsquo;t about features. They&rsquo;re about
+            being nickel-and-dimed, locked into auto-renewals, and having your own records held hostage when
+            you try to leave. We built the opposite.
+          </p>
+          <div className="mt-7 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-base font-black text-slate-900">Your data is yours</h3>
+              <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">Export everything, anytime. If you ever leave, you walk out with your records. No ransom, no 4-step download per file.</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-base font-black text-slate-900">No auto-renew traps</h3>
+              <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">Fair, plain terms. We won&rsquo;t quietly renew you a month early and call it your fault. You stay because it works.</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-base font-black text-slate-900">Transparent, flat pricing</h3>
+              <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">No per-feature add-on tax, no paying for every employee to unlock a button. What you see is what you pay.</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-base font-black text-slate-900">You talk to the person who built it</h3>
+              <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">Built by someone who spent a decade as an RBT. Support isn&rsquo;t a ticket black hole — it&rsquo;s a real person who knows the work.</p>
+            </div>
+          </div>
+          <p className="mt-5 text-sm font-semibold leading-7 text-slate-500">
+            Built so your team never loses a data point mid-session, and simple enough to teach a new RBT in a day.
+          </p>
+        </section>
+
         {/* Final CTA */}
         <section className="bg-slate-950 py-16 text-white">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
