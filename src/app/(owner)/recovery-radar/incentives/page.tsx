@@ -13,10 +13,10 @@ export const metadata = { title: "Recovery Radar — Recovery Incentives" };
 async function loadConfig(tenantId: string | undefined): Promise<BountyConfig> {
   if (!tenantId) return DEFAULT_BOUNTY_CONFIG;
   const row = await prisma.auditEvent
-    .findFirst({ where: { tenantId, eventName: `bounty-config:${tenantId}` }, orderBy: { at: "desc" } })
+    .findFirst({ where: { entityType: "bounty-config", entityId: tenantId }, orderBy: { createdAt: "desc" } })
     .catch(() => null);
-  if (row?.detail) {
-    try { return sanitizeConfig(JSON.parse(row.detail)); } catch { /* fall through */ }
+  if (row?.after) {
+    try { return sanitizeConfig(row.after as unknown as Partial<BountyConfig>); } catch { /* fall through */ }
   }
   return DEFAULT_BOUNTY_CONFIG;
 }
