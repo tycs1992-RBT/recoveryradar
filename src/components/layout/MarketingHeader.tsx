@@ -22,7 +22,7 @@ export function MarketingHeader() {
           <Link href="/aba-keyword-bank">Keyword Bank</Link>
           <Link href="/trademarks">Trademarks</Link>
           <a
-            href="/provider-os/index.html"
+            href="/provider-portal"
             title="Take a guided tour of Infinite Suite OS™ (sample data, no PHI)"
             className="font-black text-cyan-700"
           >

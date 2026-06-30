@@ -1,30 +1,21 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
-
 export const metadata = {
-  title: "Provider Portal — Infinite Suite OS™ | Recovery Radar™",
+  title: "Take a Tour: Infinite Suite OS™ | Recovery Radar™",
   description:
-    "Infinite Suite OS™ operational recovery workflow. Sign in to view.",
+    "Explore Infinite Suite OS™, the operational recovery workflow, on sample data. Core 9 demo, no login, no PHI.",
   robots: { index: false, follow: false }
 };
 
-// NOTE: This route used to be the OPEN public "Take a Tour" mock (anyone could
-// click in). It now requires login so it stops competing with the real provider
-// login and nobody random lands in the embedded OS. To reopen it as a public
-// tour later, delete the session check below and restore robots index:true.
-export default async function ProviderPortalPage() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/login?callbackUrl=/provider-workspace");
-  }
+// OPEN public demo / Take a Tour. No login. Embeds the Core 9 DEMO build at
+// public/provider-os-demo/ (only the nine core apps, no held-back apps, no phase
+// toggle), so the public can look without seeing unreleased work. The real full
+// product (phase toggles and all apps) lives behind login at /provider-workspace,
+// which embeds the separate full build at public/provider-os/.
+export default function ProviderPortalPage() {
   return (
-    // fixed inset-0 = pinned to the viewport edges, full-bleed, no body padding,
-    // no 100vw scrollbar gap. The OS fills the entire screen like a real app.
     <main className="fixed inset-0 z-0 bg-[#F4F7FB]">
       <iframe
-        src="/provider-os/index.html"
-        title="Infinite Suite OS™ (signed in)"
+        src="/provider-os-demo/index.html"
+        title="Infinite Suite OS™ (Core 9 demo)"
         className="absolute inset-0 h-full w-full border-0"
         referrerPolicy="strict-origin-when-cross-origin"
       />
