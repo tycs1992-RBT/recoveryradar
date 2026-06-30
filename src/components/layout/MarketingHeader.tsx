@@ -21,13 +21,13 @@ export function MarketingHeader() {
           <Link href="/playbook" className="font-black text-cyan-700">Playbook</Link>
           <Link href="/aba-keyword-bank">Keyword Bank</Link>
           <Link href="/trademarks">Trademarks</Link>
-          <a
+          <Link
             href="/provider-portal"
             title="Take a guided tour of Infinite Suite OS™ (sample data, no PHI)"
             className="font-black text-cyan-700"
           >
             Take a Tour
-          </a>
+          </Link>
         </nav>
         <div className="flex items-center gap-3">
           <Link

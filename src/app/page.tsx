@@ -63,7 +63,7 @@ export default function HomePage() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">Calculate lost hours</Link>
                 <Link href="/quiz" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">Take operations quiz</Link>
-                <a href="/provider-portal" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">See the Provider Portal tour</a>
+                <Link href="/provider-portal" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">See the Provider Portal tour</Link>
               </div>
               <p className="mt-4 text-xs font-bold leading-6 text-slate-500">
                 Public forms use clinic-level estimates only. Do not submit client names, PHI, or sensitive clinical details.
