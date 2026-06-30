@@ -15,21 +15,21 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeConfig, DEFAULT_BOUNTY_CONFIG, type BountyConfig } from "@/lib/bounty-config";
 
-// We store the config as a JSON blob keyed by tenant. If a dedicated
+// The config is stored as the latest AuditEvent row for this tenant's bounty
+// config: entityType pins the kind, entityId is the tenant, and the JSON blob
+// lives in `after` (append-only, latest wins on read). If a dedicated
 // BountyConfig model is added to schema.prisma later, swap these two helpers to
 // use it; the contract and the route stay the same.
-const KEY = (tenantId: string) => `bounty-config:${tenantId}`;
+const BOUNTY_ENTITY = "bounty-config";
 
 async function readConfig(tenantId: string): Promise<BountyConfig> {
-  // Stored as an AnalyticsEvent-style settings row is NOT ideal; prefer a real
-  // settings table. For now we read the most recent saved blob for this tenant.
   // FOR DANIEL: replace with the shared per-tenant config store the OS also reads.
   const row = await prisma.auditEvent.findFirst({
-    where: { tenantId, eventName: KEY(tenantId) },
-    orderBy: { at: "desc" },
+    where: { entityType: BOUNTY_ENTITY, entityId: tenantId },
+    orderBy: { createdAt: "desc" },
   }).catch(() => null);
-  if (row?.detail) {
-    try { return sanitizeConfig(JSON.parse(row.detail)); } catch { /* fall through */ }
+  if (row?.after) {
+    try { return sanitizeConfig(row.after as unknown as Partial<BountyConfig>); } catch { /* fall through */ }
   }
   return DEFAULT_BOUNTY_CONFIG;
 }
@@ -40,10 +40,11 @@ async function writeConfig(tenantId: string, actorId: string, config: BountyConf
   // so the running OS picks up the new ladder/funding without a redeploy.
   await prisma.auditEvent.create({
     data: {
-      tenantId,
       actorId,
-      eventName: KEY(tenantId),
-      detail: JSON.stringify(config),
+      action: "bounty-config.update",
+      entityType: BOUNTY_ENTITY,
+      entityId: tenantId,
+      after: JSON.parse(JSON.stringify(config)),
     },
   });
 }
