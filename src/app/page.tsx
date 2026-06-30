@@ -51,12 +51,12 @@ export default function HomePage() {
           <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:py-24">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-cyan-800">
-                ● Operational Recovery Core for ABA clinics
+                ● ABA operations, finally connected
               </div>
               <h1 className="mt-6 max-w-5xl text-5xl font-black tracking-tight text-slate-950 sm:text-7xl">
-                {offer.marketLine}
+                Turn missed sessions into managed recovery.
               </h1>
-              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">{offer.positioning}</p>
+              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">Built from the field. Designed to fit the whole clinic.</p>
               <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-slate-600">
                 When a session cancels, Infinite recovers the care a child was already approved for — restoring continuity, not adding hours — while it reduces scheduler scramble, supports staff, improves caregiver communication, and produces cleaner proof packets. No full EMR migration.
               </p>

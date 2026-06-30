@@ -93,6 +93,7 @@ function exportCsv(summary: AnalyticsSummary) {
 export function TrafficAnalyticsDashboard() {
   const [summary, setSummary] = useState<AnalyticsSummary>(emptySummary);
   const [notice, setNotice] = useState("Loading website traffic...");
+  const [source, setSource] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const metrics = useMemo(() => [
@@ -112,9 +113,11 @@ export function TrafficAnalyticsDashboard() {
       if (!response.ok) throw new Error(data.error ?? "Failed to load analytics");
       setSummary(data.summary ?? emptySummary);
       setNotice(data.notice ?? "Website traffic loaded.");
+      setSource(data.source ?? "");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Failed to load analytics");
       setSummary(emptySummary);
+      setSource("fetch_error");
     } finally {
       setLoading(false);
     }
@@ -145,7 +148,32 @@ export function TrafficAnalyticsDashboard() {
             <button type="button" onClick={() => exportCsv(summary)} disabled={!summary.recentVisitors.length} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-60">Export CSV</button>
           </div>
         </div>
-        <div className="mt-6 rounded-3xl bg-blue-50 p-4 text-sm leading-6 text-blue-950">{notice}</div>
+        {(() => {
+          // Self-diagnosing status banner. The same notice box used to look
+          // identical whether things were healthy, misconfigured, or broken,
+          // which made "all zeros" confusing. Key it off the API's source so it
+          // names the cause AND the exact fix. (Storage is already durable via
+          // Prisma; zeros are almost always a missing env var or an empty DB.)
+          const noData = summary.totals.pageViews === 0 && summary.eventCount === 0;
+          let tone = "bg-blue-50 text-blue-950 border-blue-200";
+          let fix = "";
+          if (source === "no_database") {
+            tone = "bg-amber-50 text-amber-950 border-amber-200";
+            fix = "Fix: set DATABASE_URL in your Vercel project's Environment Variables (Production), then redeploy. Nothing can be stored until it is set.";
+          } else if (source === "database_error" || source === "fetch_error") {
+            tone = "bg-rose-50 text-rose-950 border-rose-200";
+            fix = "Fix: the database is configured but the query failed. Check the DATABASE_URL connection string and confirm the database migrations have run in production (prisma migrate deploy).";
+          } else if (source === "database" && noData) {
+            tone = "bg-slate-50 text-slate-700 border-slate-200";
+            fix = "Database is connected and ready, but no public visits are recorded yet. Open the public homepage in a private window to log a test visit, then Refresh.";
+          }
+          return (
+            <div className={`mt-6 rounded-3xl border p-4 text-sm leading-6 ${tone}`}>
+              <span className="font-black">{notice}</span>
+              {fix ? <span className="mt-1 block font-semibold">{fix}</span> : null}
+            </div>
+          );
+        })()}
       </section>
 
       <div className="grid gap-6 xl:grid-cols-2">
