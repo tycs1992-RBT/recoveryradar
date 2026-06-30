@@ -15,7 +15,7 @@
 // ============================================================================
 export const offer = {
   positioning: "Keep your current EMR. Add Infinite Suite OS™ beside it.",
-  marketLine: "Competitors count hours billed. Infinite makes sure approved care actually happens — and proves it's working.",
+  marketLine: "Founded on the clinic floor. Fueled by the staff who felt forgotten.",
 
   // The trust statement that answers "isn't this just billing more hours?" head-on.
   careFrame:

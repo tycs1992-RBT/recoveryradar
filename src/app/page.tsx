@@ -56,10 +56,10 @@ export default function HomePage() {
               <h1 className="mt-6 max-w-5xl text-5xl font-black tracking-tight text-slate-950 sm:text-7xl">
                 {offer.marketLine}
               </h1>
-              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">{offer.positioning}</p>
-              <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-slate-600">
-                When a session cancels, Infinite recovers the care a child was already approved for — restoring continuity, not adding hours — while it reduces scheduler scramble, supports staff, improves caregiver communication, and produces cleaner proof packets. No full EMR migration.
+              <p className="mt-6 max-w-3xl text-lg font-semibold leading-8 text-slate-700">
+                I spent a decade as an RBT and felt the same frustration field staff live every day. So I spent my nights turning their real complaints and feedback into working tools, built from the floor up. Infinite Suite is built alongside field staff, for field staff. Because when a system actually works, there&rsquo;s always a piece that fits.
               </p>
+              <p className="mt-5 max-w-2xl text-base font-black leading-8 text-slate-900">{offer.positioning}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">Calculate lost hours</Link>
                 <Link href="/quiz" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">Take operations quiz</Link>
