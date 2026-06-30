@@ -21,35 +21,23 @@ export function MarketingHeader() {
           <Link href="/playbook" className="font-black text-cyan-700">Playbook</Link>
           <Link href="/aba-keyword-bank">Keyword Bank</Link>
           <Link href="/trademarks">Trademarks</Link>
+          <a
+            href="/provider-os/index.html"
+            title="Take a guided tour of Infinite Suite OS™ (sample data, no PHI)"
+            className="font-black text-cyan-700"
+          >
+            Take a Tour
+          </a>
         </nav>
         <div className="flex items-center gap-3">
-          {/* Mock OS — the public, no-login demo of Infinite Suite OS (sample data,
-              no PHI). Embedded at /provider-portal. Styled DARKER/distinct so it
-              reads as "try it now" and is not lost next to the login buttons. */}
-          <Link
-            href="/provider-portal"
-            title="Open the built-in Mock OS — explore Infinite Suite OS™ with sample data, no login, no PHI"
-            className="inline-flex items-center gap-1.5 rounded-2xl bg-cyan-600 px-5 py-2 text-sm font-black text-white shadow-soft transition hover:bg-cyan-500"
-          >
-            Mock OS
-          </Link>
           <Link
             href="/login?callbackUrl=/recovery-radar"
-            title="Clinic / company owner — your Recovery Radar workstation"
             className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50 sm:inline-flex"
           >
             Owner login
           </Link>
           <Link
-            href="/login?callbackUrl=/dashboard"
-            title="Infinite Pieces worker — your internal worker / founder station"
-            className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50 sm:inline-flex"
-          >
-            Worker login
-          </Link>
-          <Link
             href="/login?callbackUrl=/provider-workspace"
-            title="Provider — sign in to the real Infinite Suite OS workspace"
             className="rounded-2xl bg-slate-950 px-5 py-2 text-sm font-bold text-white shadow-soft transition hover:bg-slate-800"
           >
             Provider login

@@ -51,19 +51,19 @@ export default function HomePage() {
           <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:py-24">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-cyan-800">
-                ● ABA operations, finally connected
+                ● Operational Recovery Core for ABA clinics
               </div>
               <h1 className="mt-6 max-w-5xl text-5xl font-black tracking-tight text-slate-950 sm:text-7xl">
-                Turn missed sessions into managed recovery.
+                {offer.marketLine}
               </h1>
-              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">Built from the field. Designed to fit the whole clinic.</p>
+              <p className="mt-6 max-w-3xl text-xl font-black leading-8 text-slate-900">{offer.positioning}</p>
               <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-slate-600">
                 When a session cancels, Infinite recovers the care a child was already approved for — restoring continuity, not adding hours — while it reduces scheduler scramble, supports staff, improves caregiver communication, and produces cleaner proof packets. No full EMR migration.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/calculator" className="rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-soft">Calculate lost hours</Link>
                 <Link href="/quiz" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-800">Take operations quiz</Link>
-                <Link href="/provider-portal" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">See the Provider Portal tour</Link>
+                <a href="/provider-os/index.html" className="rounded-full border border-amber-200 bg-amber-100 px-6 py-3 text-sm font-black text-amber-950">See the Provider Portal tour</a>
               </div>
               <p className="mt-4 text-xs font-bold leading-6 text-slate-500">
                 Public forms use clinic-level estimates only. Do not submit client names, PHI, or sensitive clinical details.

@@ -9,7 +9,6 @@ const ownerNav = [
   { href: "/recovery-radar/learners", label: "By Site & Setting" },
   { href: "/recovery-radar/outcomes", label: "Outcomes" },
   { href: "/recovery-radar/waterfall", label: "Recovery Waterfall" },
-  { href: "/recovery-radar/incentives", label: "Recovery Incentives" },
   { href: "/recovery-radar/pulse", label: "Staff Pulse" },
   { href: "/recovery-radar/alerts", label: "Alerts" },
   { href: "/recovery-radar/simulator", label: "ROI Simulator" }
